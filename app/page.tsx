@@ -1,6 +1,6 @@
 export default function Home() {
   return (
-    <div>
+    <div className="bg-primary flex-1">
       <p>DASHBOARD-APP</p>
     </div>
   );
