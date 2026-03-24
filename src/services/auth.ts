@@ -1,8 +1,8 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { LoginFormSchema, LoginFormState, LoginResponse } from "@/app/lib/definitions";
-import { createSession } from "@/app/lib/session";
+import { LoginFormSchema, LoginFormState, LoginResponse } from "@/utils/definitions";
+import { createSession } from "@/utils/session";
 
 export async function login(
   state: LoginFormState,

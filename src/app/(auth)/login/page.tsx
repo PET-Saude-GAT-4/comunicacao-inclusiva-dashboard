@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useActionState } from "react";
-import { login } from "@/app/actions/auth";
+import { login } from "@/services/auth";
 
 export default function Login() {
   const [state, action, pending] = useActionState(login, undefined);
