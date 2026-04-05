@@ -3,8 +3,8 @@
 import Link from "next/link";
 import { useActionState } from "react";
 import { login } from "@/services/auth";
-import Input from "@/components/Input";
-import Button from "@/components/Button";
+import Input from "@/components/Input/Input";
+import Button from "@/components/Button/Button";
 
 export default function Login() {
   const [state, action, pending] = useActionState(login, undefined);

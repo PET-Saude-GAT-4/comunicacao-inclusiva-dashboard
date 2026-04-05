@@ -41,7 +41,11 @@ export async function login(
 
   const data: LoginResponse = await response.json();
 
-  await createSession(data.token);
+  await createSession({
+    token: data.token,
+    email: data.user.email,
+    role: data.user.role.name,
+  });
 
   redirect("/dashboard");
 }
