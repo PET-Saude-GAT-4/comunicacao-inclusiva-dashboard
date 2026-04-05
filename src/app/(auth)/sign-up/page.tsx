@@ -1,31 +1,49 @@
+"use client";
+
+import { useActionState } from "react";
+import { register } from "@/services/auth";
 import Input from "@/components/Input";
 import Button from "@/components/Button";
+import Link from "next/link";
 
 export default function Register() {
+  const [state, action, pending] = useActionState(register, undefined);
+
   return (
-    <div className="flex flex-col gap-4 w-full px-xxl py-xxl">
+    <form action={action} className="flex flex-col gap-4 w-full px-xxl py-xxl">
       <h1 className="text-title text-text-on-primary font-bold text-center my-md">
         Solicitar Registro
       </h1>
       <Input
-        id="email"
         type="email"
-        label="Digite seu e-mail:"
+        name="email"
         placeholder="Email"
+        error={state?.errors?.email?.[0]}
       />
       <Input
-        id="password"
         type="password"
-        label="Digite sua senha:"
+        name="password"
         placeholder="Senha"
+        error={state?.errors?.password?.[0]}
       />
       <Input
-        id="confirm-password"
         type="password"
-        label="Digite sua senha novamente:"
+        name="confirmPassword"
         placeholder="Confirme sua senha"
+        error={state?.errors?.confirmPassword?.[0]}
       />
-      <Button type="submit">Solicitar Registro</Button>
-    </div>
+      {state?.message && (
+        <p className="text-sm text-center text-red-500">{state.message}</p>
+      )}
+      <Link
+        href="/login"
+        className="text-body text-text-on-primary text-sm underline"
+      >
+        Já tem uma conta? Faça login!
+      </Link>
+      <Button type="submit" disabled={pending}>
+        {pending ? "Solicitando..." : "Solicitar Registro"}
+      </Button>
+    </form>
   );
 }
