@@ -3,9 +3,10 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { MdPerson, MdChevronRight, MdMenuOpen } from "react-icons/md";
+import { MdPerson, MdLogout, MdMenuOpen } from "react-icons/md";
 import { ROUTES, RouteConfig } from "@/config/routes";
 import { Role } from "@/utils/definitions";
+import { logout } from "@/services/auth";
 
 function NavItem({ route, active }: { route: RouteConfig; active: boolean }) {
   const Icon = route.icon;
@@ -76,7 +77,15 @@ export default function Sidebar({ userEmail, userRole }: SidebarProps) {
         <div className="flex items-center gap-sm px-md py-sm text-text-on-primary-variant text-body">
           <MdPerson size={20} />
           <span className="flex-1 truncate">{userEmail}</span>
-          <MdChevronRight size={18} />
+          <form action={logout} className="flex items-center">
+            <button
+              type="submit"
+              aria-label="Sair"
+              className="text-text-on-primary-variant hover:text-text-on-primary transition-colors hover:cursor-pointer"
+            >
+              <MdLogout size={18} />
+            </button>
+          </form>
         </div>
       </div>
     </nav>

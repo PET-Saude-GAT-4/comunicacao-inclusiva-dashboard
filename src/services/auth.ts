@@ -8,7 +8,7 @@ import {
   RegisterFormSchema,
   RegisterFormState,
 } from "@/utils/definitions";
-import { createSession } from "@/utils/session";
+import { createSession, deleteSession } from "@/utils/session";
 
 export async function login(
   state: LoginFormState,
@@ -80,5 +80,10 @@ export async function register(
     };
   }
 
+  redirect("/login");
+}
+
+export async function logout() {
+  await deleteSession();
   redirect("/login");
 }
