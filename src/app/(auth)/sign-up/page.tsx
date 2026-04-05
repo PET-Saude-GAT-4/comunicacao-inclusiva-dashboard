@@ -35,12 +35,14 @@ export default function Register() {
       {state?.message && (
         <p className="text-sm text-center text-red-500">{state.message}</p>
       )}
-      <Link
-        href="/login"
-        className="text-body text-text-on-primary text-sm underline"
-      >
-        Já tem uma conta? Faça login!
-      </Link>
+      <div className="text-center flex flex-col">
+        <Link
+          href="/login"
+          className="text-body text-text-on-primary text-sm underline"
+        >
+          Já tem uma conta? Faça login!
+        </Link>
+      </div>
       <Button type="submit" disabled={pending}>
         {pending ? "Solicitando..." : "Solicitar Registro"}
       </Button>
