@@ -1,12 +1,16 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { LoginFormSchema, LoginFormState, LoginResponse } from "@/utils/definitions";
+import {
+  LoginFormSchema,
+  LoginFormState,
+  LoginResponse,
+} from "@/utils/definitions";
 import { createSession } from "@/utils/session";
 
 export async function login(
   state: LoginFormState,
-  formData: FormData
+  formData: FormData,
 ): Promise<LoginFormState> {
   const validatedFields = LoginFormSchema.safeParse({
     email: formData.get("email"),

@@ -7,8 +7,7 @@ export default function AuthLayout({
 }) {
   return (
     <div className="min-h-screen bg-primary flex items-center justify-center p-4">
-      {/* h-fit and w-fit are the magic "wrap content" buttons */}
-      <div className="h-fit w-fit bg-background rounded-2xl shadow-xl">
+      <div className="h-fit w-120 bg-background rounded-2xl shadow-xl">
         {children}
       </div>
     </div>

@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useActionState } from "react";
 import { login } from "@/services/auth";
+import Input from "@/components/Input";
+import Button from "@/components/Button";
 
 export default function Login() {
   const [state, action, pending] = useActionState(login, undefined);
@@ -12,59 +14,38 @@ export default function Login() {
       <h1 className="text-title text-text-on-primary font-bold text-center my-md">
         Entrar
       </h1>
-
-      <input
-        className="focus:outline-none focus:ring-1 focus:ring-primary-dark text-text-on-primary p-sm px-xxl my-xs bg-surface-secondary rounded-lg"
+      <Input
         type="email"
         name="email"
         placeholder="Email"
+        error={state?.errors?.email?.[0]}
       />
-      {state?.errors?.email && (
-        <p className="text-error text-sm text-red-500">
-          {state.errors.email[0]}
-        </p>
-      )}
-
-      <input
-        className="focus:outline-none focus:ring-1 focus:ring-primary-dark text-text-on-primary p-sm px-xxl my-xs bg-surface-secondary rounded-lg"
+      <Input
         type="password"
         name="password"
         placeholder="Senha"
+        error={state?.errors?.password?.[0]}
       />
-      {state?.errors?.password && (
-        <p className="text-error text-sm text-red-500">
-          {state.errors.password[0]}
-        </p>
-      )}
-
       {state?.message && (
-        <p className="text-error text-sm text-center text-red-500">
-          {state.message}
-        </p>
+        <p className="text-sm text-center text-red-500">{state.message}</p>
       )}
-
       <div className="text-center flex flex-col">
         <Link
           href="/reset-password"
-          className="text-body text-text-on-primary text-sm hover:underline"
+          className="text-body text-text-on-primary text-sm underline"
         >
           Esqueceu a senha?
         </Link>
         <Link
           href="/sign-up"
-          className="text-body text-text-on-primary text-sm hover:underline"
+          className="text-body text-text-on-primary text-sm underline"
         >
           Não tem uma conta ainda? Solicite cadastro!
         </Link>
       </div>
-
-      <button
-        type="submit"
-        disabled={pending}
-        className="bg-primary-dark text-white px-lg py-sm my-md rounded-lg disabled:opacity-50"
-      >
+      <Button type="submit" disabled={pending}>
         {pending ? "Entrando..." : "Login"}
-      </button>
+      </Button>
     </form>
   );
 }
