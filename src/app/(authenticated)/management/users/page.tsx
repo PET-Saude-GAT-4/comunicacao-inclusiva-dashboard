@@ -1,58 +1,73 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { redirect } from "next/navigation";
 import TabButton from "../Components/TabButton/TabButton";
 import RemoveButton from "../Components/RemoveButton/RemoveButton";
 import AddButton from "../Components/AddButton/AddButton";
+import Modal from "../Components/Modal/Modal";
+import Table from "../Components/Table/Table";
+import Input from "@/components/Input/Input";
+import Button from "@/components/Button/Button";
 import {
   MdPeople,
   MdAssignmentInd,
   MdMedicalInformation,
   MdLocalPolice,
 } from "react-icons/md";
-import Table from "../Components/Table/Table";
-import SearchBar from "../Components/SearchBar/SearchBar";
-import { useState } from "react";
+import { getUsers, createUser, deleteUser } from "@/services/management";
+import { UserOutput } from "@/utils/definitions";
+
+type UserRow = { id: number; email: string; role: string; createdAt: string };
+
+function toRow(u: UserOutput): UserRow {
+  return {
+    id: u.id,
+    email: u.email,
+    role: u.role.name,
+    createdAt: new Date(u.createdAt).toLocaleDateString("pt-BR"),
+  };
+}
 
 function Users() {
-  const mockUsers = [
-    {
-      id: 1,
-      email: "ana.silva@email.com",
-      role: "Administrador",
-      createdAt: "12/01/2024",
-    },
-    {
-      id: 2,
-      email: "carlos.souza@email.com",
-      role: "Visualizador",
-      createdAt: "23/03/2024",
-    },
-    {
-      id: 3,
-      email: "mariana.lima@email.com",
-      role: "Administrador",
-      createdAt: "05/05/2024",
-    },
-    {
-      id: 4,
-      email: "pedro.costa@email.com",
-      role: "Visualizador",
-      createdAt: "18/07/2024",
-    },
-    {
-      id: 5,
-      email: "julia.ferreira@email.com",
-      role: "Visualizador",
-      createdAt: "30/09/2024",
-    },
-  ];
+  const [data, setData] = useState<UserRow[]>([]);
+  const [selectedIds, setSelectedIds] = useState<number[]>([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
 
-  const [open, setOpen] = useState(false)
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [role, setRole] = useState("");
+
+  const fetchData = () => getUsers().then((rows) => setData(rows.map(toRow)));
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const handleCreate = async () => {
+    const result = await createUser({ email, password, role });
+    if (result.success) {
+      setIsModalOpen(false);
+      setFormError(null);
+      setEmail("");
+      setPassword("");
+      setRole("");
+      fetchData();
+    } else {
+      setFormError(result.error ?? "Erro ao criar usuário.");
+    }
+  };
+
+  const handleDelete = async () => {
+    await Promise.all(selectedIds.map((id) => deleteUser(id)));
+    setData((prev) => prev.filter((item) => !selectedIds.includes(item.id)));
+    setSelectedIds([]);
+  };
 
   return (
     <div className="min-h-screen w-full bg-surface-primary">
-      <div className="text-text-on-primary border-b border-outline-common text-heading  px-lg py-md">
+      <div className="text-text-on-primary border-b border-outline-common text-heading px-lg py-md">
         <p>Usuários</p>
       </div>
       <div className="flex items-center justify-between p-sm text-text-on-primary border-b border-outline-common">
@@ -61,45 +76,76 @@ function Users() {
           <TabButton
             icon={MdAssignmentInd}
             active={false}
-            onClick={() => {
-              redirect(`/management/professions`);
-            }}
+            onClick={() => redirect("/management/professions")}
           />
           <TabButton
             icon={MdMedicalInformation}
             active={false}
-            onClick={() => {
-              redirect(`/management/specialities`);
-            }}
+            onClick={() => redirect("/management/specialities")}
           />
           <TabButton
             icon={MdLocalPolice}
             active={false}
-            onClick={() => {
-              redirect(`/management/roles`);
-            }}
+            onClick={() => redirect("/management/roles")}
           />
         </nav>
-        <div className="flex w-full justify-around">
-          {/* <SearchBar/> */}
-        </div>
+        <div className="flex w-full justify-around">{/* <SearchBar/> */}</div>
         <div className="flex">
-          <AddButton onClick={() => {}} />
-          {/* Activates if a user is selected */}
-          <RemoveButton active={false} onClick={() => {}} />
+          <AddButton onClick={() => setIsModalOpen(true)} />
+          <RemoveButton
+            active={selectedIds.length > 0}
+            onClick={handleDelete}
+          />
         </div>
       </div>
-      <div>
+      <div className="flex-1">
         <Table
-          data={mockUsers}
+          data={data}
           columns={[
             { key: "id", label: "ID" },
             { key: "email", label: "Usuário" },
             { key: "role", label: "Nível de Permissões" },
             { key: "createdAt", label: "Data de Ingresso" },
           ]}
+          onSelectionChange={setSelectedIds}
         />
       </div>
+      <Modal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        title="Novo Usuário"
+      >
+        <div className="flex flex-col gap-sm">
+          <Input
+            id="email"
+            label="Email"
+            type="email"
+            placeholder="usuario@email.com"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+          <Input
+            id="password"
+            label="Senha"
+            type="password"
+            placeholder="Senha"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+          <Input
+            id="role"
+            label="Permissão"
+            type="text"
+            placeholder="ex: admin"
+            value={role}
+            onChange={(e) => setRole(e.target.value)}
+          />
+          {formError && <p className="text-sm text-red-500">{formError}</p>}
+          <Button type="button" onClick={handleCreate}>
+            Criar
+          </Button>
+        </div>
+      </Modal>
     </div>
   );
 }
