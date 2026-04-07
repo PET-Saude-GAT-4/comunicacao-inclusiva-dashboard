@@ -1,5 +1,7 @@
 import z from "zod";
 
+export type Role = "super_admin" | "admin" | "viewer";
+
 export const LoginFormSchema = z.object({
   email: z.email({ message: "Insira um email válido." }).trim(),
   password: z.string().min(1, { message: "A senha é obrigatória." }).trim(),
@@ -15,13 +17,26 @@ export type LoginFormState =
     }
   | undefined;
 
+export type RoleOutput = {
+  id: number;
+  name: Role;
+  createdAt: string;
+  updatedAt: string;
+};
+
 export type UserOutput = {
   id: number;
   uuid: string;
   email: string;
-  roleId: number;
+  role: RoleOutput;
   createdAt: string;
   updatedAt: string;
+};
+
+export type SessionPayload = {
+  token: string;
+  email: string;
+  role: Role;
 };
 
 export type LoginResponse = {

@@ -1,9 +1,12 @@
-import React from "react";
+import { redirect } from "next/navigation";
+import { getSession } from "@/utils/session";
 
-export default function Home() {
-  return (
-    <div className="bg-primary flex-1">
-      <h1>Hello!</h1>
-    </div>
-  );
+export default async function Home() {
+  const session = await getSession();
+
+  if (session) {
+    redirect("/dashboard");
+  } else {
+    redirect("/login");
+  }
 }

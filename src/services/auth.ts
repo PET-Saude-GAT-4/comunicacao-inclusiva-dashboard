@@ -8,7 +8,7 @@ import {
   RegisterFormSchema,
   RegisterFormState,
 } from "@/utils/definitions";
-import { createSession } from "@/utils/session";
+import { createSession, deleteSession } from "@/utils/session";
 
 export async function login(
   state: LoginFormState,
@@ -41,7 +41,11 @@ export async function login(
 
   const data: LoginResponse = await response.json();
 
-  await createSession(data.token);
+  await createSession({
+    token: data.token,
+    email: data.user.email,
+    role: data.user.role.name,
+  });
 
   redirect("/dashboard");
 }
@@ -76,5 +80,10 @@ export async function register(
     };
   }
 
+  redirect("/login");
+}
+
+export async function logout() {
+  await deleteSession();
   redirect("/login");
 }

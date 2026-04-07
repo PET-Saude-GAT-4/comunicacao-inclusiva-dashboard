@@ -1,13 +1,14 @@
 import "server-only";
 import { cookies } from "next/headers";
+import { SessionPayload } from "@/utils/definitions";
 
 const COOKIE_NAME = "auth-token";
 const MAX_AGE = 24 * 60 * 60; // 24 hours
 
-export async function createSession(token: string) {
+export async function createSession(payload: SessionPayload) {
   const cookieStore = await cookies();
 
-  cookieStore.set(COOKIE_NAME, token, {
+  cookieStore.set(COOKIE_NAME, JSON.stringify(payload), {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
@@ -16,9 +17,17 @@ export async function createSession(token: string) {
   });
 }
 
-export async function getSession(): Promise<string | undefined> {
+export async function getSession(): Promise<SessionPayload | undefined> {
   const cookieStore = await cookies();
-  return cookieStore.get(COOKIE_NAME)?.value;
+  const value = cookieStore.get(COOKIE_NAME)?.value;
+
+  if (!value) return undefined;
+
+  try {
+    return JSON.parse(value) as SessionPayload;
+  } catch {
+    return undefined;
+  }
 }
 
 export async function deleteSession() {
