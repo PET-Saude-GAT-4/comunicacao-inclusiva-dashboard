@@ -11,8 +11,9 @@ import {
   MdLocalPolice,
 } from "react-icons/md";
 import Table from "../Components/Table/Table";
+import SearchBar from "../Components/SearchBar/SearchBar";
 
-function Professions() {
+function Specialities() {
   const mockSpecialities = [
     {
       id: 1,
@@ -51,14 +52,14 @@ function Professions() {
             icon={MdPeople}
             active={false}
             onClick={() => {
-              redirect(`management/users`);
+              redirect(`/management/users`);
             }}
           />
           <TabButton
             icon={MdAssignmentInd}
             active={false}
             onClick={() => {
-              redirect(`management/professions`);
+              redirect(`/management/professions`);
             }}
           />
           <TabButton icon={MdMedicalInformation} active={true} />
@@ -66,12 +67,12 @@ function Professions() {
             icon={MdLocalPolice}
             active={false}
             onClick={() => {
-              redirect(`management/roles`);
+              redirect(`/management/roles`);
             }}
           />
         </nav>
-        <div>
-          <p>search</p>
+        <div className="flex">
+          {/* <SearchBar/> */}
         </div>
         <div className="flex">
           <AddButton onClick={() => {}} />
@@ -94,4 +95,4 @@ function Professions() {
   );
 }
 
-export default Professions;
+export default Specialities;

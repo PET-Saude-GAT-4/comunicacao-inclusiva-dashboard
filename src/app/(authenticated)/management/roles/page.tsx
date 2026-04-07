@@ -2,8 +2,7 @@
 
 import { redirect } from "next/navigation";
 import TabButton from "../Components/TabButton/TabButton";
-import RemoveButton from "../Components/RemoveButton/RemoveButton";
-import AddButton from "../Components/AddButton/AddButton";
+
 import {
   MdPeople,
   MdAssignmentInd,
@@ -12,7 +11,7 @@ import {
 } from "react-icons/md";
 import Table from "../Components/Table/Table";
 
-function Professions() {
+function Roles() {
   const mockRoles = [
     {
       id: 1,
@@ -38,27 +37,29 @@ function Professions() {
       </div>
       <div className="flex items-center justify-between p-sm text-text-on-primary border-b border-outline-common">
         <nav className="flex justify-between">
-          <TabButton icon={MdPeople} active={false} />
+          <TabButton
+            icon={MdPeople}
+            active={false}
+            onClick={() => {
+              redirect(`/management/users`);
+            }}
+          />
           <TabButton
             icon={MdAssignmentInd}
             active={false}
             onClick={() => {
-              redirect(`management/specialities`);
+              redirect(`/management/professions`);
             }}
           />
           <TabButton
             icon={MdMedicalInformation}
             active={false}
             onClick={() => {
-              redirect(`management/specialities`);
+              redirect(`/management/specialities`);
             }}
           />
-          <TabButton
-            icon={MdLocalPolice}
-            active={true}
-          />
+          <TabButton icon={MdLocalPolice} active={true} />
         </nav>
-
       </div>
       <div className="flex-1">
         <Table
@@ -74,4 +75,4 @@ function Professions() {
   );
 }
 
-export default Professions;
+export default Roles;

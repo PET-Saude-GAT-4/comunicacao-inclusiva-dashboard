@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import TabButton from "../Components/TabButton/TabButton";
 import RemoveButton from "../Components/RemoveButton/RemoveButton";
 import AddButton from "../Components/AddButton/AddButton";
+import SearchBar from "../Components/SearchBar/SearchBar";
 import {
   MdPeople,
   MdAssignmentInd,
@@ -42,7 +43,7 @@ function Professions() {
             icon={MdPeople}
             active={false}
             onClick={() => {
-              redirect(`management/users`);
+              redirect(`/management/users`);
             }}
           />
           <TabButton icon={MdAssignmentInd} active={true} onClick={() => {}} />
@@ -50,19 +51,19 @@ function Professions() {
             icon={MdMedicalInformation}
             active={false}
             onClick={() => {
-              redirect(`management/specialities`);
+              redirect(`/management/specialities`);
             }}
           />
           <TabButton
             icon={MdLocalPolice}
             active={false}
             onClick={() => {
-              redirect(`management/roles`);
+              redirect(`/management/roles`);
             }}
           />
         </nav>
-        <div>
-          <p>search</p>
+        <div className="flex">
+          {/* <SearchBar/> */}
         </div>
         <div className="flex">
           <AddButton onClick={() => {}} />

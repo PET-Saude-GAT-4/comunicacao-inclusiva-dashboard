@@ -11,6 +11,8 @@ import {
   MdLocalPolice,
 } from "react-icons/md";
 import Table from "../Components/Table/Table";
+import SearchBar from "../Components/SearchBar/SearchBar";
+import { useState } from "react";
 
 function Users() {
   const mockUsers = [
@@ -46,6 +48,8 @@ function Users() {
     },
   ];
 
+  const [open, setOpen] = useState(false)
+
   return (
     <div className="min-h-screen w-full bg-surface-primary">
       <div className="text-text-on-primary border-b border-outline-common text-heading  px-lg py-md">
@@ -58,26 +62,26 @@ function Users() {
             icon={MdAssignmentInd}
             active={false}
             onClick={() => {
-              redirect(`management/professions`);
+              redirect(`/management/professions`);
             }}
           />
           <TabButton
             icon={MdMedicalInformation}
             active={false}
             onClick={() => {
-              redirect(`management/specialities`);
+              redirect(`/management/specialities`);
             }}
           />
           <TabButton
             icon={MdLocalPolice}
             active={false}
             onClick={() => {
-              redirect(`management/roles`);
+              redirect(`/management/roles`);
             }}
           />
         </nav>
-        <div>
-          <p>search</p>
+        <div className="flex w-full justify-around">
+          {/* <SearchBar/> */}
         </div>
         <div className="flex">
           <AddButton onClick={() => {}} />
@@ -85,16 +89,16 @@ function Users() {
           <RemoveButton active={false} onClick={() => {}} />
         </div>
       </div>
-      <div className="flex-1">
-      <Table
-        data={mockUsers}
-        columns={[
-          { key: "id", label: "ID" },
-          { key: "email", label: "Usuário" },
-          { key: "role", label: "Nível de Permissões" },
-          { key: "createdAt", label: "Data de Ingresso" },
-        ]}
-      />
+      <div>
+        <Table
+          data={mockUsers}
+          columns={[
+            { key: "id", label: "ID" },
+            { key: "email", label: "Usuário" },
+            { key: "role", label: "Nível de Permissões" },
+            { key: "createdAt", label: "Data de Ingresso" },
+          ]}
+        />
       </div>
     </div>
   );
