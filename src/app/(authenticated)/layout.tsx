@@ -28,7 +28,7 @@ export default async function AuthenticatedLayout({
       />
       <div className="flex flex-col flex-1 overflow-hidden">
         <Header />
-        <main className="flex-1 overflow-y-auto bg-surface-primary p-lg">
+        <main className="flex-1 overflow-y-auto bg-surface-primary">
           {children}
         </main>
       </div>
