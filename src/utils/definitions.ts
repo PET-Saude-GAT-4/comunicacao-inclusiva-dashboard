@@ -24,6 +24,25 @@ export type RoleOutput = {
   updatedAt: string;
 };
 
+export type ProfessionOutput = {
+  id: number;
+  name: string;
+  code: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type SpecialityOutput = {
+  id: number;
+  name: string;
+  code: string;
+  professionCode: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type ActionResult = { success: boolean; error?: string };
+
 export type UserOutput = {
   id: number;
   uuid: string;

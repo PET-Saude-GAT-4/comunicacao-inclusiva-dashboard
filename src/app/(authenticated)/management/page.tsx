@@ -1,5 +1,7 @@
+import { redirect } from "next/navigation";
+
 function Management() {
-  return <div className="text-red-500">Gerenciamento (Não implementado)</div>;
+  redirect("/management/users");
 }
 
 export default Management;
