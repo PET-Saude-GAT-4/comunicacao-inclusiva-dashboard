@@ -1,70 +1,71 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
 import AddButton from "@/components/AddButton/AddButton";
 import Modal from "@/components/Modal/Modal";
 import Table from "@/components/Table/Table";
 import Input from "@/components/Input/Input";
 import Button from "@/components/Button/Button";
-import { getBoards, createBoard } from "@/services/management";
-import { BoardOutput } from "@/utils/definitions";
+import { getPictograms, createPictogram } from "@/services/management";
+import { PictogramOutput } from "@/utils/definitions";
 import Image from "next/image";
 
-type BoardRow = {
+type PictogramRow = {
   uuid: string;
-  title: string;
-  representativeImageUrl: string;
+  imageUrl: string;
+  description: string;
   createdAt: string;
 };
 
-function toRow(b: BoardOutput): BoardRow {
+function toRow(p: PictogramOutput): PictogramRow {
   return {
-    uuid: b.uuid,
-    title: b.title,
-    representativeImageUrl: b.representativePictogram.fileUrl,
-    createdAt: new Date(b.createdAt).toLocaleDateString("pt-BR"),
+    uuid: p.uuid,
+    imageUrl: p.fileUrl,
+    description: p.description,
+    createdAt: new Date(p.createdAt).toLocaleDateString("pt-BR"),
   };
 }
 
-function Boards() {
-  const router = useRouter();
-  const [data, setData] = useState<BoardRow[]>([]);
+function Pictograms() {
+  const [data, setData] = useState<PictogramRow[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
 
-  const [title, setTitle] = useState("");
-  const [representativeUuid, setRepresentativeUuid] = useState("");
+  const [description, setDescription] = useState("");
+  const fileRef = useRef<HTMLInputElement>(null);
 
-  const fetchData = () => getBoards().then((rows) => setData(rows.map(toRow)));
+  const fetchData = () =>
+    getPictograms().then((rows) => setData(rows.map(toRow)));
 
   useEffect(() => {
     fetchData();
   }, []);
 
   const handleCreate = async () => {
-    if (!title || !representativeUuid) {
-      setFormError(
-        "Título e UUID do pictograma representante são obrigatórios.",
-      );
+    const file = fileRef.current?.files?.[0];
+    if (!description || !file) {
+      setFormError("Descrição e imagem são obrigatórias.");
       return;
     }
-    const result = await createBoard({ title, representativeUuid });
+    const formData = new FormData();
+    formData.append("description", description);
+    formData.append("image", file);
+    const result = await createPictogram(formData);
     if (result.success) {
       setIsModalOpen(false);
       setFormError(null);
-      setTitle("");
-      setRepresentativeUuid("");
+      setDescription("");
+      if (fileRef.current) fileRef.current.value = "";
       fetchData();
     } else {
-      setFormError(result.error ?? "Erro ao criar prancha.");
+      setFormError(result.error ?? "Erro ao criar pictograma.");
     }
   };
 
   return (
     <div className="min-h-screen w-full bg-surface-primary">
       <div className="text-text-on-primary border-b border-outline-common text-heading px-lg py-md">
-        <p>Pranchas</p>
+        <p>Pictogramas</p>
       </div>
       <div className="flex items-center justify-end p-sm text-text-on-primary border-b border-outline-common">
         <div className="flex">
@@ -76,10 +77,9 @@ function Boards() {
           data={data}
           columns={[
             { key: "uuid", label: "UUID" },
-            { key: "title", label: "Título" },
             {
-              key: "representativeImageUrl",
-              label: "Pictograma Representante",
+              key: "imageUrl",
+              label: "Imagem",
               render: (value) => (
                 <Image
                   src={String(value)}
@@ -90,33 +90,37 @@ function Boards() {
                 />
               ),
             },
+            { key: "description", label: "Descrição" },
             { key: "createdAt", label: "Data de Criação" },
           ]}
-          onRowClick={(row) => router.push(`/boards/${row.uuid}`)}
         />
       </div>
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        title="Nova Prancha"
+        title="Novo Pictograma"
       >
         <div className="flex flex-col gap-sm">
           <Input
-            id="title"
-            label="Título"
+            id="description"
+            label="Descrição"
             type="text"
-            placeholder="ex: Rotina matinal"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
+            placeholder="ex: Cachorro"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
           />
-          <Input
-            id="representativeUuid"
-            label="UUID do Pictograma Representante"
-            type="text"
-            placeholder="ex: 550e8400-e29b-41d4-a716-446655440000"
-            value={representativeUuid}
-            onChange={(e) => setRepresentativeUuid(e.target.value)}
-          />
+          <div className="flex flex-col">
+            <label className="text-text-on-primary" htmlFor="file">
+              Imagem
+            </label>
+            <input
+              id="file"
+              type="file"
+              accept="image/*"
+              ref={fileRef}
+              className="focus:outline-none focus:ring-1 focus:ring-primary-dark text-text-on-primary p-sm px-lg my-xs bg-surface-secondary rounded-lg"
+            />
+          </div>
           {formError && <p className="text-sm text-red-500">{formError}</p>}
           <Button type="button" onClick={handleCreate}>
             Criar
@@ -127,4 +131,4 @@ function Boards() {
   );
 }
 
-export default Boards;
+export default Pictograms;

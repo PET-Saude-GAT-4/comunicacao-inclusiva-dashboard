@@ -2,9 +2,10 @@ import {
   MdSettings,
   MdDeveloperBoard,
   MdAutoStories,
-  MdAddCircle,
+  MdPermMedia,
   MdRecentActors,
   MdLiveHelp,
+  MdContentPaste,
 } from "react-icons/md";
 import { Role } from "@/utils/definitions";
 
@@ -36,11 +37,19 @@ export const ROUTES: RouteConfig[] = [
   },
   {
     path: "/boards",
-    title: "Criador de Pranchas",
-    subtitle: "Crie pranchas personalizadas",
-    icon: MdAddCircle,
+    title: "Pranchas",
+    subtitle: "Gerencie as pranchas do sistema",
+    icon: MdContentPaste,
     placement: "main",
-    allowedRoles: "all",
+    allowedRoles: ["super_admin", "admin"],
+  },
+  {
+    path: "/pictograms",
+    title: "Pictogramas",
+    subtitle: "Gerencie os pictogramas do sistema",
+    icon: MdPermMedia,
+    placement: "main",
+    allowedRoles: ["super_admin", "admin"],
   },
   {
     path: "/management",

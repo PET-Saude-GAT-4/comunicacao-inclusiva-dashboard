@@ -63,6 +63,22 @@ export type LoginResponse = {
   user: UserOutput;
 };
 
+export type PictogramOutput = {
+  uuid: string;
+  description: string;
+  fileUrl: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type BoardOutput = {
+  uuid: string;
+  title: string;
+  representativePictogram: PictogramOutput;
+  createdAt: string;
+  updatedAt: string;
+};
+
 export const RegisterFormSchema = z
   .object({
     email: z.email({ message: "Insira um email válido." }).trim(),

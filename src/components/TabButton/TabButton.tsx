@@ -16,7 +16,7 @@ function TabButton({
     >
       <Icon
         size={24}
-        className={`${active ? "text-text-on-primary-dark" : "text-surface-secondary-dark" }`}
+        className={`${active ? "text-text-on-primary-dark" : "text-surface-secondary-dark"}`}
       />
     </button>
   );

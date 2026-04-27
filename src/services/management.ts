@@ -3,6 +3,8 @@
 import { getSession } from "@/utils/session";
 import {
   ActionResult,
+  BoardOutput,
+  PictogramOutput,
   ProfessionOutput,
   RoleOutput,
   SpecialityOutput,
@@ -173,6 +175,147 @@ export async function deleteRole(id: number): Promise<ActionResult> {
   });
   if (!response.ok) {
     return { success: false, error: `Erro ao remover permissão ${id}.` };
+  }
+  return { success: true };
+}
+
+// ─── Pictograms ───────────────────────────────────────────────────────────────
+
+export async function getPictograms(): Promise<PictogramOutput[]> {
+  const headers = await authHeaders();
+  const response = await fetch(`${process.env.API_URL}/pictograms`, {
+    headers,
+  });
+  if (!response.ok) return [];
+  const data = await response.json();
+  return data.pictograms as PictogramOutput[];
+}
+
+export async function getPictogram(
+  uuid: string,
+): Promise<PictogramOutput | null> {
+  const headers = await authHeaders();
+  const response = await fetch(`${process.env.API_URL}/pictograms/${uuid}`, {
+    headers,
+  });
+  if (!response.ok) return null;
+  const data = await response.json();
+  return data.pictogram as PictogramOutput;
+}
+
+export async function createPictogram(
+  formData: FormData,
+): Promise<ActionResult> {
+  const session = await getSession();
+  const response = await fetch(`${process.env.API_URL}/pictograms`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${session?.token ?? ""}` },
+    body: formData,
+  });
+  if (!response.ok) {
+    return { success: false, error: "Erro ao criar pictograma." };
+  }
+  return { success: true };
+}
+
+export async function deletePictogram(uuid: string): Promise<ActionResult> {
+  const headers = await authHeaders();
+  const response = await fetch(`${process.env.API_URL}/pictograms/${uuid}`, {
+    method: "DELETE",
+    headers,
+  });
+  if (!response.ok) {
+    return { success: false, error: `Erro ao remover pictograma ${uuid}.` };
+  }
+  return { success: true };
+}
+
+// ─── Boards ───────────────────────────────────────────────────────────────────
+
+export async function getBoards(): Promise<BoardOutput[]> {
+  const headers = await authHeaders();
+  const response = await fetch(`${process.env.API_URL}/boards`, { headers });
+  if (!response.ok) return [];
+  const data = await response.json();
+  return data.boards;
+}
+
+export async function getBoard(uuid: string): Promise<BoardOutput | null> {
+  const headers = await authHeaders();
+  const response = await fetch(`${process.env.API_URL}/boards/${uuid}`, {
+    headers,
+  });
+  if (!response.ok) return null;
+  const data = await response.json();
+  return data.board;
+}
+
+export async function createBoard(data: {
+  title: string;
+  representativeUuid: string;
+}): Promise<ActionResult> {
+  const headers = await authHeaders();
+  const response = await fetch(`${process.env.API_URL}/boards`, {
+    method: "POST",
+    headers,
+    body: JSON.stringify({
+      title: data.title,
+      representativeUuid: data.representativeUuid,
+    }),
+  });
+  if (!response.ok) {
+    return { success: false, error: "Erro ao criar prancha." };
+  }
+  return { success: true };
+}
+
+export async function deleteBoard(uuid: string): Promise<ActionResult> {
+  const headers = await authHeaders();
+  const response = await fetch(`${process.env.API_URL}/boards/${uuid}`, {
+    method: "DELETE",
+    headers,
+  });
+  if (!response.ok) {
+    return { success: false, error: `Erro ao remover prancha ${uuid}.` };
+  }
+  return { success: true };
+}
+
+// ─── Board Pictograms ─────────────────────────────────────────────────────────
+
+export async function getBoardPictograms(
+  boardUuid: string,
+): Promise<PictogramOutput[]> {
+  const headers = await authHeaders();
+  const response = await fetch(
+    `${process.env.API_URL}/boards/${boardUuid}/pictograms`,
+    { headers },
+  );
+  if (!response.ok) return [];
+  const data = await response.json();
+  return data.pictograms as PictogramOutput[];
+}
+
+export async function addPictogramToBoard(
+  boardUuid: string,
+  data: { pictogramUuid: string; order?: number },
+): Promise<ActionResult> {
+  const headers = await authHeaders();
+  const body: Record<string, unknown> = { pictogramUuid: data.pictogramUuid };
+  if (data.order !== undefined) body.order = data.order;
+  const response = await fetch(
+    `${process.env.API_URL}/boards/${boardUuid}/pictograms`,
+    {
+      method: "POST",
+      headers,
+      body: JSON.stringify(body),
+    },
+  );
+  if (!response.ok) {
+    if (response.status === 409) {
+      return { success: false, error: "Pictograma já está nesta prancha." };
+    }
+    return { success: false, error: "Erro ao adicionar pictograma à prancha." };
   }
   return { success: true };
 }
