@@ -2,11 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { redirect } from "next/navigation";
-import TabButton from "../Components/TabButton/TabButton";
-import RemoveButton from "../Components/RemoveButton/RemoveButton";
-import AddButton from "../Components/AddButton/AddButton";
-import Modal from "../Components/Modal/Modal";
-import Table from "../Components/Table/Table";
+import TabButton from "@/components/TabButton/TabButton";
+import RemoveButton from "@/components/RemoveButton/RemoveButton";
+import AddButton from "@/components/AddButton/AddButton";
+import Modal from "@/components/Modal/Modal";
+import Table from "@/components/Table/Table";
 import Input from "@/components/Input/Input";
 import Button from "@/components/Button/Button";
 import {
@@ -42,7 +42,7 @@ function toRow(s: SpecialityOutput): SpecialityRow {
 
 function Specialities() {
   const [data, setData] = useState<SpecialityRow[]>([]);
-  const [selectedIds, setSelectedIds] = useState<number[]>([]);
+  const [selectedIds, setSelectedIds] = useState<(number | string)[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
 
@@ -72,7 +72,7 @@ function Specialities() {
   };
 
   const handleDelete = async () => {
-    await Promise.all(selectedIds.map((id) => deleteSpeciality(id)));
+    await Promise.all(selectedIds.map((id) => deleteSpeciality(Number(id))));
     setData((prev) => prev.filter((item) => !selectedIds.includes(item.id)));
     setSelectedIds([]);
   };

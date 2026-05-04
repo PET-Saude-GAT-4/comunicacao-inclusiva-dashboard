@@ -3,33 +3,38 @@ import { useState } from "react";
 type Column<T> = {
   key: keyof T;
   label: string;
+  render?: (value: T[keyof T], row: T) => React.ReactNode;
 };
 
-function Table<T extends { id: number }>({
+function Table<T extends { id: number } | { uuid: string }>({
   data,
   columns,
   onSelectionChange,
+  onRowClick,
 }: {
   data: T[];
   columns: Column<T>[];
-  onSelectionChange?: (ids: number[]) => void;
+  onSelectionChange?: (ids: (number | string)[]) => void;
+  onRowClick?: (row: T) => void;
 }) {
-  const [selected, setSelected] = useState<number[]>([]);
+  const [selected, setSelected] = useState<(number | string)[]>([]);
 
-  const updateSelection = (next: number[]) => {
+  const rowKey = (row: T): number | string => ("id" in row ? row.id : row.uuid);
+
+  const updateSelection = (next: (number | string)[]) => {
     setSelected(next);
     onSelectionChange?.(next);
   };
 
   const toggleAll = () => {
-    const next = selected.length === data.length ? [] : data.map((r) => r.id);
+    const next = selected.length === data.length ? [] : data.map(rowKey);
     updateSelection(next);
   };
 
-  const toggleRow = (id: number) => {
-    const next = selected.includes(id)
-      ? selected.filter((s) => s !== id)
-      : [...selected, id];
+  const toggleRow = (key: number | string) => {
+    const next = selected.includes(key)
+      ? selected.filter((s) => s !== key)
+      : [...selected, key];
     updateSelection(next);
   };
 
@@ -56,12 +61,16 @@ function Table<T extends { id: number }>({
       </thead>
       <tbody>
         {data.map((row) => (
-          <tr className="border-b border-outline-common" key={row.id}>
+          <tr
+            className={`border-b border-outline-common${onRowClick ? " cursor-pointer hover:bg-surface-secondary" : ""}`}
+            key={rowKey(row)}
+            onClick={() => onRowClick?.(row)}
+          >
             <td className="py-sm px-sm border-r text-center border-outline-common">
               <input
                 type="checkbox"
-                checked={selected.includes(row.id)}
-                onChange={() => toggleRow(row.id)}
+                checked={selected.includes(rowKey(row))}
+                onChange={() => toggleRow(rowKey(row))}
               />
             </td>
             {columns.map((col) => (
@@ -69,7 +78,9 @@ function Table<T extends { id: number }>({
                 className="py-sm px-sm border-r border-outline-common"
                 key={String(col.key)}
               >
-                {String(row[col.key])}
+                {col.render
+                  ? col.render(row[col.key], row)
+                  : String(row[col.key])}
               </td>
             ))}
           </tr>
