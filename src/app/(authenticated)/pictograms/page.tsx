@@ -6,9 +6,10 @@ import Modal from "@/components/Modal/Modal";
 import Table from "@/components/Table/Table";
 import Input from "@/components/Input/Input";
 import Button from "@/components/Button/Button";
-import { getPictograms, createPictogram } from "@/services/management";
+import { getPictograms, createPictogram, deletePictogram } from "@/services/management";
 import { PictogramOutput } from "@/utils/definitions";
 import Image from "next/image";
+import RemoveButton from "@/components/RemoveButton/RemoveButton";
 
 type PictogramRow = {
   uuid: string;
@@ -30,6 +31,7 @@ function Pictograms() {
   const [data, setData] = useState<PictogramRow[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
+  const [selectedIds, setSelectedIds] = useState<(string | number)[]>([]);
 
   const [description, setDescription] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
@@ -62,6 +64,12 @@ function Pictograms() {
     }
   };
 
+  const handleDelete = async () => {
+    await Promise.all(selectedIds.map((id) => deletePictogram(String(id))));
+    setData((prev) => prev.filter((item) => !selectedIds.includes(item.uuid)));
+    setSelectedIds([]);
+  };
+
   return (
     <div className="min-h-screen w-full bg-surface-primary">
       <div className="text-text-on-primary border-b border-outline-common text-heading px-lg py-md">
@@ -70,6 +78,10 @@ function Pictograms() {
       <div className="flex items-center justify-end p-sm text-text-on-primary border-b border-outline-common">
         <div className="flex">
           <AddButton onClick={() => setIsModalOpen(true)} />
+          <RemoveButton
+            active={selectedIds.length > 0}
+            onClick={handleDelete}
+          />
         </div>
       </div>
       <div className="flex-1">
@@ -93,6 +105,7 @@ function Pictograms() {
             { key: "description", label: "Descrição" },
             { key: "createdAt", label: "Data de Criação" },
           ]}
+          onSelectionChange={setSelectedIds}
         />
       </div>
       <Modal
