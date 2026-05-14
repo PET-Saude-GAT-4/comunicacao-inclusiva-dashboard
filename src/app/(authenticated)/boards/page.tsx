@@ -7,9 +7,10 @@ import Modal from "@/components/Modal/Modal";
 import Table from "@/components/Table/Table";
 import Input from "@/components/Input/Input";
 import Button from "@/components/Button/Button";
-import { getBoards, createBoard } from "@/services/management";
+import { getBoards, createBoard, deleteBoard } from "@/services/management";
 import { BoardOutput } from "@/utils/definitions";
 import Image from "next/image";
+import RemoveButton from "@/components/RemoveButton/RemoveButton";
 
 type BoardRow = {
   uuid: string;
@@ -35,6 +36,7 @@ function Boards() {
 
   const [title, setTitle] = useState("");
   const [representativeUuid, setRepresentativeUuid] = useState("");
+  const [selectedIds, setSelectedIds] = useState<(string | number)[]>([]);
 
   const fetchData = () => getBoards().then((rows) => setData(rows.map(toRow)));
 
@@ -61,6 +63,11 @@ function Boards() {
     }
   };
 
+  const handleDelete = async () => {
+    await Promise.all(selectedIds.map((id) => deleteBoard(String(id))));
+    setData((prev) => prev.filter((item) => !selectedIds.includes(item.uuid)));
+  };
+
   return (
     <div className="min-h-screen w-full bg-surface-primary">
       <div className="text-text-on-primary border-b border-outline-common text-heading px-lg py-md">
@@ -69,6 +76,10 @@ function Boards() {
       <div className="flex items-center justify-end p-sm text-text-on-primary border-b border-outline-common">
         <div className="flex">
           <AddButton onClick={() => setIsModalOpen(true)} />
+          <RemoveButton
+            active={selectedIds.length > 0}
+            onClick={handleDelete}
+          />
         </div>
       </div>
       <div className="flex-1">
