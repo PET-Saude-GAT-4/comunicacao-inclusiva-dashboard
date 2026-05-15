@@ -15,7 +15,7 @@ import {
   MdMedicalInformation,
   MdLocalPolice,
 } from "react-icons/md";
-import { getRoles, createRole, deleteRole } from "@/services/management";
+import { getRoles, createRole, deleteRole } from "@/services/roles";
 import { RoleOutput } from "@/utils/definitions";
 
 type RoleRow = { id: number; name: string; createdAt: string };

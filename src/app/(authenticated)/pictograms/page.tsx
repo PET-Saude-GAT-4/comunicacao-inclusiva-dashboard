@@ -6,7 +6,7 @@ import Modal from "@/components/Modal/Modal";
 import Table from "@/components/Table/Table";
 import Input from "@/components/Input/Input";
 import Button from "@/components/Button/Button";
-import { getPictograms, createPictogram } from "@/services/management";
+import { getPictograms, createPictogram } from "@/services/pictograms";
 import { PictogramOutput } from "@/utils/definitions";
 import Image from "next/image";
 
