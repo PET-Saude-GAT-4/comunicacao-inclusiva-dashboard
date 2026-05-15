@@ -6,10 +6,12 @@ export async function loginRequest(
   password: string,
 ): Promise<LoginResponse> {
   try {
-    return await apiFetch("/auth/login", {
+    const data = await apiFetch<LoginResponse>("/auth/login", {
       method: "POST",
       body: JSON.stringify({ email, password }),
     });
+    if (!data) throw new Error();
+    return data;
   } catch {
     throw new Error("Email ou senha inválidos.");
   }

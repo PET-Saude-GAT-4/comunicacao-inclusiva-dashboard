@@ -3,11 +3,13 @@ import { apiFetch } from "./client";
 
 export async function getBoards(): Promise<BoardOutput[]> {
   const data = await apiFetch<{ boards: BoardOutput[] }>("/boards");
+  if (!data) throw new Error("Erro ao buscar pranchas.");
   return data.boards;
 }
 
 export async function getBoard(uuid: string): Promise<BoardOutput | null> {
   const data = await apiFetch<{ board: BoardOutput }>(`/boards/${uuid}`);
+  if (!data) throw new Error("Erro ao buscar prancha.");
   return data.board;
 }
 
@@ -28,6 +30,7 @@ export async function getBoardPictograms(
   const data = await apiFetch<{ pictograms: PictogramOutput[] }>(
     `/boards/${boardUuid}/pictograms`,
   );
+  if (!data) throw new Error("Erro ao buscar pictogramas da prancha.");
   return data.pictograms;
 }
 

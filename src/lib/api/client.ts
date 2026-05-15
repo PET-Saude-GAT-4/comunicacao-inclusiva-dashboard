@@ -12,7 +12,7 @@ export class ApiError extends Error {
 export async function apiFetch<T>(
   path: string,
   options: RequestInit = {},
-): Promise<T> {
+): Promise<T | undefined> {
   const session = await getSession();
   const isFormData = options.body instanceof FormData;
 
@@ -26,5 +26,8 @@ export async function apiFetch<T>(
   });
 
   if (!res.ok) throw new ApiError(res.status, await res.text());
-  return res.json() as Promise<T>;
+
+  const text = await res.text();
+  if (!text) return undefined;
+  return JSON.parse(text) as T;
 }

@@ -3,6 +3,7 @@ import { apiFetch } from "./client";
 
 export async function getUsers(): Promise<UserOutput[]> {
   const data = await apiFetch<{ users: UserOutput[] }>("/users");
+  if (!data) throw new Error("Erro ao buscar usuários.");
   return data.users;
 }
 

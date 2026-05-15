@@ -3,6 +3,7 @@ import { apiFetch } from "./client";
 
 export async function getPictograms(): Promise<PictogramOutput[]> {
   const data = await apiFetch<{ pictograms: PictogramOutput[] }>("/pictograms");
+  if (!data) throw new Error("Erro ao buscar pictogramas.");
   return data.pictograms;
 }
 
@@ -12,6 +13,7 @@ export async function getPictogram(
   const data = await apiFetch<{ pictogram: PictogramOutput }>(
     `/pictograms/${uuid}`,
   );
+  if (!data) throw new Error("Erro ao buscar pictograma.");
   return data.pictogram;
 }
 
