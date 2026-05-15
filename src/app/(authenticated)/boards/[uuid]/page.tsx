@@ -6,7 +6,7 @@ import {
   getBoard,
   getBoardPictograms,
   addPictogramToBoard,
-} from "@/services/management";
+} from "@/services/boards";
 import { BoardOutput, PictogramOutput } from "@/utils/definitions";
 import AddButton from "@/components/AddButton/AddButton";
 import Modal from "@/components/Modal/Modal";
