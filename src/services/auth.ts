@@ -4,48 +4,38 @@ import { redirect } from "next/navigation";
 import {
   LoginFormSchema,
   LoginFormState,
-  LoginResponse,
   RegisterFormSchema,
   RegisterFormState,
 } from "@/utils/definitions";
 import { createSession, deleteSession } from "@/utils/session";
+import { loginRequest, registerRequest } from "@/lib/api/auth";
 
 export async function login(
   state: LoginFormState,
   formData: FormData,
 ): Promise<LoginFormState> {
-  const validatedFields = LoginFormSchema.safeParse({
+  const validated = LoginFormSchema.safeParse({
     email: formData.get("email"),
     password: formData.get("password"),
   });
 
-  if (!validatedFields.success) {
-    return {
-      errors: validatedFields.error.flatten().fieldErrors,
-    };
+  if (!validated.success) {
+    return { errors: validated.error.flatten().fieldErrors };
   }
 
-  const { email, password } = validatedFields.data;
-
-  const response = await fetch(`${process.env.API_URL}/auth/login`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email, password }),
-  });
-
-  if (!response.ok) {
-    return {
-      message: "Email ou senha inválidos.",
-    };
+  try {
+    const data = await loginRequest(
+      validated.data.email,
+      validated.data.password,
+    );
+    await createSession({
+      token: data.token,
+      email: data.user.email,
+      role: data.user.role.name,
+    });
+  } catch (e) {
+    return { message: e instanceof Error ? e.message : String(e) };
   }
-
-  const data: LoginResponse = await response.json();
-
-  await createSession({
-    token: data.token,
-    email: data.user.email,
-    role: data.user.role.name,
-  });
 
   redirect("/dashboard");
 }
@@ -54,30 +44,20 @@ export async function register(
   state: RegisterFormState,
   formData: FormData,
 ): Promise<RegisterFormState> {
-  const validatedFields = RegisterFormSchema.safeParse({
+  const validated = RegisterFormSchema.safeParse({
     email: formData.get("email"),
     password: formData.get("password"),
     confirmPassword: formData.get("confirmPassword"),
   });
 
-  if (!validatedFields.success) {
-    return {
-      errors: validatedFields.error.flatten().fieldErrors,
-    };
+  if (!validated.success) {
+    return { errors: validated.error.flatten().fieldErrors };
   }
 
-  const { email, password } = validatedFields.data;
-
-  const response = await fetch(`${process.env.API_URL}/auth/register`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email, password, role: "viewer" }),
-  });
-
-  if (!response.ok) {
-    return {
-      message: "Erro ao solicitar registro. Tente novamente.",
-    };
+  try {
+    await registerRequest(validated.data.email, validated.data.password);
+  } catch (e) {
+    return { message: e instanceof Error ? e.message : String(e) };
   }
 
   redirect("/login");

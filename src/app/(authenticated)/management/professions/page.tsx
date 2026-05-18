@@ -19,7 +19,7 @@ import {
   getProfessions,
   createProfession,
   deleteProfession,
-} from "@/services/management";
+} from "@/services/professions";
 import { ProfessionOutput } from "@/utils/definitions";
 
 type ProfessionRow = {

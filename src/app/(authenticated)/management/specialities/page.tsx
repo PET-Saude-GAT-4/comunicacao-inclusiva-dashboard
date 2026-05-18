@@ -19,7 +19,7 @@ import {
   getSpecialities,
   createSpeciality,
   deleteSpeciality,
-} from "@/services/management";
+} from "@/services/professions";
 import { SpecialityOutput } from "@/utils/definitions";
 
 type SpecialityRow = {

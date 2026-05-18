@@ -15,7 +15,7 @@ import {
   MdMedicalInformation,
   MdLocalPolice,
 } from "react-icons/md";
-import { getUsers, createUser, deleteUser } from "@/services/management";
+import { getUsers, createUser, deleteUser } from "@/services/users";
 import { UserOutput } from "@/utils/definitions";
 
 type UserRow = { id: number; email: string; role: string; createdAt: string };
