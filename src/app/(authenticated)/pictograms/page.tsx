@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import AddButton from "@/components/AddButton/AddButton";
 import Modal from "@/components/Modal/Modal";
 import Table from "@/components/Table/Table";
@@ -88,7 +88,7 @@ function Pictograms() {
         <Table
           data={data}
           columns={[
-            { key: "uuid", label: "UUID" },
+            { key: "uuid", label: "Código de Pictograma" },
             {
               key: "imageUrl",
               label: "Imagem",

@@ -70,7 +70,10 @@ function Table<T extends { id: number } | { uuid: string }>({
               <input
                 type="checkbox"
                 checked={selected.includes(rowKey(row))}
-                onChange={() => toggleRow(rowKey(row))}
+                onClick={(e) => e.stopPropagation()}
+                onChange={(e) => {
+                  toggleRow(rowKey(row));
+                }}
               />
             </td>
             {columns.map((col) => (

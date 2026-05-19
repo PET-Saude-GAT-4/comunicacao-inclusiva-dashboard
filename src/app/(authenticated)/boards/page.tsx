@@ -86,7 +86,7 @@ function Boards() {
         <Table
           data={data}
           columns={[
-            { key: "uuid", label: "UUID" },
+            { key: "uuid", label: "Código de Prancha" },
             { key: "title", label: "Título" },
             {
               key: "representativeImageUrl",
@@ -104,6 +104,7 @@ function Boards() {
             { key: "createdAt", label: "Data de Criação" },
           ]}
           onRowClick={(row) => router.push(`/boards/${row.uuid}`)}
+          onSelectionChange={setSelectedIds}
         />
       </div>
       <Modal

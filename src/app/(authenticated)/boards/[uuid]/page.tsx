@@ -40,7 +40,7 @@ function BoardDetail() {
 
   const handleAdd = async () => {
     if (!pictogramUuid) {
-      setFormError("UUID do pictograma é obrigatório.");
+      setFormError("Código de pictograma é obrigatório.");
       return;
     }
     const result = await addPictogramToBoard(uuid, {
