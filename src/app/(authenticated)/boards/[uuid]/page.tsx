@@ -13,6 +13,7 @@ import Modal from "@/components/Modal/Modal";
 import Input from "@/components/Input/Input";
 import Button from "@/components/Button/Button";
 import Image from "next/image";
+import { useDragReorder } from "@/hooks/useDragReorder";
 
 function BoardDetail() {
   const params = useParams();
@@ -58,6 +59,19 @@ function BoardDetail() {
     }
   };
 
+  // Destructuring the handlers from the custom hook
+  const {
+    handleDragStart,
+    handleDragOver,
+    handleDrop,
+    handleDropAtEnd,
+    draggedUuid,
+  } = useDragReorder({
+    boardUuid: uuid,
+    pictograms: items,
+    onReorderSuccess: fetchItems,
+  });
+
   return (
     <div className="min-h-screen w-full bg-surface-primary">
       <div className="flex items-center justify-between border-b border-outline-common px-lg py-md">
@@ -70,6 +84,16 @@ function BoardDetail() {
         {items.map((item) => (
           <div
             key={item.uuid}
+            draggable
+            onDragStart={(e) => handleDragStart(e, item.uuid)}
+            onDragOver={(e) => handleDragOver(e)}
+            onDrop={(e) => {
+              if (items.indexOf(item) < items.length - 1) {
+                handleDrop(e, item.uuid);
+              } else {
+                handleDropAtEnd(e);
+              }
+            }}
             className="flex flex-col items-center gap-xs bg-surface-secondary rounded-sm"
           >
             <Image

@@ -60,3 +60,16 @@ export async function addPictogramToBoard(
     return { success: false, error: "Erro ao adicionar pictograma à prancha." };
   }
 }
+
+export async function reorderPictogram(
+  boardUuid: string,
+  pictogramUuid: string,
+  data: { next: string | null },
+): Promise<ActionResult> {
+  try {
+    await api.reorderPictogram(boardUuid, pictogramUuid, data);
+    return { success: true };
+  } catch (e) {
+    return { success: false, error: "Erro ao mover pictograma" };
+  }
+}
