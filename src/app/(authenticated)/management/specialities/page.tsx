@@ -66,7 +66,7 @@ function Specialities() {
       setCode("");
       setProfessionCode("");
       fetchData();
-    } else {
+    } else {  
       setFormError(result.error ?? "Erro ao criar especialidade.");
     }
   };
