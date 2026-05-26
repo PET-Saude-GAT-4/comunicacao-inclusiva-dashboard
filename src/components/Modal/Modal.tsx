@@ -31,11 +31,11 @@ function Modal({
       onClick={onClose}
     >
       <div
-        className="bg-surface-primary outline-2 outline-outline-common rounded-lg p-lg min-w-96 max-w-lg w-full mx-lg"
+        className="bg-surface-primary outline-2 outline-outline-common rounded-lg p-lg min-w-100 max-w-fit w-full mx-lg"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between border-b border-outline-common pb-sm mb-md">
-          <p className="text-text-on-primary text-heading">{title}</p>
+          <p className="text-text-on-primary text-heading font-bold ">{title}</p>
           <button
             className="px-sm py-sm rounded-sm bg-transparent outline-1 outline-surface-secondary hover:bg-surface-secondary hover:cursor-pointer transition-colors"
             onClick={onClose}

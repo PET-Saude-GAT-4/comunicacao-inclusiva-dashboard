@@ -15,7 +15,7 @@ export default function Input({ label, error, id, ...props }: InputProps) {
       )}
       <input
         id={id}
-        className="focus:outline-none focus:ring-1 focus:ring-primary-dark text-text-on-primary p-sm px-lg my-xs bg-surface-secondary rounded-lg"
+        className="focus:outline-none focus:ring-1 focus:ring-primary-dark text-text-on-primary p-sm px-lg my-xs bg-surface-secondary rounded-md"
         {...props}
       />
       {error && <p className="text-sm text-red-500">{error}</p>}

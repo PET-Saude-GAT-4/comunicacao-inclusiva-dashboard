@@ -11,6 +11,8 @@ import { getBoards, createBoard, deleteBoard } from "@/services/boards";
 import { BoardOutput } from "@/utils/definitions";
 import Image from "next/image";
 import RemoveButton from "@/components/RemoveButton/RemoveButton";
+import { PictogramOutput } from "@/utils/definitions";
+import { getPictograms } from "@/services/pictograms";
 
 type BoardRow = {
   uuid: string;
@@ -33,10 +35,22 @@ function Boards() {
   const [data, setData] = useState<BoardRow[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
+  const [pictograms, setPictograms] = useState<PictogramOutput[]>([]);
 
   const [title, setTitle] = useState("");
+
   const [representativeUuid, setRepresentativeUuid] = useState("");
+  const [representativeImageUrl, setRepresentativeImageUrl] = useState("");
+  const [representativeDescription, setRepresentativeDescription] =
+    useState("");
+
   const [selectedIds, setSelectedIds] = useState<(string | number)[]>([]);
+
+  const clearForm = () => {
+    setTitle("");
+    setRepresentativeUuid("");
+    setRepresentativeImageUrl("");
+  };
 
   const fetchData = () => getBoards().then((rows) => setData(rows.map(toRow)));
 
@@ -47,7 +61,7 @@ function Boards() {
   const handleCreate = async () => {
     if (!title || !representativeUuid) {
       setFormError(
-        "Título e UUID do pictograma representante são obrigatórios.",
+        "Título e Código do pictograma representante são obrigatórios.",
       );
       return;
     }
@@ -68,6 +82,11 @@ function Boards() {
     setData((prev) => prev.filter((item) => !selectedIds.includes(item.uuid)));
   };
 
+  const listPictograms = async () => {
+    getPictograms().then((items) => setPictograms(items));
+    setIsModalOpen(true);
+  };
+
   return (
     <div className="min-h-screen w-full bg-surface-primary">
       <div className="text-text-on-primary border-b border-outline-common text-heading px-lg py-md">
@@ -75,7 +94,11 @@ function Boards() {
       </div>
       <div className="flex items-center justify-end p-sm text-text-on-primary border-b border-outline-common">
         <div className="flex">
-          <AddButton onClick={() => setIsModalOpen(true)} />
+          <AddButton
+            onClick={() => {
+              listPictograms();
+            }}
+          />
           <RemoveButton
             active={selectedIds.length > 0}
             onClick={handleDelete}
@@ -109,27 +132,94 @@ function Boards() {
       </div>
       <Modal
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        onClose={() => {
+          setIsModalOpen(false);
+          setFormError(null);
+          clearForm();
+        }}
         title="Nova Prancha"
       >
-        <div className="flex flex-col gap-sm">
-          <Input
-            id="title"
-            label="Título"
-            type="text"
-            placeholder="ex: Rotina matinal"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-          />
-          <Input
-            id="representativeUuid"
-            label="UUID do Pictograma Representante"
-            type="text"
-            placeholder="ex: 550e8400-e29b-41d4-a716-446655440000"
-            value={representativeUuid}
-            onChange={(e) => setRepresentativeUuid(e.target.value)}
-          />
-          {formError && <p className="text-sm text-red-500">{formError}</p>}
+        {formError && <p className="text-sm text-red-500">{formError}</p>}
+        <div className="flex flex-rol justify-between w-200 gap-xxl m-xl mb-xs">
+          <div className="flex flex-col w-full gap-lg">
+            <Input
+              id="title"
+              label="Título:"
+              type="text"
+              placeholder="ex: Rotina matinal"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+            />
+            <Input
+              id="representativeUuid"
+              label="Pictograma Representante"
+              type="text"
+              disabled
+              placeholder="ex: 550e8400-e29b-41d4-a716-446655440000"
+              value={representativeUuid}
+              onChange={(e) => setRepresentativeUuid(e.target.value)}
+            />
+            <div className="flex w-full justify-center">
+              {representativeImageUrl ? (
+                <div className="flex flex-col items-center gap-md">
+                  <Image
+                    src={representativeImageUrl}
+                    alt=""
+                    width="200"
+                    height="200"
+                    className="border border-outline-common object-contain rounded-md"
+                  />
+                  <p className="text-text-on-primary text-center font-bold text-md">
+                    {representativeDescription}
+                  </p>
+                </div>
+              ) : (
+                <div className="border border-outline-common flex items-center rounded-md w-50 h-50">
+                  <p className="text-text-on-primary text-center font-bold text-md">
+                    Nenhum pictograma selecionado.
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+          <div
+            id="pictograms"
+            className="flex flex-col w-full h-overflow-scroll gap-md"
+          >
+            <p className="text-text-on-primary">Pictogramas Disponíveis: </p>
+            <ul className="flex flex-col gap-md ">
+              {pictograms.map((pictogram) => (
+                <div
+                  key={pictogram.uuid}
+                  className="flex flex-row items-center gap-md border border-outline-common rounded-md p-sm justify-between cursor-pointer"
+                  onClick={() => {
+                    setRepresentativeUuid(pictogram.uuid);
+                    setRepresentativeImageUrl(pictogram.fileUrl);
+                    setRepresentativeDescription(pictogram.description);
+                  }}
+                >
+                  <Image
+                    src={pictogram.fileUrl}
+                    alt=""
+                    width={50}
+                    height={50}
+                    className="object-contain rounded"
+                  />
+                  <p className="text-text-on-primary">
+                    {pictogram.description}
+                  </p>
+                  <AddButton
+                    onClick={() => {
+                      setRepresentativeUuid(pictogram.uuid);
+                      setRepresentativeImageUrl(pictogram.fileUrl);
+                    }}
+                  />
+                </div>
+              ))}
+            </ul>
+          </div>
+        </div>
+        <div className="flex justify-end gap-md">
           <Button type="button" onClick={handleCreate}>
             Criar
           </Button>
