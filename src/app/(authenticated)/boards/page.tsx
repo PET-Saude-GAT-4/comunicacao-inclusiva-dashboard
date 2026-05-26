@@ -141,6 +141,44 @@ function Boards() {
       >
         {formError && <p className="text-sm text-red-500">{formError}</p>}
         <div className="flex flex-rol justify-between w-200 gap-xxl m-xl mb-xs">
+          <div
+            id="pictograms"
+            className="flex flex-col w-full h-96 overflow-y-auto gap-md"
+          >
+            <p className="text-text-on-primary sticky top-0 bg-surface-primary pt-0 pb-2 z-10">
+              Pictogramas Disponíveis:{" "}
+            </p>
+            <ul className="flex flex-col gap-md  top-10">
+              {pictograms.map((pictogram) => (
+                <div
+                  key={pictogram.uuid}
+                  className="flex flex-row items-center gap-md border border-outline-common rounded-md p-sm justify-between cursor-pointer"
+                  onClick={() => {
+                    setRepresentativeUuid(pictogram.uuid);
+                    setRepresentativeImageUrl(pictogram.fileUrl);
+                    setRepresentativeDescription(pictogram.description);
+                  }}
+                >
+                  <Image
+                    src={pictogram.fileUrl}
+                    alt=""
+                    width={50}
+                    height={50}
+                    className="object-contain rounded"
+                  />
+                  <p className="text-text-on-primary">
+                    {pictogram.description}
+                  </p>
+                  <AddButton
+                    onClick={() => {
+                      setRepresentativeUuid(pictogram.uuid);
+                      setRepresentativeImageUrl(pictogram.fileUrl);
+                    }}
+                  />
+                </div>
+              ))}
+            </ul>
+          </div>
           <div className="flex flex-col w-full gap-lg">
             <Input
               id="title"
@@ -181,42 +219,6 @@ function Boards() {
                 </div>
               )}
             </div>
-          </div>
-          <div
-            id="pictograms"
-            className="flex flex-col w-full h-96 overflow-y-auto gap-md"
-          >
-            <p className="text-text-on-primary sticky top-0 bg-surface-primary pt-0 pb-2 z-10">Pictogramas Disponíveis: </p>
-            <ul className="flex flex-col gap-md  top-10">
-              {pictograms.map((pictogram) => (
-                <div
-                  key={pictogram.uuid}
-                  className="flex flex-row items-center gap-md border border-outline-common rounded-md p-sm justify-between cursor-pointer"
-                  onClick={() => {
-                    setRepresentativeUuid(pictogram.uuid);
-                    setRepresentativeImageUrl(pictogram.fileUrl);
-                    setRepresentativeDescription(pictogram.description);
-                  }}
-                >
-                  <Image
-                    src={pictogram.fileUrl}
-                    alt=""
-                    width={50}
-                    height={50}
-                    className="object-contain rounded"
-                  />
-                  <p className="text-text-on-primary">
-                    {pictogram.description}
-                  </p>
-                  <AddButton
-                    onClick={() => {
-                      setRepresentativeUuid(pictogram.uuid);
-                      setRepresentativeImageUrl(pictogram.fileUrl);
-                    }}
-                  />
-                </div>
-              ))}
-            </ul>
           </div>
         </div>
         <div className="flex justify-end gap-md">

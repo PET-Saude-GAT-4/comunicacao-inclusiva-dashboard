@@ -14,6 +14,7 @@ import Input from "@/components/Input/Input";
 import Button from "@/components/Button/Button";
 import Image from "next/image";
 import { useDragReorder } from "@/hooks/useDragReorder";
+import { getPictograms } from "@/services/pictograms";
 
 function BoardDetail() {
   const params = useParams();
@@ -25,8 +26,18 @@ function BoardDetail() {
   const [formError, setFormError] = useState<string | null>(null);
 
   const [pictogramUuid, setPictogramUuid] = useState("");
+  const [pictogramImage, setPictogramImage] = useState("");
+  const [pictogramDescription, setpictogramDescription] = useState("");
+
+  const [pictograms, setPictograms] = useState<PictogramOutput[]>([]);
   const [order, setOrder] = useState("");
 
+  const clearForm = () => {
+    setFormError("");
+    setPictogramUuid("");
+    setPictogramImage("");
+    setpictogramDescription("");
+  };
   const fetchItems = () =>
     getBoardPictograms(uuid).then((data) => setItems(data));
 
@@ -41,7 +52,7 @@ function BoardDetail() {
 
   const handleAdd = async () => {
     if (!pictogramUuid) {
-      setFormError("Código de pictograma é obrigatório.");
+      setFormError("Selecionar pictograma é obrigatório.");
       return;
     }
     const result = await addPictogramToBoard(uuid, {
@@ -57,6 +68,11 @@ function BoardDetail() {
     } else {
       setFormError(result.error ?? "Erro ao adicionar pictograma.");
     }
+  };
+
+  const listPictograms = async () => {
+    getPictograms().then((items) => setPictograms(items));
+    setIsModalOpen(true);
   };
 
   // Destructuring the handlers from the custom hook
@@ -78,7 +94,12 @@ function BoardDetail() {
         <div className="flex items-center gap-md text-text-on-primary">
           <p className="text-heading">{board?.title ?? "Carregando..."}</p>
         </div>
-        <AddButton onClick={() => setIsModalOpen(true)} />
+        <AddButton
+          onClick={() => {
+            setIsModalOpen(true);
+            listPictograms();
+          }}
+        />
       </div>
       <div className="flex flex-wrap gap-md p-lg">
         {items.map((item) => (
@@ -116,27 +137,84 @@ function BoardDetail() {
       </div>
       <Modal
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        onClose={() => {
+          setIsModalOpen(false);
+          clearForm();
+        }}
         title="Adicionar Pictograma"
       >
-        <div className="flex flex-col gap-sm">
-          <Input
-            id="pictogramUuid"
-            label="UUID do Pictograma"
-            type="text"
-            placeholder="ex: 550e8400-e29b-41d4-a716-446655440000"
-            value={pictogramUuid}
-            onChange={(e) => setPictogramUuid(e.target.value)}
-          />
-          <Input
-            id="order"
-            label="Ordem (opcional)"
-            type="number"
-            placeholder="ex: 1"
-            value={order}
-            onChange={(e) => setOrder(e.target.value)}
-          />
-          {formError && <p className="text-sm text-red-500">{formError}</p>}
+        {formError && <p className="text-sm text-red-500">{formError}</p>}
+        <div className="flex flex-row gap-sm w-200 m-xl mb-xs">
+          <div
+            id="pictograms"
+            className="flex flex-col w-full h-96 overflow-y-auto gap-md"
+          >
+            <p className="text-text-on-primary sticky top-0 bg-surface-primary pt-0 pb-2 z-10">
+              Pictogramas Disponíveis:{" "}
+            </p>
+            <ul className="flex flex-col gap-md top-10">
+              {pictograms.map((pictogram) => (
+                <div
+                  key={pictogram.uuid}
+                  className="flex flex-row items-center gap-md border border-outline-common rounded-md p-sm justify-between cursor-pointer"
+                  onClick={() => {}}
+                >
+                  <Image
+                    src={pictogram.fileUrl}
+                    alt=""
+                    width={50}
+                    height={50}
+                    className="object-contain rounded"
+                  />
+                  <p className="text-text-on-primary">
+                    {pictogram.description}
+                  </p>
+                  <AddButton
+                    onClick={() => {
+                      setPictogramUuid(pictogram.uuid);
+                      setPictogramImage(pictogram.fileUrl);
+                      setpictogramDescription(pictogram.description);
+                    }}
+                  />
+                </div>
+              ))}
+            </ul>
+          </div>
+          <div className="flex flex-col w-full gap-md ">
+            <Input
+              id="pictogramUuid"
+              label="Código do Pictograma"
+              type="text"
+              disabled
+              placeholder="ex: 550e8400-e29b-41d4-a716-446655440000"
+              value={pictogramUuid}
+              onChange={(e) => setPictogramUuid(e.target.value)}
+            />
+            <div className="flex w-full justify-center">
+              {pictogramUuid ? (
+                <div className="flex flex-col items-center gap-md">
+                  <Image
+                    src={pictogramImage}
+                    alt=""
+                    width="200"
+                    height="200"
+                    className="border border-outline-common object-contain rounded-md"
+                  />
+                  <p className="text-text-on-primary text-center font-bold text-md">
+                    {pictogramDescription}
+                  </p>
+                </div>
+              ) : (
+                <div className="border border-outline-common flex items-center rounded-md w-50 h-50">
+                  <p className="text-text-on-primary text-center font-bold text-md">
+                    Nenhum pictograma selecionado.
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+        <div className="flex justify-end gap-md">
           <Button type="button" onClick={handleAdd}>
             Adicionar
           </Button>
