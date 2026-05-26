@@ -184,10 +184,10 @@ function Boards() {
           </div>
           <div
             id="pictograms"
-            className="flex flex-col w-full h-overflow-scroll gap-md"
+            className="flex flex-col w-full h-96 overflow-y-auto gap-md"
           >
-            <p className="text-text-on-primary">Pictogramas Disponíveis: </p>
-            <ul className="flex flex-col gap-md ">
+            <p className="text-text-on-primary sticky top-0 bg-surface-primary pt-0 pb-2 z-10">Pictogramas Disponíveis: </p>
+            <ul className="flex flex-col gap-md  top-10">
               {pictograms.map((pictogram) => (
                 <div
                   key={pictogram.uuid}
