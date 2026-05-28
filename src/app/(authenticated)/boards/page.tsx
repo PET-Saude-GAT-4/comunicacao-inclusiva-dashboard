@@ -21,6 +21,12 @@ type BoardRow = {
   createdAt: string;
 };
 
+type PictogramInput = {
+  uuid: string;
+  imageUrl: string;
+  description: string;
+};
+
 function toRow(b: BoardOutput): BoardRow {
   return {
     uuid: b.uuid,
@@ -39,17 +45,13 @@ function Boards() {
 
   const [title, setTitle] = useState("");
 
-  const [representativeUuid, setRepresentativeUuid] = useState("");
-  const [representativeImageUrl, setRepresentativeImageUrl] = useState("");
-  const [representativeDescription, setRepresentativeDescription] =
-    useState("");
+  const [selectedPictogram, setSelectedPictogram] = useState<PictogramInput>();
 
   const [selectedIds, setSelectedIds] = useState<(string | number)[]>([]);
 
   const clearForm = () => {
     setTitle("");
-    setRepresentativeUuid("");
-    setRepresentativeImageUrl("");
+    setSelectedPictogram(undefined);
   };
 
   const fetchData = () => getBoards().then((rows) => setData(rows.map(toRow)));
@@ -59,18 +61,19 @@ function Boards() {
   }, []);
 
   const handleCreate = async () => {
-    if (!title || !representativeUuid) {
+    if (!title || !selectedPictogram?.uuid) {
       setFormError(
         "Título e Código do pictograma representante são obrigatórios.",
       );
       return;
     }
-    const result = await createBoard({ title, representativeUuid });
+    const result = await createBoard({
+      title: title,
+      representativeUuid: selectedPictogram.uuid,
+    });
     if (result.success) {
       setIsModalOpen(false);
-      setFormError(null);
-      setTitle("");
-      setRepresentativeUuid("");
+      clearForm();
       fetchData();
     } else {
       setFormError(result.error ?? "Erro ao criar prancha.");
@@ -154,9 +157,11 @@ function Boards() {
                   key={pictogram.uuid}
                   className="flex flex-row items-center gap-md border border-outline-common rounded-md p-sm justify-between cursor-pointer"
                   onClick={() => {
-                    setRepresentativeUuid(pictogram.uuid);
-                    setRepresentativeImageUrl(pictogram.fileUrl);
-                    setRepresentativeDescription(pictogram.description);
+                    setSelectedPictogram({
+                      uuid: pictogram.uuid,
+                      description: pictogram.description,
+                      imageUrl: pictogram.fileUrl,
+                    });
                   }}
                 >
                   <Image
@@ -171,8 +176,11 @@ function Boards() {
                   </p>
                   <AddButton
                     onClick={() => {
-                      setRepresentativeUuid(pictogram.uuid);
-                      setRepresentativeImageUrl(pictogram.fileUrl);
+                      setSelectedPictogram({
+                        uuid: pictogram.uuid,
+                        description: pictogram.description,
+                        imageUrl: pictogram.fileUrl,
+                      });
                     }}
                   />
                 </div>
@@ -183,7 +191,7 @@ function Boards() {
             <Input
               id="title"
               label="Título:"
-              type="text"
+
               placeholder="ex: Rotina matinal"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
@@ -194,21 +202,20 @@ function Boards() {
               type="text"
               disabled
               placeholder="ex: 550e8400-e29b-41d4-a716-446655440000"
-              value={representativeUuid}
-              onChange={(e) => setRepresentativeUuid(e.target.value)}
+              value={selectedPictogram?.uuid || ""}
             />
             <div className="flex w-full justify-center">
-              {representativeImageUrl ? (
+              {selectedPictogram ? (
                 <div className="flex flex-col items-center gap-md">
                   <Image
-                    src={representativeImageUrl}
+                    src={selectedPictogram?.imageUrl}
                     alt=""
                     width="200"
                     height="200"
                     className="border border-outline-common object-contain rounded-md"
                   />
                   <p className="text-text-on-primary text-center font-bold text-md">
-                    {representativeDescription}
+                    {selectedPictogram.description}
                   </p>
                 </div>
               ) : (

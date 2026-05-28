@@ -16,6 +16,12 @@ import Image from "next/image";
 import { useDragReorder } from "@/hooks/useDragReorder";
 import { getPictograms } from "@/services/pictograms";
 
+type PictogramInput = {
+  uuid: string;
+  imageUrl: string;
+  description: string;
+};
+
 function BoardDetail() {
   const params = useParams();
   const uuid = String(params.uuid);
@@ -25,18 +31,14 @@ function BoardDetail() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
 
-  const [pictogramUuid, setPictogramUuid] = useState("");
-  const [pictogramImage, setPictogramImage] = useState("");
-  const [pictogramDescription, setpictogramDescription] = useState("");
+  const [selectedPictogram, setSelectedPictogram] = useState<PictogramInput>();
 
   const [pictograms, setPictograms] = useState<PictogramOutput[]>([]);
   const [order, setOrder] = useState("");
 
   const clearForm = () => {
     setFormError("");
-    setPictogramUuid("");
-    setPictogramImage("");
-    setpictogramDescription("");
+    setSelectedPictogram(undefined);
   };
   const fetchItems = () =>
     getBoardPictograms(uuid).then((data) => setItems(data));
@@ -51,19 +53,17 @@ function BoardDetail() {
   }, [uuid]);
 
   const handleAdd = async () => {
-    if (!pictogramUuid) {
+    if (!selectedPictogram?.uuid) {
       setFormError("Selecionar pictograma é obrigatório.");
       return;
     }
     const result = await addPictogramToBoard(uuid, {
-      pictogramUuid,
+      pictogramUuid: selectedPictogram.uuid,
       ...(order ? { order: Number(order) } : {}),
     });
     if (result.success) {
       setIsModalOpen(false);
-      setFormError(null);
-      setPictogramUuid("");
-      setOrder("");
+      clearForm();
       fetchItems();
     } else {
       setFormError(result.error ?? "Erro ao adicionar pictograma.");
@@ -171,9 +171,11 @@ function BoardDetail() {
                   </p>
                   <AddButton
                     onClick={() => {
-                      setPictogramUuid(pictogram.uuid);
-                      setPictogramImage(pictogram.fileUrl);
-                      setpictogramDescription(pictogram.description);
+                      setSelectedPictogram({
+                        uuid: pictogram.uuid,
+                        imageUrl: pictogram.fileUrl,
+                        description: pictogram.description,
+                      });
                     }}
                   />
                 </div>
@@ -187,21 +189,20 @@ function BoardDetail() {
               type="text"
               disabled
               placeholder="ex: 550e8400-e29b-41d4-a716-446655440000"
-              value={pictogramUuid}
-              onChange={(e) => setPictogramUuid(e.target.value)}
+              value={selectedPictogram?.uuid || ""}
             />
             <div className="flex w-full justify-center">
-              {pictogramUuid ? (
+              {selectedPictogram ? (
                 <div className="flex flex-col items-center gap-md">
                   <Image
-                    src={pictogramImage}
+                    src={selectedPictogram?.imageUrl}
                     alt=""
                     width="200"
                     height="200"
                     className="border border-outline-common object-contain rounded-md"
                   />
                   <p className="text-text-on-primary text-center font-bold text-md">
-                    {pictogramDescription}
+                    {selectedPictogram.description}
                   </p>
                 </div>
               ) : (

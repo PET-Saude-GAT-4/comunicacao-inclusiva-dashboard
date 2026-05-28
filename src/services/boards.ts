@@ -69,7 +69,8 @@ export async function reorderPictogram(
   try {
     await api.reorderPictogram(boardUuid, pictogramUuid, data);
     return { success: true };
-  } catch (e) {
+  } catch (err) {
     return { success: false, error: "Erro ao mover pictograma" };
+    console.log(err);
   }
 }
