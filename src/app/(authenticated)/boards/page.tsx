@@ -13,18 +13,15 @@ import Image from "next/image";
 import RemoveButton from "@/components/RemoveButton/RemoveButton";
 import { PictogramOutput } from "@/utils/definitions";
 import { getPictograms } from "@/services/pictograms";
+import PictogramPicker, {
+  PictogramInput,
+} from "@/components/PictogramPicker/PictogramPicker";
 
 type BoardRow = {
   uuid: string;
   title: string;
   representativeImageUrl: string;
   createdAt: string;
-};
-
-type PictogramInput = {
-  uuid: string;
-  imageUrl: string;
-  description: string;
 };
 
 function toRow(b: BoardOutput): BoardRow {
@@ -144,54 +141,14 @@ function Boards() {
       >
         {formError && <p className="text-sm text-red-500">{formError}</p>}
         <div className="flex flex-rol justify-between w-200 gap-xxl m-xl mb-xs">
-          <div
-            id="pictograms"
-            className="flex flex-col w-full h-96 overflow-y-auto gap-md"
-          >
-            <p className="text-text-on-primary sticky top-0 bg-surface-primary pt-0 pb-2 z-10">
-              Pictogramas Disponíveis:{" "}
-            </p>
-            <ul className="flex flex-col gap-md  top-10">
-              {pictograms.map((pictogram) => (
-                <div
-                  key={pictogram.uuid}
-                  className="flex flex-row items-center gap-md border border-outline-common rounded-md p-sm justify-between cursor-pointer"
-                  onClick={() => {
-                    setSelectedPictogram({
-                      uuid: pictogram.uuid,
-                      description: pictogram.description,
-                      imageUrl: pictogram.fileUrl,
-                    });
-                  }}
-                >
-                  <Image
-                    src={pictogram.fileUrl}
-                    alt=""
-                    width={50}
-                    height={50}
-                    className="object-contain rounded"
-                  />
-                  <p className="text-text-on-primary">
-                    {pictogram.description}
-                  </p>
-                  <AddButton
-                    onClick={() => {
-                      setSelectedPictogram({
-                        uuid: pictogram.uuid,
-                        description: pictogram.description,
-                        imageUrl: pictogram.fileUrl,
-                      });
-                    }}
-                  />
-                </div>
-              ))}
-            </ul>
-          </div>
+          <PictogramPicker
+            pictograms={pictograms}
+            onSelect={setSelectedPictogram}
+          />
           <div className="flex flex-col w-full gap-lg">
             <Input
               id="title"
               label="Título:"
-
               placeholder="ex: Rotina matinal"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
