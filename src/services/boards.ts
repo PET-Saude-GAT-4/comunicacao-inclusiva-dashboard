@@ -17,6 +17,22 @@ export async function getBoard(uuid: string): Promise<BoardOutput | null> {
   return api.getBoard(uuid);
 }
 
+export async function getPublicBoards(): Promise<BoardOutput[]> {
+  return api.getPublicBoards();
+}
+
+export async function getPublicBoard(
+  uuid: string,
+): Promise<BoardOutput | null> {
+  return api.getPublicBoard(uuid);
+}
+
+export async function getPublicBoardPictograms(
+  boardUuid: string,
+): Promise<PictogramOutput[]> {
+  return api.getPublicBoardPictograms(boardUuid);
+}
+
 export async function createBoard(data: {
   title: string;
   representativeUuid: string;
@@ -37,6 +53,28 @@ export async function deleteBoard(uuid: string): Promise<ActionResult> {
     return { success: true };
   } catch {
     return { success: false, error: `Erro ao remover prancha ${uuid}.` };
+  }
+}
+
+export async function publishBoard(uuid: string): Promise<ActionResult> {
+  try {
+    await api.publishBoard(uuid);
+    revalidatePath("/boards");
+    revalidatePath(`/boards/${uuid}`);
+    return { success: true };
+  } catch {
+    return { success: false, error: "Erro ao publicar prancha." };
+  }
+}
+
+export async function unpublishBoard(uuid: string): Promise<ActionResult> {
+  try {
+    await api.unpublishBoard(uuid);
+    revalidatePath("/boards");
+    revalidatePath(`/boards/${uuid}`);
+    return { success: true };
+  } catch {
+    return { success: false, error: "Erro ao despublicar prancha." };
   }
 }
 

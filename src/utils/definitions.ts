@@ -54,6 +54,13 @@ export type UserOutput = {
 
 export type SessionPayload = {
   token: string;
+  uuid: string;
+  email: string;
+  role: Role;
+};
+
+export type SessionUser = {
+  uuid: string;
   email: string;
   role: Role;
 };
@@ -74,7 +81,9 @@ export type PictogramOutput = {
 export type BoardOutput = {
   uuid: string;
   title: string;
+  authorUuid: string | null;
   representativePictogram: PictogramOutput;
+  publishedAt: string | null;
   createdAt: string;
   updatedAt: string;
 };

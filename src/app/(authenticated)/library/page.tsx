@@ -1,5 +1,7 @@
+import { redirect } from "next/navigation";
+
 function Library() {
-  return <div className="text-red-500">Biblioteca (Não implementado)</div>;
+  redirect("/library/boards");
 }
 
 export default Library;

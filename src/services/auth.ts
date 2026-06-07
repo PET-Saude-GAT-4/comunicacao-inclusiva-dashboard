@@ -6,8 +6,9 @@ import {
   LoginFormState,
   RegisterFormSchema,
   RegisterFormState,
+  SessionUser,
 } from "@/utils/definitions";
-import { createSession, deleteSession } from "@/utils/session";
+import { createSession, deleteSession, getSession } from "@/utils/session";
 import { loginRequest, registerRequest } from "@/lib/api/auth";
 
 export async function login(
@@ -30,6 +31,7 @@ export async function login(
     );
     await createSession({
       token: data.token,
+      uuid: data.user.uuid,
       email: data.user.email,
       role: data.user.role.name,
     });
@@ -66,4 +68,11 @@ export async function register(
 export async function logout() {
   await deleteSession();
   redirect("/login");
+}
+
+export async function getSessionUser(): Promise<SessionUser | null> {
+  const session = await getSession();
+  return session
+    ? { uuid: session.uuid, email: session.email, role: session.role }
+    : null;
 }
