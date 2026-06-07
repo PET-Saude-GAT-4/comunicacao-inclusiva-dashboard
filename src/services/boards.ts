@@ -17,6 +17,22 @@ export async function getBoard(uuid: string): Promise<BoardOutput | null> {
   return api.getBoard(uuid);
 }
 
+export async function getPublicBoards(): Promise<BoardOutput[]> {
+  return api.getPublicBoards();
+}
+
+export async function getPublicBoard(
+  uuid: string,
+): Promise<BoardOutput | null> {
+  return api.getPublicBoard(uuid);
+}
+
+export async function getPublicBoardPictograms(
+  boardUuid: string,
+): Promise<PictogramOutput[]> {
+  return api.getPublicBoardPictograms(boardUuid);
+}
+
 export async function createBoard(data: {
   title: string;
   representativeUuid: string;

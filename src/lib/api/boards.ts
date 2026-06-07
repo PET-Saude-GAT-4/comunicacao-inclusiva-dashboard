@@ -13,6 +13,30 @@ export async function getBoard(uuid: string): Promise<BoardOutput | null> {
   return data.board;
 }
 
+export async function getPublicBoards(): Promise<BoardOutput[]> {
+  const data = await apiFetch<{ boards: BoardOutput[] }>("/public/boards");
+  if (!data) throw new Error("Erro ao buscar pranchas.");
+  return data.boards;
+}
+
+export async function getPublicBoard(
+  uuid: string,
+): Promise<BoardOutput | null> {
+  const data = await apiFetch<{ board: BoardOutput }>(`/public/boards/${uuid}`);
+  if (!data) throw new Error("Erro ao buscar prancha.");
+  return data.board;
+}
+
+export async function getPublicBoardPictograms(
+  boardUuid: string,
+): Promise<PictogramOutput[]> {
+  const data = await apiFetch<{ pictograms: PictogramOutput[] }>(
+    `/public/boards/${boardUuid}/pictograms`,
+  );
+  if (!data) throw new Error("Erro ao buscar pictogramas da prancha.");
+  return data.pictograms;
+}
+
 export function createBoard(data: {
   title: string;
   representativeUuid: string;

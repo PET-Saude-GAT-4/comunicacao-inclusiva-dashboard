@@ -8,7 +8,9 @@ import Table from "@/components/Table/Table";
 import Input from "@/components/Input/Input";
 import Button from "@/components/Button/Button";
 import { getBoards, createBoard, deleteBoard } from "@/services/boards";
-import { BoardOutput } from "@/utils/definitions";
+import { getSessionUser } from "@/services/auth";
+import { BoardOutput, SessionUser } from "@/utils/definitions";
+import { boardHref } from "@/utils/board";
 import Image from "next/image";
 import RemoveButton from "@/components/RemoveButton/RemoveButton";
 import Badge from "@/components/Badge/Badge";
@@ -18,27 +20,10 @@ import PictogramPicker, {
   PictogramInput,
 } from "@/components/PictogramPicker/PictogramPicker";
 
-type BoardRow = {
-  uuid: string;
-  title: string;
-  representativeImageUrl: string;
-  published: boolean;
-  createdAt: string;
-};
-
-function toRow(b: BoardOutput): BoardRow {
-  return {
-    uuid: b.uuid,
-    title: b.title,
-    representativeImageUrl: b.representativePictogram.fileUrl,
-    published: b.publishedAt !== null,
-    createdAt: new Date(b.createdAt).toLocaleDateString("pt-BR"),
-  };
-}
-
 function Boards() {
   const router = useRouter();
-  const [data, setData] = useState<BoardRow[]>([]);
+  const [data, setData] = useState<BoardOutput[]>([]);
+  const [user, setUser] = useState<SessionUser | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const [pictograms, setPictograms] = useState<PictogramOutput[]>([]);
@@ -54,10 +39,11 @@ function Boards() {
     setSelectedPictogram(undefined);
   };
 
-  const fetchData = () => getBoards().then((rows) => setData(rows.map(toRow)));
+  const fetchData = () => getBoards().then(setData);
 
   useEffect(() => {
     fetchData();
+    getSessionUser().then(setUser);
   }, []);
 
   const handleCreate = async () => {
@@ -115,11 +101,11 @@ function Boards() {
             { key: "uuid", label: "Código de Prancha" },
             { key: "title", label: "Título" },
             {
-              key: "representativeImageUrl",
+              key: "representativePictogram",
               label: "Pictograma Representante",
               render: (value) => (
                 <Image
-                  src={String(value)}
+                  src={(value as PictogramOutput).fileUrl}
                   alt=""
                   width={40}
                   height={40}
@@ -128,7 +114,7 @@ function Boards() {
               ),
             },
             {
-              key: "published",
+              key: "publishedAt",
               label: "Status",
               render: (value) =>
                 value ? (
@@ -137,9 +123,14 @@ function Boards() {
                   <Badge variant="neutral">Não publicado</Badge>
                 ),
             },
-            { key: "createdAt", label: "Data de Criação" },
+            {
+              key: "createdAt",
+              label: "Data de Criação",
+              render: (value) =>
+                new Date(String(value)).toLocaleDateString("pt-BR"),
+            },
           ]}
-          onRowClick={(row) => router.push(`/boards/${row.uuid}`)}
+          onRowClick={(row) => router.push(boardHref(row, user))}
           onSelectionChange={setSelectedIds}
         />
       </div>

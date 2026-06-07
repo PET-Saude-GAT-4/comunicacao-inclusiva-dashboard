@@ -27,6 +27,7 @@ function BoardDetail() {
 
   const [board, setBoard] = useState<BoardOutput | null>(null);
   const [items, setItems] = useState<PictogramOutput[]>([]);
+  const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
 
@@ -48,12 +49,13 @@ function BoardDetail() {
   const fetchBoard = () => getBoard(uuid).then((data) => setBoard(data));
 
   useEffect(() => {
-    Promise.all([getBoard(uuid), getBoardPictograms(uuid)]).then(
-      ([boardData, pictogramsData]) => {
+    Promise.all([getBoard(uuid), getBoardPictograms(uuid)])
+      .then(([boardData, pictogramsData]) => {
         setBoard(boardData);
         setItems(pictogramsData);
-      },
-    );
+      })
+      .catch(() => setBoard(null))
+      .finally(() => setLoading(false));
   }, [uuid]);
 
   const handleTogglePublish = async () => {
@@ -109,27 +111,37 @@ function BoardDetail() {
     onReorderSuccess: fetchItems,
   });
 
+  if (board === null) {
+    return (
+      <div className="min-h-screen w-full bg-surface-primary">
+        <div className="flex items-center justify-between border-b border-outline-common px-lg py-md">
+          <p className="text-heading text-text-on-primary">
+            {loading ? "Carregando..." : "Prancha não encontrada"}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen w-full bg-surface-primary">
       <div className="flex items-center justify-between border-b border-outline-common px-lg py-md">
         <div className="flex items-center gap-md text-text-on-primary">
-          <p className="text-heading">{board?.title ?? "Carregando..."}</p>
+          <p className="text-heading">{board.title}</p>
         </div>
         <div className="flex items-center gap-md">
-          {board && (
-            <Button
-              type="button"
-              variant={board.publishedAt === null ? "primary" : "danger"}
-              onClick={() => {
-                setPublishError(null);
-                setIsConfirmOpen(true);
-              }}
-            >
-              {board.publishedAt === null
-                ? "Publicar na biblioteca"
-                : "Despublicar"}
-            </Button>
-          )}
+          <Button
+            type="button"
+            variant={board.publishedAt === null ? "primary" : "danger"}
+            onClick={() => {
+              setPublishError(null);
+              setIsConfirmOpen(true);
+            }}
+          >
+            {board.publishedAt === null
+              ? "Publicar na biblioteca"
+              : "Despublicar"}
+          </Button>
           <AddButton
             onClick={() => {
               setIsModalOpen(true);
@@ -166,7 +178,7 @@ function BoardDetail() {
             </p>
           </div>
         ))}
-        {items.length === 0 && board !== null && (
+        {items.length === 0 && (
           <p className="text-text-on-primary-variant text-body">
             Nenhum pictograma nesta prancha.
           </p>
@@ -232,14 +244,14 @@ function BoardDetail() {
           setIsConfirmOpen(false);
         }}
         title={
-          board?.publishedAt === null
+          board.publishedAt === null
             ? "Publicar prancha"
             : "Despublicar prancha"
         }
       >
         <div className="flex flex-col gap-md w-100">
           <p className="text-text-on-primary text-body">
-            {board?.publishedAt === null
+            {board.publishedAt === null
               ? "Esta prancha ficará visível na biblioteca pública. Deseja continuar?"
               : "Esta prancha deixará de aparecer na biblioteca pública. Deseja continuar?"}
           </p>
@@ -257,13 +269,13 @@ function BoardDetail() {
             </Button>
             <Button
               type="button"
-              variant={board?.publishedAt === null ? "primary" : "danger"}
+              variant={board.publishedAt === null ? "primary" : "danger"}
               disabled={publishLoading}
               onClick={handleTogglePublish}
             >
               {publishLoading
                 ? "Processando..."
-                : board?.publishedAt === null
+                : board.publishedAt === null
                   ? "Publicar"
                   : "Despublicar"}
             </Button>
