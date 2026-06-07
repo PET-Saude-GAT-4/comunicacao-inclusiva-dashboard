@@ -11,6 +11,7 @@ import { getBoards, createBoard, deleteBoard } from "@/services/boards";
 import { BoardOutput } from "@/utils/definitions";
 import Image from "next/image";
 import RemoveButton from "@/components/RemoveButton/RemoveButton";
+import Badge from "@/components/Badge/Badge";
 import { PictogramOutput } from "@/utils/definitions";
 import { getPictograms } from "@/services/pictograms";
 import PictogramPicker, {
@@ -21,6 +22,7 @@ type BoardRow = {
   uuid: string;
   title: string;
   representativeImageUrl: string;
+  published: boolean;
   createdAt: string;
 };
 
@@ -29,6 +31,7 @@ function toRow(b: BoardOutput): BoardRow {
     uuid: b.uuid,
     title: b.title,
     representativeImageUrl: b.representativePictogram.fileUrl,
+    published: b.publishedAt !== null,
     createdAt: new Date(b.createdAt).toLocaleDateString("pt-BR"),
   };
 }
@@ -123,6 +126,16 @@ function Boards() {
                   className="object-contain rounded"
                 />
               ),
+            },
+            {
+              key: "published",
+              label: "Status",
+              render: (value) =>
+                value ? (
+                  <Badge>Público</Badge>
+                ) : (
+                  <Badge variant="neutral">Não publicado</Badge>
+                ),
             },
             { key: "createdAt", label: "Data de Criação" },
           ]}

@@ -40,6 +40,28 @@ export async function deleteBoard(uuid: string): Promise<ActionResult> {
   }
 }
 
+export async function publishBoard(uuid: string): Promise<ActionResult> {
+  try {
+    await api.publishBoard(uuid);
+    revalidatePath("/boards");
+    revalidatePath(`/boards/${uuid}`);
+    return { success: true };
+  } catch {
+    return { success: false, error: "Erro ao publicar prancha." };
+  }
+}
+
+export async function unpublishBoard(uuid: string): Promise<ActionResult> {
+  try {
+    await api.unpublishBoard(uuid);
+    revalidatePath("/boards");
+    revalidatePath(`/boards/${uuid}`);
+    return { success: true };
+  } catch {
+    return { success: false, error: "Erro ao despublicar prancha." };
+  }
+}
+
 export async function getBoardPictograms(
   boardUuid: string,
 ): Promise<PictogramOutput[]> {

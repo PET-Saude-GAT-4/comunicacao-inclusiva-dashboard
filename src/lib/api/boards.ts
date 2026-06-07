@@ -20,7 +20,7 @@ export function createBoard(data: {
   return apiFetch("/boards", { method: "POST", body: JSON.stringify(data) });
 }
 
-export function deleteBoard(uuid: string): Promise<void> {  
+export function deleteBoard(uuid: string): Promise<void> {
   return apiFetch(`/boards/${uuid}`, { method: "DELETE" });
 }
 
@@ -48,13 +48,21 @@ export function addPictogramToBoard(
   });
 }
 
+export function publishBoard(uuid: string): Promise<void> {
+  return apiFetch(`/boards/${uuid}/publish`, { method: "PATCH" });
+}
+
+export function unpublishBoard(uuid: string): Promise<void> {
+  return apiFetch(`/boards/${uuid}/unpublish`, { method: "PATCH" });
+}
+
 export function reorderPictogram(
   boardUuid: string,
   pictogramUuid: string,
   data: { next: string | null },
 ): Promise<void> {
   const body: Record<string, unknown> = { next: data.next };
-  
+
   return apiFetch(`/boards/${boardUuid}/pictograms/${pictogramUuid}/order`, {
     method: "PATCH",
     body: JSON.stringify(body),

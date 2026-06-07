@@ -6,6 +6,8 @@ import {
   getBoard,
   getBoardPictograms,
   addPictogramToBoard,
+  publishBoard,
+  unpublishBoard,
 } from "@/services/boards";
 import { BoardOutput, PictogramOutput } from "@/utils/definitions";
 import AddButton from "@/components/AddButton/AddButton";
@@ -28,6 +30,10 @@ function BoardDetail() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
 
+  const [publishLoading, setPublishLoading] = useState(false);
+  const [publishError, setPublishError] = useState<string | null>(null);
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+
   const [selectedPictogram, setSelectedPictogram] = useState<PictogramInput>();
 
   const [pictograms, setPictograms] = useState<PictogramOutput[]>([]);
@@ -39,6 +45,7 @@ function BoardDetail() {
   };
   const fetchItems = () =>
     getBoardPictograms(uuid).then((data) => setItems(data));
+  const fetchBoard = () => getBoard(uuid).then((data) => setBoard(data));
 
   useEffect(() => {
     Promise.all([getBoard(uuid), getBoardPictograms(uuid)]).then(
@@ -48,6 +55,23 @@ function BoardDetail() {
       },
     );
   }, [uuid]);
+
+  const handleTogglePublish = async () => {
+    if (!board) return;
+    setPublishLoading(true);
+    setPublishError(null);
+    const result =
+      board.publishedAt === null
+        ? await publishBoard(uuid)
+        : await unpublishBoard(uuid);
+    if (result.success) {
+      await fetchBoard();
+      setIsConfirmOpen(false);
+    } else {
+      setPublishError(result.error ?? "Erro ao atualizar publicação.");
+    }
+    setPublishLoading(false);
+  };
 
   const handleAdd = async () => {
     if (!selectedPictogram?.uuid) {
@@ -91,12 +115,28 @@ function BoardDetail() {
         <div className="flex items-center gap-md text-text-on-primary">
           <p className="text-heading">{board?.title ?? "Carregando..."}</p>
         </div>
-        <AddButton
-          onClick={() => {
-            setIsModalOpen(true);
-            listPictograms();
-          }}
-        />
+        <div className="flex items-center gap-md">
+          {board && (
+            <Button
+              type="button"
+              variant={board.publishedAt === null ? "primary" : "danger"}
+              onClick={() => {
+                setPublishError(null);
+                setIsConfirmOpen(true);
+              }}
+            >
+              {board.publishedAt === null
+                ? "Publicar na biblioteca"
+                : "Despublicar"}
+            </Button>
+          )}
+          <AddButton
+            onClick={() => {
+              setIsModalOpen(true);
+              listPictograms();
+            }}
+          />
+        </div>
       </div>
       <div className="flex flex-wrap gap-md p-lg">
         {items.map((item) => (
@@ -183,6 +223,51 @@ function BoardDetail() {
           <Button type="button" onClick={handleAdd}>
             Adicionar
           </Button>
+        </div>
+      </Modal>
+      <Modal
+        isOpen={isConfirmOpen}
+        onClose={() => {
+          if (publishLoading) return;
+          setIsConfirmOpen(false);
+        }}
+        title={
+          board?.publishedAt === null
+            ? "Publicar prancha"
+            : "Despublicar prancha"
+        }
+      >
+        <div className="flex flex-col gap-md w-100">
+          <p className="text-text-on-primary text-body">
+            {board?.publishedAt === null
+              ? "Esta prancha ficará visível na biblioteca pública. Deseja continuar?"
+              : "Esta prancha deixará de aparecer na biblioteca pública. Deseja continuar?"}
+          </p>
+          {publishError && (
+            <p className="text-sm text-red-500">{publishError}</p>
+          )}
+          <div className="flex justify-end gap-md">
+            <Button
+              type="button"
+              variant="neutral"
+              disabled={publishLoading}
+              onClick={() => setIsConfirmOpen(false)}
+            >
+              Cancelar
+            </Button>
+            <Button
+              type="button"
+              variant={board?.publishedAt === null ? "primary" : "danger"}
+              disabled={publishLoading}
+              onClick={handleTogglePublish}
+            >
+              {publishLoading
+                ? "Processando..."
+                : board?.publishedAt === null
+                  ? "Publicar"
+                  : "Despublicar"}
+            </Button>
+          </div>
         </div>
       </Modal>
     </div>
