@@ -20,7 +20,7 @@ import {
   createSpeciality,
   deleteSpeciality,
 } from "@/services/professions";
-import { SpecialityOutput } from "@/utils/definitions";
+import { SpecialityOutput } from "@/types/profession";
 
 type SpecialityRow = {
   id: number;
@@ -66,7 +66,7 @@ function Specialities() {
       setCode("");
       setProfessionCode("");
       fetchData();
-    } else {  
+    } else {
       setFormError(result.error ?? "Erro ao criar especialidade.");
     }
   };

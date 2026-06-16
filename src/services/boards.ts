@@ -1,11 +1,9 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import {
-  ActionResult,
-  BoardOutput,
-  PictogramOutput,
-} from "@/utils/definitions";
+import { ActionResult } from "@/types/common";
+import { BoardOutput } from "@/types/board";
+import { PictogramOutput } from "@/types/pictogram";
 import { ApiError } from "@/lib/api/client";
 import * as api from "@/lib/api/boards";
 

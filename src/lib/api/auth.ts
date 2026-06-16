@@ -1,4 +1,4 @@
-import { LoginResponse } from "@/utils/definitions";
+import { LoginResponse } from "@/types/auth";
 import { apiFetch } from "./client";
 
 export async function loginRequest(

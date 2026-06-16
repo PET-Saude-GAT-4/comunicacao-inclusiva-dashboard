@@ -20,7 +20,7 @@ import {
   createProfession,
   deleteProfession,
 } from "@/services/professions";
-import { ProfessionOutput } from "@/utils/definitions";
+import { ProfessionOutput } from "@/types/profession";
 
 type ProfessionRow = {
   id: number;

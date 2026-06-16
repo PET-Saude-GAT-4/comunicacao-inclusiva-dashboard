@@ -4,7 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import AddButton from "@/components/AddButton/AddButton";
 import Input from "@/components/Input/Input";
-import { PictogramOutput } from "@/utils/definitions";
+import { PictogramOutput } from "@/types/pictogram";
 
 export type PictogramInput = {
   uuid: string;

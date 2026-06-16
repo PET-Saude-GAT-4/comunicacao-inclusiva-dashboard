@@ -1,4 +1,4 @@
-import { UserOutput } from "@/utils/definitions";
+import { UserOutput } from "@/types/user";
 import { apiFetch } from "./client";
 
 export async function getUsers(): Promise<UserOutput[]> {

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { isRouteAuthorized } from "@/config/route-access";
-import type { SessionPayload } from "@/utils/definitions";
+import type { SessionPayload } from "@/types/session";
 
 const publicPaths = ["/", "/login", "/sign-up"];
 

@@ -9,12 +9,13 @@ import Input from "@/components/Input/Input";
 import Button from "@/components/Button/Button";
 import { getBoards, createBoard, deleteBoard } from "@/services/boards";
 import { getSessionUser } from "@/services/auth";
-import { BoardOutput, SessionUser } from "@/utils/definitions";
+import { BoardOutput } from "@/types/board";
+import { SessionUser } from "@/types/session";
 import { boardHref } from "@/utils/board";
 import Image from "next/image";
 import RemoveButton from "@/components/RemoveButton/RemoveButton";
 import Badge from "@/components/Badge/Badge";
-import { PictogramOutput } from "@/utils/definitions";
+import { PictogramOutput } from "@/types/pictogram";
 import { getPictograms } from "@/services/pictograms";
 import PictogramPicker, {
   PictogramInput,

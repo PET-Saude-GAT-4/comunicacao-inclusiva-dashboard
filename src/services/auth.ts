@@ -1,13 +1,9 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import {
-  LoginFormSchema,
-  LoginFormState,
-  RegisterFormSchema,
-  RegisterFormState,
-  SessionUser,
-} from "@/utils/definitions";
+import { LoginFormSchema, RegisterFormSchema } from "@/schemas/auth";
+import { LoginFormState, RegisterFormState } from "@/types/auth";
+import { SessionUser } from "@/types/session";
 import { createSession, deleteSession, getSession } from "@/utils/session";
 import { loginRequest, registerRequest } from "@/lib/api/auth";
 

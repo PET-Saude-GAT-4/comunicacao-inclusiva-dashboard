@@ -1,4 +1,4 @@
-import { RoleOutput } from "@/utils/definitions";
+import { RoleOutput } from "@/types/role";
 import { apiFetch } from "./client";
 
 export async function getRoles(): Promise<RoleOutput[]> {

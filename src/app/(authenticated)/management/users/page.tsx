@@ -16,7 +16,7 @@ import {
   MdLocalPolice,
 } from "react-icons/md";
 import { getUsers, createUser, deleteUser } from "@/services/users";
-import { UserOutput } from "@/utils/definitions";
+import { UserOutput } from "@/types/user";
 
 type UserRow = { id: number; email: string; role: string; createdAt: string };
 

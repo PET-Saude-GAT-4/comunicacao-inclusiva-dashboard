@@ -1,4 +1,4 @@
-import { Role } from "@/utils/definitions";
+import { Role } from "@/types/role";
 
 export type RouteAccess = {
   path: string;

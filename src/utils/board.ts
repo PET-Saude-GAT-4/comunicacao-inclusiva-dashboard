@@ -1,4 +1,5 @@
-import { BoardOutput, SessionUser } from "@/utils/definitions";
+import { BoardOutput } from "@/types/board";
+import { SessionUser } from "@/types/session";
 
 export function canEditBoard(
   board: BoardOutput,

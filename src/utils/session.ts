@@ -1,6 +1,6 @@
 import "server-only";
 import { cookies } from "next/headers";
-import { SessionPayload } from "@/utils/definitions";
+import { SessionPayload } from "@/types/session";
 
 const COOKIE_NAME = "auth-token";
 const MAX_AGE = 24 * 60 * 60; // 24 hours

@@ -1,11 +1,8 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import {
-  ActionResult,
-  ProfessionOutput,
-  SpecialityOutput,
-} from "@/utils/definitions";
+import { ActionResult } from "@/types/common";
+import { ProfessionOutput, SpecialityOutput } from "@/types/profession";
 import * as api from "@/lib/api/professions";
 
 export async function getProfessions(): Promise<ProfessionOutput[]> {

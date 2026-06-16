@@ -1,7 +1,8 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { ActionResult, RoleOutput } from "@/utils/definitions";
+import { ActionResult } from "@/types/common";
+import { RoleOutput } from "@/types/role";
 import * as api from "@/lib/api/roles";
 
 export async function getRoles(): Promise<RoleOutput[]> {

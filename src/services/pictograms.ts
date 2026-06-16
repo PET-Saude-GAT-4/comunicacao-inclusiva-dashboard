@@ -1,7 +1,8 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { ActionResult, PictogramOutput } from "@/utils/definitions";
+import { ActionResult } from "@/types/common";
+import { PictogramOutput } from "@/types/pictogram";
 import * as api from "@/lib/api/pictograms";
 
 export async function getPictograms(): Promise<PictogramOutput[]> {

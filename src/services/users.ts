@@ -1,6 +1,7 @@
 "use server";
 
-import { ActionResult, UserOutput } from "@/utils/definitions";
+import { ActionResult } from "@/types/common";
+import { UserOutput } from "@/types/user";
 import * as api from "@/lib/api/users";
 
 export async function getUsers(): Promise<UserOutput[]> {

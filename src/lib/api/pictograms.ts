@@ -1,4 +1,4 @@
-import { PictogramOutput } from "@/utils/definitions";
+import { PictogramOutput } from "@/types/pictogram";
 import { apiFetch } from "./client";
 
 export async function getPictograms(): Promise<PictogramOutput[]> {

@@ -4,7 +4,8 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Image from "next/image";
 import { getPublicBoard, getPublicBoardPictograms } from "@/services/boards";
-import { BoardOutput, PictogramOutput } from "@/utils/definitions";
+import { BoardOutput } from "@/types/board";
+import { PictogramOutput } from "@/types/pictogram";
 
 function ReadonlyBoardDetail() {
   const params = useParams();

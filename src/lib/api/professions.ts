@@ -1,4 +1,4 @@
-import { ProfessionOutput, SpecialityOutput } from "@/utils/definitions";
+import { ProfessionOutput, SpecialityOutput } from "@/types/profession";
 import { apiFetch } from "./client";
 
 export async function getProfessions(): Promise<ProfessionOutput[]> {

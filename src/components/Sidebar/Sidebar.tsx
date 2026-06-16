@@ -7,7 +7,7 @@ import { usePathname } from "next/navigation";
 import { MdPerson, MdLogout, MdMenuOpen, MdMenu } from "react-icons/md";
 import { ROUTES, RouteConfig } from "@/config/routes";
 import { isRouteAuthorized } from "@/config/route-access";
-import { Role } from "@/utils/definitions";
+import { Role } from "@/types/role";
 import { logout } from "@/services/auth";
 
 function NavItem({

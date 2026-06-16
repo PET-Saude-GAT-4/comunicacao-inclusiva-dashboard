@@ -1,4 +1,5 @@
-import { BoardOutput, PictogramOutput } from "@/utils/definitions";
+import { BoardOutput } from "@/types/board";
+import { PictogramOutput } from "@/types/pictogram";
 import { apiFetch } from "./client";
 
 export async function getBoards(): Promise<BoardOutput[]> {

@@ -8,7 +8,9 @@ import Table from "@/components/Table/Table";
 import Image from "next/image";
 import { getPublicBoards } from "@/services/boards";
 import { getSessionUser } from "@/services/auth";
-import { BoardOutput, PictogramOutput, SessionUser } from "@/utils/definitions";
+import { BoardOutput } from "@/types/board";
+import { PictogramOutput } from "@/types/pictogram";
+import { SessionUser } from "@/types/session";
 import { boardHref } from "@/utils/board";
 
 function Library() {

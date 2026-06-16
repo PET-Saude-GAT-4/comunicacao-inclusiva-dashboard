@@ -9,7 +9,8 @@ import {
   publishBoard,
   unpublishBoard,
 } from "@/services/boards";
-import { BoardOutput, PictogramOutput } from "@/utils/definitions";
+import { BoardOutput } from "@/types/board";
+import { PictogramOutput } from "@/types/pictogram";
 import AddButton from "@/components/AddButton/AddButton";
 import Modal from "@/components/Modal/Modal";
 import Input from "@/components/Input/Input";
