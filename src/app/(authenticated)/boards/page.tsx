@@ -101,6 +101,16 @@ function Boards() {
           columns={[
             { key: "uuid", label: "Código de Prancha" },
             { key: "title", label: "Título" },
+            ...(user?.role === "super_admin"
+              ? [
+                  {
+                    key: "authorUuid" as const,
+                    label: "Autor",
+                    render: (value: BoardOutput[keyof BoardOutput]) =>
+                      (value as string | null) ?? "—",
+                  },
+                ]
+              : []),
             {
               key: "representativePictogram",
               label: "Pictograma Representante",
