@@ -6,6 +6,7 @@ import { useState } from "react";
 import { usePathname } from "next/navigation";
 import { MdPerson, MdLogout, MdMenuOpen, MdMenu } from "react-icons/md";
 import { ROUTES, RouteConfig } from "@/config/routes";
+import { isRouteAuthorized } from "@/config/route-access";
 import { Role } from "@/utils/definitions";
 import { logout } from "@/services/auth";
 
@@ -65,9 +66,8 @@ export default function Sidebar({
   const isActive = (path: string) =>
     pathname === path || pathname.startsWith(path + "/");
 
-  const allowedRoutes = ROUTES.filter(
-    (r) =>
-      r.allowedRoles === "all" || (r.allowedRoles as Role[]).includes(userRole),
+  const allowedRoutes = ROUTES.filter((r) =>
+    isRouteAuthorized(r.path, userRole),
   );
 
   const mainRoutes = allowedRoutes.filter((r) => r.placement === "main");
