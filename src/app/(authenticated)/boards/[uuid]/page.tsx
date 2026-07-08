@@ -21,6 +21,7 @@ import { getPictograms } from "@/services/pictograms";
 import PictogramPicker, {
   PictogramInput,
 } from "@/components/PictogramPicker/PictogramPicker";
+import CreateInteractionChainModal from "../../components/CreateInteractionChainModal";
 
 function BoardDetail() {
   const params = useParams();
@@ -29,7 +30,14 @@ function BoardDetail() {
   const [board, setBoard] = useState<BoardOutput | null>(null);
   const [items, setItems] = useState<PictogramOutput[]>([]);
   const [loading, setLoading] = useState(true);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const [isCreateBoardModalOpen, setIsCreateBoardModalOpen] = useState(false);
+
+  const [
+    isCreateInteractionChainModalOpen,
+    setIsCreateInteractionChainModalOpen,
+  ] = useState(false);
+
   const [formError, setFormError] = useState<string | null>(null);
 
   const [publishLoading, setPublishLoading] = useState(false);
@@ -86,7 +94,7 @@ function BoardDetail() {
       ...(order ? { order: Number(order) } : {}),
     });
     if (result.success) {
-      setIsModalOpen(false);
+      setIsCreateBoardModalOpen(false);
       clearForm();
       fetchItems();
     } else {
@@ -96,7 +104,7 @@ function BoardDetail() {
 
   const listPictograms = async () => {
     getPictograms().then((items) => setPictograms(items));
-    setIsModalOpen(true);
+    setIsCreateBoardModalOpen(true);
   };
 
   // Destructuring the handlers from the custom hook
@@ -132,6 +140,12 @@ function BoardDetail() {
         </div>
         <div className="flex items-center gap-md">
           <Button
+            className="bg-surface-secondary outline-1 outline-outline-common "
+            onClick={() => setIsCreateInteractionChainModalOpen(true)}
+          >
+            <p className="text-gray-600">Nova Interação</p>
+          </Button>
+          <Button
             type="button"
             variant={board.publishedAt === null ? "primary" : "danger"}
             onClick={() => {
@@ -145,7 +159,7 @@ function BoardDetail() {
           </Button>
           <AddButton
             onClick={() => {
-              setIsModalOpen(true);
+              setIsCreateBoardModalOpen(true);
               listPictograms();
             }}
           />
@@ -186,9 +200,9 @@ function BoardDetail() {
         )}
       </div>
       <Modal
-        isOpen={isModalOpen}
+        isOpen={isCreateBoardModalOpen}
         onClose={() => {
-          setIsModalOpen(false);
+          setIsCreateBoardModalOpen(false);
           clearForm();
         }}
         title="Adicionar Pictograma"
@@ -283,6 +297,13 @@ function BoardDetail() {
           </div>
         </div>
       </Modal>
+      <CreateInteractionChainModal
+        isModalOpen={isCreateInteractionChainModalOpen}
+        setIsModalOpen={setIsCreateInteractionChainModalOpen}
+        formError={formError}
+        setFormError={setFormError}
+        incomingTriggerBoardUuid={uuid}
+      ></CreateInteractionChainModal>
     </div>
   );
 }

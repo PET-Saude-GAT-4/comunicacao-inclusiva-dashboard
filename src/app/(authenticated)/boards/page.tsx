@@ -20,12 +20,19 @@ import { getPictograms } from "@/services/pictograms";
 import PictogramPicker, {
   PictogramInput,
 } from "@/components/PictogramPicker/PictogramPicker";
+import CreateInteractionChainModal from "../components/CreateInteractionChainModal";
 
 function Boards() {
   const router = useRouter();
   const [data, setData] = useState<BoardOutput[]>([]);
   const [user, setUser] = useState<SessionUser | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isCreateBoardModalOpen, setIsCreateBoardModalOpen] = useState(false);
+
+  const [
+    isCreateInteractionChainModalOpen,
+    setIsCreateInteractionChainModalOpen,
+  ] = useState(false);
+
   const [formError, setFormError] = useState<string | null>(null);
   const [pictograms, setPictograms] = useState<PictogramOutput[]>([]);
 
@@ -59,7 +66,7 @@ function Boards() {
       representativeUuid: selectedPictogram.uuid,
     });
     if (result.success) {
-      setIsModalOpen(false);
+      setIsCreateBoardModalOpen(false);
       clearForm();
       fetchData();
     } else {
@@ -74,7 +81,7 @@ function Boards() {
 
   const listPictograms = async () => {
     getPictograms().then((items) => setPictograms(items));
-    setIsModalOpen(true);
+    setIsCreateBoardModalOpen(true);
   };
 
   return (
@@ -83,16 +90,24 @@ function Boards() {
         <p>Pranchas</p>
       </div>
       <div className="flex items-center justify-end p-sm text-text-on-primary border-b border-outline-common">
-        <div className="flex">
-          <AddButton
-            onClick={() => {
-              listPictograms();
-            }}
-          />
-          <RemoveButton
-            active={selectedIds.length > 0}
-            onClick={handleDelete}
-          />
+        <div className="flex justify-between w-full">
+          <Button
+            className="bg-surface-secondary outline-1 outline-outline-common "
+            onClick={() => setIsCreateInteractionChainModalOpen(true)}
+          >
+            <p className="text-gray-600">Criar Interação Entre Pranchas</p>
+          </Button>
+          <div className=" flex items-center justify-center ">
+            <AddButton
+              onClick={() => {
+                listPictograms();
+              }}
+            />
+            <RemoveButton
+              active={selectedIds.length > 0}
+              onClick={handleDelete}
+            />
+          </div>
         </div>
       </div>
       <div className="flex-1">
@@ -146,9 +161,9 @@ function Boards() {
         />
       </div>
       <Modal
-        isOpen={isModalOpen}
+        isOpen={isCreateBoardModalOpen}
         onClose={() => {
-          setIsModalOpen(false);
+          setIsCreateBoardModalOpen(false);
           setFormError(null);
           clearForm();
         }}
@@ -206,6 +221,12 @@ function Boards() {
           </Button>
         </div>
       </Modal>
+      <CreateInteractionChainModal
+        isModalOpen={isCreateInteractionChainModalOpen}
+        setIsModalOpen={setIsCreateInteractionChainModalOpen}
+        formError={formError}
+        setFormError={setFormError}
+      ></CreateInteractionChainModal>
     </div>
   );
 }
