@@ -16,15 +16,16 @@ const variantClasses: Record<ButtonVariant, string> = {
 
 export default function Button({
   children,
-  className,
   variant = "primary",
+  className = "",
   ...props
 }: ButtonProps) {
+  const baseClasses =
+    variantClasses[variant] +
+    " px-lg py-sm my-md rounded-lg disabled:opacity-50 hover:cursor-pointer transition-colors";
+
   return (
-    <button
-      className={`${variantClasses[variant]} px-lg py-sm my-md rounded-lg disabled:opacity-50 hover:cursor-pointer transition-colors ${className ?? ""}`}
-      {...props}
-    >
+    <button className={`${baseClasses} ${className}`.trim()} {...props}>
       {children}
     </button>
   );
