@@ -12,6 +12,12 @@ export async function getInteractionChains(): Promise<
   return api.getInteractionChains();
 }
 
+export async function getInteractionChainByBoardUuid(
+  triggerBoardUuid: string,
+): Promise<InteractionChainOutput[] | null> {
+  return api.getInteractionChainByBoardUuid(triggerBoardUuid);
+}
+
 export async function getInteractionChain(
   id: number,
 ): Promise<InteractionChainOutput | null> {

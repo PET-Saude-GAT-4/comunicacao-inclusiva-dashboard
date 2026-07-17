@@ -46,6 +46,16 @@ export function updateInteractionChain(
   });
 }
 
+export async function getInteractionChainByBoardUuid(
+  triggerBoardUuid: string,
+): Promise<InteractionChainOutput[] | null> {
+  const data = await apiFetch<{ interactionChains: InteractionChainOutput[] }>(
+    `/interaction-chains/trigger-board/${triggerBoardUuid}`,
+  );
+  if (!data) return null;
+  return data.interactionChains;
+}
+
 export function deleteInteractionChain(id: number): Promise<void> {
   return apiFetch(`/interaction-chains/${id}`, { method: "DELETE" });
 }
