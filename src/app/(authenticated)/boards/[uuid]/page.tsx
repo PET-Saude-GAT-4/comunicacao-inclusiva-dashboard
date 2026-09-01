@@ -21,7 +21,7 @@ import { getPictograms } from "@/services/pictograms";
 import PictogramPicker, {
   PictogramInput,
 } from "@/components/PictogramPicker/PictogramPicker";
-import CreateInteractionChainModal from "../../components/CreateInteractionChainModal";
+import CreateInteractionChainModal from "../../components/CreateInteractionChainModal/CreateInteractionChainModal";
 
 function BoardDetail() {
   const params = useParams();

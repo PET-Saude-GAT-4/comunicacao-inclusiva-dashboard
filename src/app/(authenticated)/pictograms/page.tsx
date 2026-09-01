@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState } from "react";
 import AddButton from "@/components/AddButton/AddButton";
 import Modal from "@/components/Modal/Modal";
-import Table from "@/components/Table/Table";
 import Input from "@/components/Input/Input";
 import Button from "@/components/Button/Button";
 import {
@@ -12,36 +11,23 @@ import {
   deletePictogram,
 } from "@/services/pictograms";
 import { PictogramOutput } from "@/types/pictogram";
-import Image from "next/image";
 import RemoveButton from "@/components/RemoveButton/RemoveButton";
-
-type PictogramRow = {
-  uuid: string;
-  imageUrl: string;
-  description: string;
-  createdAt: string;
-};
-
-function toRow(p: PictogramOutput): PictogramRow {
-  return {
-    uuid: p.uuid,
-    imageUrl: p.fileUrl,
-    description: p.description,
-    createdAt: new Date(p.createdAt).toLocaleDateString("pt-BR"),
-  };
-}
+import PictogramCard from "../components/PictogramCard/PictogramCard";
+import { MdChevronLeft, MdChevronRight } from "react-icons/md";
 
 function Pictograms() {
-  const [data, setData] = useState<PictogramRow[]>([]);
+  const [data, setData] = useState<PictogramOutput[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const [selectedIds, setSelectedIds] = useState<(string | number)[]>([]);
+  const [page, setPage] = useState(1);
+  const pageSize = 12;
 
   const [description, setDescription] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
 
   const fetchData = () =>
-    getPictograms().then((rows) => setData(rows.map(toRow)));
+    getPictograms().then((pictograms) => setData(pictograms));
 
   useEffect(() => {
     fetchData();
@@ -74,8 +60,12 @@ function Pictograms() {
     setSelectedIds([]);
   };
 
+  const pageCount = Math.max(1, Math.ceil(data.length / pageSize));
+  const pageData = data.slice((page - 1) * pageSize, page * pageSize);
+  const goToPage = (n: number) => setPage(Math.min(Math.max(1, n), pageCount));
+
   return (
-    <div className="min-h-screen w-full bg-surface-primary">
+    <div className="h-full w-full bg-surface-primary flex flex-col">
       <div className="text-text-on-primary border-b border-outline-common text-heading px-lg py-md">
         <p>Pictogramas</p>
       </div>
@@ -88,29 +78,57 @@ function Pictograms() {
           />
         </div>
       </div>
-      <div className="flex-1">
-        <Table
-          data={data}
-          columns={[
-            { key: "uuid", label: "Código de Pictograma" },
-            {
-              key: "imageUrl",
-              label: "Imagem",
-              render: (value) => (
-                <Image
-                  src={String(value)}
-                  alt=""
-                  width={40}
-                  height={40}
-                  className="object-contain rounded"
-                />
-              ),
-            },
-            { key: "description", label: "Descrição" },
-            { key: "createdAt", label: "Data de Criação" },
-          ]}
-          onSelectionChange={setSelectedIds}
-        />
+      <div className="flex-1 flex flex-col">
+        <div className="grid grid-cols-3 grid-rows-4 gap-4 p-4 h-fit">
+          {pageData.map((pictogram) => (
+            <div key={pictogram.uuid}>
+              <PictogramCard pictogram={pictogram} />
+            </div>
+          ))}
+        </div>
+
+        {pageCount > 1 && (
+          <div className="flex items-center justify-center gap-1 border-t border-outline-common py-sm text-body-emph bg-surface-primary">
+            <button
+              type="button"
+              onClick={() => goToPage(page - 1)}
+              disabled={page === 1}
+              aria-label="Página anterior"
+              className="grid h-8 w-8 place-items-center rounded-sm text-text-on-primary-variant hover:bg-surface-secondary disabled:opacity-30 disabled:hover:bg-transparent transition-colors"
+            >
+              <MdChevronLeft size={20} />
+            </button>
+
+            <div className="flex items-center gap-0.5">
+              {Array.from({ length: pageCount }, (_, i) => i + 1).map((n) => (
+                <button
+                  key={n}
+                  type="button"
+                  onClick={() => goToPage(n)}
+                  aria-current={n === page ? "page" : undefined}
+                  className={[
+                    "grid h-8 min-w-8 place-items-center rounded-sm px-2 text-body transition-colors",
+                    n === page
+                      ? "font-bold text-primary-dark"
+                      : "font-regular text-text-on-primary-variant hover:bg-surface-secondary",
+                  ].join(" ")}
+                >
+                  {n}
+                </button>
+              ))}
+            </div>
+
+            <button
+              type="button"
+              onClick={() => goToPage(page + 1)}
+              disabled={page === pageCount}
+              aria-label="Próxima página"
+              className="grid h-8 w-8 place-items-center rounded-sm text-text-on-primary-variant hover:bg-surface-secondary disabled:opacity-30 disabled:hover:bg-transparent transition-colors"
+            >
+              <MdChevronRight size={20} />
+            </button>
+          </div>
+        )}
       </div>
       <Modal
         isOpen={isModalOpen}

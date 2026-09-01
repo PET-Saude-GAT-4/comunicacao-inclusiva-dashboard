@@ -6,7 +6,6 @@ import TabButton from "@/components/TabButton/TabButton";
 import RemoveButton from "@/components/RemoveButton/RemoveButton";
 import AddButton from "@/components/AddButton/AddButton";
 import Modal from "@/components/Modal/Modal";
-import Table from "@/components/Table/Table";
 import Input from "@/components/Input/Input";
 import Button from "@/components/Button/Button";
 import {
@@ -14,32 +13,26 @@ import {
   MdAssignmentInd,
   MdMedicalInformation,
   MdLocalPolice,
+  MdChevronLeft,
+  MdChevronRight,
 } from "react-icons/md";
 import { getUsers, createUser, deleteUser } from "@/services/users";
 import { UserOutput } from "@/types/user";
-
-type UserRow = { id: number; email: string; role: string; createdAt: string };
-
-function toRow(u: UserOutput): UserRow {
-  return {
-    id: u.id,
-    email: u.email,
-    role: u.role.name,
-    createdAt: new Date(u.createdAt).toLocaleDateString("pt-BR"),
-  };
-}
+import UserCard from "../../components/UserCard/UserCard";
 
 function Users() {
-  const [data, setData] = useState<UserRow[]>([]);
+  const [data, setData] = useState<UserOutput[]>([]);
   const [selectedIds, setSelectedIds] = useState<(number | string)[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const pageSize = 12;
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState("");
 
-  const fetchData = () => getUsers().then((rows) => setData(rows.map(toRow)));
+  const fetchData = () => getUsers().then((users) => setData(users));
 
   useEffect(() => {
     fetchData();
@@ -65,8 +58,12 @@ function Users() {
     setSelectedIds([]);
   };
 
+  const pageCount = Math.max(1, Math.ceil(data.length / pageSize));
+  const pageData = data.slice((page - 1) * pageSize, page * pageSize);
+  const goToPage = (n: number) => setPage(Math.min(Math.max(1, n), pageCount));
+
   return (
-    <div className="min-h-screen w-full bg-surface-primary">
+    <div className="h-full w-full bg-surface-primary flex flex-col">
       <div className="text-text-on-primary border-b border-outline-common text-heading px-lg py-md">
         <p>Usuários</p>
       </div>
@@ -98,8 +95,60 @@ function Users() {
           />
         </div>
       </div>
-      <div className="flex-1">
-        <Table
+      <div className="flex-1 flex flex-col">
+        <div className="grid grid-cols-3 grid-rows-4 gap-4 p-4 h-fit">
+          {pageData.map((user) => (
+            <div key={user.id}>
+              <UserCard user={user} />
+            </div>
+          ))}
+        </div>
+
+        {pageCount > 1 && (
+          <div className="flex items-center justify-center gap-1 border-t border-outline-common py-sm text-body-emph bg-surface-primary">
+            <button
+              type="button"
+              onClick={() => goToPage(page - 1)}
+              disabled={page === 1}
+              aria-label="Página anterior"
+              className="grid h-8 w-8 place-items-center rounded-sm text-text-on-primary-variant hover:bg-surface-secondary disabled:opacity-30 disabled:hover:bg-transparent transition-colors"
+            >
+              <MdChevronLeft size={20} />
+            </button>
+
+            <div className="flex items-center gap-0.5">
+              {Array.from({ length: pageCount }, (_, i) => i + 1).map((n) => (
+                <button
+                  key={n}
+                  type="button"
+                  onClick={() => goToPage(n)}
+                  aria-current={n === page ? "page" : undefined}
+                  className={[
+                    "grid h-8 min-w-8 place-items-center rounded-sm px-2 text-body transition-colors",
+                    n === page
+                      ? "font-bold text-primary-dark"
+                      : "font-regular text-text-on-primary-variant hover:bg-surface-secondary",
+                  ].join(" ")}
+                >
+                  {n}
+                </button>
+              ))}
+            </div>
+
+            <button
+              type="button"
+              onClick={() => goToPage(page + 1)}
+              disabled={page === pageCount}
+              aria-label="Próxima página"
+              className="grid h-8 w-8 place-items-center rounded-sm text-text-on-primary-variant hover:bg-surface-secondary disabled:opacity-30 disabled:hover:bg-transparent transition-colors"
+            >
+              <MdChevronRight size={20} />
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* <Table
           data={data}
           columns={[
             { key: "id", label: "ID" },
@@ -108,8 +157,7 @@ function Users() {
             { key: "createdAt", label: "Data de Ingresso" },
           ]}
           onSelectionChange={setSelectedIds}
-        />
-      </div>
+        /> */}
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
