@@ -21,7 +21,7 @@ function Pictograms() {
   const [formError, setFormError] = useState<string | null>(null);
   const [selectedIds, setSelectedIds] = useState<(string | number)[]>([]);
   const [page, setPage] = useState(1);
-  const pageSize = 12;
+  const pageSize = 20;
 
   const [description, setDescription] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
@@ -79,56 +79,57 @@ function Pictograms() {
         </div>
       </div>
       <div className="flex-1 flex flex-col">
-        <div className="grid grid-cols-3 grid-rows-4 gap-4 p-4 h-fit">
+        <div className="grid grid-cols-6 grid-rows-4 gap-4 p-4 h-fit">
           {pageData.map((pictogram) => (
             <div key={pictogram.uuid}>
               <PictogramCard pictogram={pictogram} />
             </div>
           ))}
         </div>
+        <div className="flex items-center justify-center bg-white">
+          {pageCount > 1 && (
+            <div className="flex items-center justify-center bg-gray-100 rounded-md gap-1 py-sm text-body-emph ">
+              <button
+                type="button"
+                onClick={() => goToPage(page - 1)}
+                disabled={page === 1}
+                aria-label="Página anterior"
+                className="grid h-8 w-8 place-items-center rounded-sm text-text-on-primary-variant hover:bg-surface-secondary disabled:opacity-30 disabled:hover:bg-transparent transition-colors"
+              >
+                <MdChevronLeft size={20} />
+              </button>
 
-        {pageCount > 1 && (
-          <div className="flex items-center justify-center gap-1 border-t border-outline-common py-sm text-body-emph bg-surface-primary">
-            <button
-              type="button"
-              onClick={() => goToPage(page - 1)}
-              disabled={page === 1}
-              aria-label="Página anterior"
-              className="grid h-8 w-8 place-items-center rounded-sm text-text-on-primary-variant hover:bg-surface-secondary disabled:opacity-30 disabled:hover:bg-transparent transition-colors"
-            >
-              <MdChevronLeft size={20} />
-            </button>
+              <div className="flex items-center gap-0.5">
+                {Array.from({ length: pageCount }, (_, i) => i + 1).map((n) => (
+                  <button
+                    key={n}
+                    type="button"
+                    onClick={() => goToPage(n)}
+                    aria-current={n === page ? "page" : undefined}
+                    className={[
+                      "grid h-8 min-w-8 place-items-center rounded-sm px-2 text-body transition-colors",
+                      n === page
+                        ? "font-bold text-primary-dark"
+                        : "font-regular text-text-on-primary-variant hover:bg-surface-secondary",
+                    ].join(" ")}
+                  >
+                    {n}
+                  </button>
+                ))}
+              </div>
 
-            <div className="flex items-center gap-0.5">
-              {Array.from({ length: pageCount }, (_, i) => i + 1).map((n) => (
-                <button
-                  key={n}
-                  type="button"
-                  onClick={() => goToPage(n)}
-                  aria-current={n === page ? "page" : undefined}
-                  className={[
-                    "grid h-8 min-w-8 place-items-center rounded-sm px-2 text-body transition-colors",
-                    n === page
-                      ? "font-bold text-primary-dark"
-                      : "font-regular text-text-on-primary-variant hover:bg-surface-secondary",
-                  ].join(" ")}
-                >
-                  {n}
-                </button>
-              ))}
+              <button
+                type="button"
+                onClick={() => goToPage(page + 1)}
+                disabled={page === pageCount}
+                aria-label="Próxima página"
+                className="grid h-8 w-8 place-items-center rounded-sm text-text-on-primary-variant hover:bg-surface-secondary disabled:opacity-30 disabled:hover:bg-transparent transition-colors"
+              >
+                <MdChevronRight size={20} />
+              </button>
             </div>
-
-            <button
-              type="button"
-              onClick={() => goToPage(page + 1)}
-              disabled={page === pageCount}
-              aria-label="Próxima página"
-              className="grid h-8 w-8 place-items-center rounded-sm text-text-on-primary-variant hover:bg-surface-secondary disabled:opacity-30 disabled:hover:bg-transparent transition-colors"
-            >
-              <MdChevronRight size={20} />
-            </button>
-          </div>
-        )}
+          )}
+        </div>
       </div>
       <Modal
         isOpen={isModalOpen}

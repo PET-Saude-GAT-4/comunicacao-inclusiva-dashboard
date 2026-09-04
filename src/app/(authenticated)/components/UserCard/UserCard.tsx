@@ -42,7 +42,7 @@ export default function UserCard({ user }: Props) {
       <hr className="border-t border-outline-common my-1" />
       <div className="flex flex-col gap-1">
         <span className="font-bold">Data Ingresso</span>
-        <span>{user.createdAt}</span>
+        <span>{new Date(user.createdAt).toLocaleDateString('pt-BR')}</span>
       </div>
     </div>
   );
