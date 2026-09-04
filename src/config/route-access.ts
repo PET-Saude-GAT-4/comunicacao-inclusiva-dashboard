@@ -11,6 +11,7 @@ export const ROUTE_ACCESS = [
   { path: "/library", allowedRoles: "all" },
   { path: "/boards", allowedRoles: ["super_admin", "admin"] },
   { path: "/pictograms", allowedRoles: ["super_admin", "admin"] },
+  { path: "/sign-writings", allowedRoles: ["super_admin", "admin"] },
   { path: "/management", allowedRoles: ["super_admin", "admin"] },
   { path: "/settings", allowedRoles: "all" },
   { path: "/help", allowedRoles: "all" },
