@@ -3,6 +3,7 @@ import {
   MdDeveloperBoard,
   MdAutoStories,
   MdPermMedia,
+  MdSignLanguage,
   MdRecentActors,
   MdLiveHelp,
   MdContentPaste,
@@ -41,6 +42,12 @@ const ROUTE_DISPLAY: Record<RoutePath, RouteDisplay> = {
     title: "Pictogramas",
     subtitle: "Gerencie os pictogramas do sistema",
     icon: MdPermMedia,
+    placement: "main",
+  },
+  "/sign-writings": {
+    title: "SignWriting",
+    subtitle: "Gerencie os SignWritings do sistema",
+    icon: MdSignLanguage,
     placement: "main",
   },
   "/management": {
