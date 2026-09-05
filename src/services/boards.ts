@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { ActionResult } from "@/types/common";
 import { BoardOutput } from "@/types/board";
-import { PictogramOutput } from "@/types/pictogram";
+import { BoardTermOutput } from "@/types/term";
 import { ApiError } from "@/lib/api/client";
 import * as api from "@/lib/api/boards";
 
@@ -25,10 +25,10 @@ export async function getPublicBoard(
   return api.getPublicBoard(uuid);
 }
 
-export async function getPublicBoardPictograms(
+export async function getPublicBoardTerms(
   boardUuid: string,
-): Promise<PictogramOutput[]> {
-  return api.getPublicBoardPictograms(boardUuid);
+): Promise<BoardTermOutput[]> {
+  return api.getPublicBoardTerms(boardUuid);
 }
 
 export async function createBoard(data: {
@@ -76,37 +76,48 @@ export async function unpublishBoard(uuid: string): Promise<ActionResult> {
   }
 }
 
-export async function getBoardPictograms(
+export async function getBoardTerms(
   boardUuid: string,
-): Promise<PictogramOutput[]> {
-  return api.getBoardPictograms(boardUuid);
+): Promise<BoardTermOutput[]> {
+  return api.getBoardTerms(boardUuid);
 }
 
-export async function addPictogramToBoard(
+export async function addTermToBoard(
   boardUuid: string,
-  data: { pictogramUuid: string; order?: number },
+  data: { termUuid: string; next?: string | null },
 ): Promise<ActionResult> {
   try {
-    await api.addPictogramToBoard(boardUuid, data);
+    await api.addTermToBoard(boardUuid, data);
     return { success: true };
   } catch (e) {
     if (e instanceof ApiError && e.status === 409) {
-      return { success: false, error: "Pictograma já está nesta prancha." };
+      return { success: false, error: "Termo já está nesta prancha." };
     }
-    return { success: false, error: "Erro ao adicionar pictograma à prancha." };
+    return { success: false, error: "Erro ao adicionar termo à prancha." };
   }
 }
 
-export async function reorderPictogram(
+export async function removeTermFromBoard(
   boardUuid: string,
-  pictogramUuid: string,
+  boardTermUuid: string,
+): Promise<ActionResult> {
+  try {
+    await api.deleteBoardTerm(boardUuid, boardTermUuid);
+    return { success: true };
+  } catch {
+    return { success: false, error: "Erro ao remover termo da prancha." };
+  }
+}
+
+export async function reorderBoardTerm(
+  boardUuid: string,
+  boardTermUuid: string,
   data: { next: string | null },
 ): Promise<ActionResult> {
   try {
-    await api.reorderPictogram(boardUuid, pictogramUuid, data);
+    await api.reorderBoardTerm(boardUuid, boardTermUuid, data);
     return { success: true };
-  } catch (err) {
-    return { success: false, error: "Erro ao mover pictograma" };
-    console.log(err);
+  } catch {
+    return { success: false, error: "Erro ao mover termo." };
   }
 }

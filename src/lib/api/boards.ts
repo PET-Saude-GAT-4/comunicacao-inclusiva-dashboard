@@ -1,5 +1,5 @@
 import { BoardOutput } from "@/types/board";
-import { PictogramOutput } from "@/types/pictogram";
+import { BoardTermOutput } from "@/types/term";
 import { apiFetch } from "./client";
 
 export async function getBoards(): Promise<BoardOutput[]> {
@@ -28,14 +28,14 @@ export async function getPublicBoard(
   return data.board;
 }
 
-export async function getPublicBoardPictograms(
+export async function getPublicBoardTerms(
   boardUuid: string,
-): Promise<PictogramOutput[]> {
-  const data = await apiFetch<{ pictograms: PictogramOutput[] }>(
-    `/public/boards/${boardUuid}/pictograms`,
+): Promise<BoardTermOutput[]> {
+  const data = await apiFetch<{ terms: BoardTermOutput[] }>(
+    `/public/boards/${boardUuid}/terms`,
   );
-  if (!data) throw new Error("Erro ao buscar pictogramas da prancha.");
-  return data.pictograms;
+  if (!data) throw new Error("Erro ao buscar termos da prancha.");
+  return data.terms;
 }
 
 export function createBoard(data: {
@@ -49,27 +49,36 @@ export function deleteBoard(uuid: string): Promise<void> {
   return apiFetch(`/boards/${uuid}`, { method: "DELETE" });
 }
 
-export async function getBoardPictograms(
+export async function getBoardTerms(
   boardUuid: string,
-): Promise<PictogramOutput[]> {
-  const data = await apiFetch<{ pictograms: PictogramOutput[] }>(
-    `/boards/${boardUuid}/pictograms`,
+): Promise<BoardTermOutput[]> {
+  const data = await apiFetch<{ terms: BoardTermOutput[] }>(
+    `/boards/${boardUuid}/terms`,
   );
-  if (!data) throw new Error("Erro ao buscar pictogramas da prancha.");
-  return data.pictograms;
+  if (!data) throw new Error("Erro ao buscar termos da prancha.");
+  return data.terms;
 }
 
-export function addPictogramToBoard(
+export function addTermToBoard(
   boardUuid: string,
-  data: { pictogramUuid: string; order?: number },
+  data: { termUuid: string; next?: string | null },
 ): Promise<void> {
-  const body: Record<string, unknown> = { pictogramUuid: data.pictogramUuid };
+  const body: Record<string, unknown> = { termUuid: data.termUuid };
 
-  if (data.order !== undefined) body.order = data.order;
+  if (data.next !== undefined) body.next = data.next;
 
-  return apiFetch(`/boards/${boardUuid}/pictograms`, {
+  return apiFetch(`/boards/${boardUuid}/terms`, {
     method: "POST",
     body: JSON.stringify(body),
+  });
+}
+
+export function deleteBoardTerm(
+  boardUuid: string,
+  boardTermUuid: string,
+): Promise<void> {
+  return apiFetch(`/boards/${boardUuid}/terms/${boardTermUuid}`, {
+    method: "DELETE",
   });
 }
 
@@ -81,14 +90,14 @@ export function unpublishBoard(uuid: string): Promise<void> {
   return apiFetch(`/boards/${uuid}/unpublish`, { method: "PATCH" });
 }
 
-export function reorderPictogram(
+export function reorderBoardTerm(
   boardUuid: string,
-  pictogramUuid: string,
+  boardTermUuid: string,
   data: { next: string | null },
 ): Promise<void> {
   const body: Record<string, unknown> = { next: data.next };
 
-  return apiFetch(`/boards/${boardUuid}/pictograms/${pictogramUuid}/order`, {
+  return apiFetch(`/boards/${boardUuid}/terms/${boardTermUuid}/order`, {
     method: "PATCH",
     body: JSON.stringify(body),
   });
