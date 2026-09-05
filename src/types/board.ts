@@ -5,6 +5,7 @@ export type BoardOutput = {
   title: string;
   authorUuid: string | null;
   representativePictogram: PictogramOutput;
+  termCount: number;
   publishedAt: string | null;
   createdAt: string;
   updatedAt: string;

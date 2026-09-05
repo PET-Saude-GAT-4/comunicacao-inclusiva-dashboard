@@ -17,9 +17,7 @@ import RemoveButton from "@/components/RemoveButton/RemoveButton";
 import Badge from "@/components/Badge/Badge";
 import { PictogramOutput } from "@/types/pictogram";
 import { getPictograms } from "@/services/pictograms";
-import PictogramPicker, {
-  PictogramInput,
-} from "@/components/PictogramPicker/PictogramPicker";
+import AssetPicker, { Asset } from "@/components/AssetPicker/AssetPicker";
 
 function Boards() {
   const router = useRouter();
@@ -31,7 +29,7 @@ function Boards() {
 
   const [title, setTitle] = useState("");
 
-  const [selectedPictogram, setSelectedPictogram] = useState<PictogramInput>();
+  const [selectedPictogram, setSelectedPictogram] = useState<Asset>();
 
   const [selectedIds, setSelectedIds] = useState<(string | number)[]>([]);
 
@@ -156,10 +154,7 @@ function Boards() {
       >
         {formError && <p className="text-sm text-red-500">{formError}</p>}
         <div className="flex flex-rol justify-between w-200 gap-xxl m-xl mb-xs">
-          <PictogramPicker
-            pictograms={pictograms}
-            onSelect={setSelectedPictogram}
-          />
+          <AssetPicker items={pictograms} onSelect={setSelectedPictogram} />
           <div className="flex flex-col w-full gap-lg">
             <Input
               id="title"
@@ -180,7 +175,7 @@ function Boards() {
               {selectedPictogram ? (
                 <div className="flex flex-col items-center gap-md">
                   <Image
-                    src={selectedPictogram?.imageUrl}
+                    src={selectedPictogram?.fileUrl}
                     alt=""
                     width="200"
                     height="200"

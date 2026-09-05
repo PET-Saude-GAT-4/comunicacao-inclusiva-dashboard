@@ -1,63 +1,67 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import {
   getBoard,
-  getBoardPictograms,
-  addPictogramToBoard,
+  getBoardTerms,
+  addTermToBoard,
+  removeTermFromBoard,
   publishBoard,
   unpublishBoard,
 } from "@/services/boards";
 import { BoardOutput } from "@/types/board";
-import { PictogramOutput } from "@/types/pictogram";
+import { BoardTermOutput, TermOutput } from "@/types/term";
 import AddButton from "@/components/AddButton/AddButton";
 import Modal from "@/components/Modal/Modal";
 import Input from "@/components/Input/Input";
 import Button from "@/components/Button/Button";
 import Image from "next/image";
 import { useDragReorder } from "@/hooks/useDragReorder";
-import { getPictograms } from "@/services/pictograms";
-import PictogramPicker, {
-  PictogramInput,
-} from "@/components/PictogramPicker/PictogramPicker";
+import { getTerms } from "@/services/terms";
+import TermPicker from "@/components/TermPicker/TermPicker";
 
 function BoardDetail() {
   const params = useParams();
   const uuid = String(params.uuid);
 
   const [board, setBoard] = useState<BoardOutput | null>(null);
-  const [items, setItems] = useState<PictogramOutput[]>([]);
+  const [items, setItems] = useState<BoardTermOutput[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
+  const [removeError, setRemoveError] = useState<string | null>(null);
 
   const [publishLoading, setPublishLoading] = useState(false);
   const [publishError, setPublishError] = useState<string | null>(null);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
 
-  const [selectedPictogram, setSelectedPictogram] = useState<PictogramInput>();
+  const [selectedTerm, setSelectedTerm] = useState<TermOutput>();
 
-  const [pictograms, setPictograms] = useState<PictogramOutput[]>([]);
-  const [order, setOrder] = useState("");
+  const [terms, setTerms] = useState<TermOutput[]>([]);
 
   const clearForm = () => {
     setFormError("");
-    setSelectedPictogram(undefined);
+    setSelectedTerm(undefined);
   };
-  const fetchItems = () =>
-    getBoardPictograms(uuid).then((data) => setItems(data));
-  const fetchBoard = () => getBoard(uuid).then((data) => setBoard(data));
+  const fetchItems = () => getBoardTerms(uuid).then((data) => setItems(data));
+
+  const refresh = useCallback(
+    () =>
+      Promise.all([getBoard(uuid), getBoardTerms(uuid)]).then(
+        ([boardData, termsData]) => {
+          setBoard(boardData);
+          setItems(termsData);
+        },
+      ),
+    [uuid],
+  );
 
   useEffect(() => {
-    Promise.all([getBoard(uuid), getBoardPictograms(uuid)])
-      .then(([boardData, pictogramsData]) => {
-        setBoard(boardData);
-        setItems(pictogramsData);
-      })
+    refresh()
       .catch(() => setBoard(null))
       .finally(() => setLoading(false));
-  }, [uuid]);
+  }, [refresh]);
 
   const handleTogglePublish = async () => {
     if (!board) return;
@@ -68,7 +72,7 @@ function BoardDetail() {
         ? await publishBoard(uuid)
         : await unpublishBoard(uuid);
     if (result.success) {
-      await fetchBoard();
+      await refresh();
       setIsConfirmOpen(false);
     } else {
       setPublishError(result.error ?? "Erro ao atualizar publicação.");
@@ -77,40 +81,41 @@ function BoardDetail() {
   };
 
   const handleAdd = async () => {
-    if (!selectedPictogram?.uuid) {
-      setFormError("Selecionar pictograma é obrigatório.");
+    if (!selectedTerm?.uuid) {
+      setFormError("Selecionar termo é obrigatório.");
       return;
     }
-    const result = await addPictogramToBoard(uuid, {
-      pictogramUuid: selectedPictogram.uuid,
-      ...(order ? { order: Number(order) } : {}),
-    });
+    const result = await addTermToBoard(uuid, { termUuid: selectedTerm.uuid });
     if (result.success) {
       setIsModalOpen(false);
       clearForm();
-      fetchItems();
+      refresh();
     } else {
-      setFormError(result.error ?? "Erro ao adicionar pictograma.");
+      setFormError(result.error ?? "Erro ao adicionar termo.");
     }
   };
 
-  const listPictograms = async () => {
-    getPictograms().then((items) => setPictograms(items));
+  const handleRemove = async (boardTermUuid: string) => {
+    setRemoveError(null);
+    const result = await removeTermFromBoard(uuid, boardTermUuid);
+    if (result.success) {
+      refresh();
+    } else {
+      setRemoveError(result.error ?? "Erro ao remover termo.");
+    }
+  };
+
+  const listTerms = async () => {
+    getTerms().then((items) => setTerms(items));
     setIsModalOpen(true);
   };
 
   // Destructuring the handlers from the custom hook
-  const {
-    handleDragStart,
-    handleDragOver,
-    handleDrop,
-    handleDropAtEnd,
-    draggedUuid,
-  } = useDragReorder({
-    boardUuid: uuid,
-    pictograms: items,
-    onReorderSuccess: fetchItems,
-  });
+  const { handleDragStart, handleDragOver, handleDrop, handleDropAtEnd } =
+    useDragReorder({
+      boardUuid: uuid,
+      onReorderSuccess: fetchItems,
+    });
 
   if (board === null) {
     return (
@@ -143,14 +148,14 @@ function BoardDetail() {
               ? "Publicar na biblioteca"
               : "Despublicar"}
           </Button>
-          <AddButton
-            onClick={() => {
-              setIsModalOpen(true);
-              listPictograms();
-            }}
-          />
+          <AddButton onClick={listTerms} />
         </div>
       </div>
+      {removeError && (
+        <p className="text-sm text-red-500 px-lg py-sm border-b border-outline-common">
+          {removeError}
+        </p>
+      )}
       <div className="flex flex-wrap gap-md p-lg">
         {items.map((item) => (
           <div
@@ -165,15 +170,34 @@ function BoardDetail() {
                 handleDropAtEnd(e);
               }
             }}
-            className="flex flex-col items-center gap-xs bg-surface-secondary rounded-sm"
+            className="group relative flex flex-col items-center gap-xs bg-surface-secondary rounded-sm p-xs"
           >
-            <Image
-              src={item.fileUrl}
-              alt={item.description}
-              width={80}
-              height={80}
-              className="object-contain rounded"
-            />
+            <button
+              type="button"
+              aria-label={`Remover ${item.description}`}
+              onClick={() => handleRemove(item.uuid)}
+              className="absolute top-0 right-0 hidden group-hover:block px-xs text-text-on-primary-variant hover:text-text-on-primary hover:cursor-pointer"
+            >
+              ×
+            </button>
+            <div className="flex items-center gap-xs">
+              <Image
+                src={item.pictogram.fileUrl}
+                alt=""
+                draggable={false}
+                width={80}
+                height={80}
+                className="object-contain rounded"
+              />
+              <Image
+                src={item.signWriting.fileUrl}
+                alt=""
+                draggable={false}
+                width={80}
+                height={80}
+                className="object-contain rounded"
+              />
+            </div>
             <p className="text-text-on-primary text-body font-bold text-center  ">
               {item.description}
             </p>
@@ -181,7 +205,7 @@ function BoardDetail() {
         ))}
         {items.length === 0 && (
           <p className="text-text-on-primary-variant text-body">
-            Nenhum pictograma nesta prancha.
+            Nenhum termo nesta prancha.
           </p>
         )}
       </div>
@@ -191,41 +215,47 @@ function BoardDetail() {
           setIsModalOpen(false);
           clearForm();
         }}
-        title="Adicionar Pictograma"
+        title="Adicionar Termo"
       >
         {formError && <p className="text-sm text-red-500">{formError}</p>}
         <div className="flex flex-row gap-sm w-200 m-xl mb-xs">
-          <PictogramPicker
-            pictograms={pictograms}
-            onSelect={setSelectedPictogram}
-          />
+          <TermPicker terms={terms} onSelect={setSelectedTerm} />
           <div className="flex flex-col w-full gap-md ">
             <Input
-              id="pictogramUuid"
-              label="Código do Pictograma"
+              id="termUuid"
+              label="Código do Termo"
               type="text"
               disabled
               placeholder="ex: 550e8400-e29b-41d4-a716-446655440000"
-              value={selectedPictogram?.uuid || ""}
+              value={selectedTerm?.uuid || ""}
             />
             <div className="flex w-full justify-center">
-              {selectedPictogram ? (
+              {selectedTerm ? (
                 <div className="flex flex-col items-center gap-md">
-                  <Image
-                    src={selectedPictogram?.imageUrl}
-                    alt=""
-                    width="200"
-                    height="200"
-                    className="border border-outline-common object-contain rounded-md"
-                  />
+                  <div className="flex items-center gap-md">
+                    <Image
+                      src={selectedTerm.pictogram.fileUrl}
+                      alt=""
+                      width="150"
+                      height="150"
+                      className="border border-outline-common object-contain rounded-md"
+                    />
+                    <Image
+                      src={selectedTerm.signWriting.fileUrl}
+                      alt=""
+                      width="150"
+                      height="150"
+                      className="border border-outline-common object-contain rounded-md"
+                    />
+                  </div>
                   <p className="text-text-on-primary text-center font-bold text-md">
-                    {selectedPictogram.description}
+                    {selectedTerm.description}
                   </p>
                 </div>
               ) : (
                 <div className="border border-outline-common flex items-center rounded-md w-50 h-50">
                   <p className="text-text-on-primary text-center font-bold text-md">
-                    Nenhum pictograma selecionado.
+                    Nenhum termo selecionado.
                   </p>
                 </div>
               )}

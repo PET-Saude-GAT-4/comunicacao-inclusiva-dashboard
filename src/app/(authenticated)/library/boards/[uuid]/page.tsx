@@ -3,23 +3,23 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Image from "next/image";
-import { getPublicBoard, getPublicBoardPictograms } from "@/services/boards";
+import { getPublicBoard, getPublicBoardTerms } from "@/services/boards";
 import { BoardOutput } from "@/types/board";
-import { PictogramOutput } from "@/types/pictogram";
+import { BoardTermOutput } from "@/types/term";
 
 function ReadonlyBoardDetail() {
   const params = useParams();
   const uuid = String(params.uuid);
 
   const [board, setBoard] = useState<BoardOutput | null>(null);
-  const [items, setItems] = useState<PictogramOutput[]>([]);
+  const [items, setItems] = useState<BoardTermOutput[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    Promise.all([getPublicBoard(uuid), getPublicBoardPictograms(uuid)])
-      .then(([boardData, pictogramsData]) => {
+    Promise.all([getPublicBoard(uuid), getPublicBoardTerms(uuid)])
+      .then(([boardData, termsData]) => {
         setBoard(boardData);
-        setItems(pictogramsData);
+        setItems(termsData);
       })
       .catch(() => setBoard(null))
       .finally(() => setLoading(false));
@@ -48,15 +48,24 @@ function ReadonlyBoardDetail() {
         {items.map((item) => (
           <div
             key={item.uuid}
-            className="flex flex-col items-center gap-xs bg-surface-secondary rounded-sm"
+            className="flex flex-col items-center gap-xs bg-surface-secondary rounded-sm p-xs"
           >
-            <Image
-              src={item.fileUrl}
-              alt={item.description}
-              width={80}
-              height={80}
-              className="object-contain rounded"
-            />
+            <div className="flex items-center gap-xs">
+              <Image
+                src={item.pictogram.fileUrl}
+                alt=""
+                width={80}
+                height={80}
+                className="object-contain rounded"
+              />
+              <Image
+                src={item.signWriting.fileUrl}
+                alt=""
+                width={80}
+                height={80}
+                className="object-contain rounded"
+              />
+            </div>
             <p className="text-text-on-primary text-body font-bold text-center  ">
               {item.description}
             </p>
@@ -64,7 +73,7 @@ function ReadonlyBoardDetail() {
         ))}
         {items.length === 0 && (
           <p className="text-text-on-primary-variant text-body">
-            Nenhum pictograma nesta prancha.
+            Nenhum termo nesta prancha.
           </p>
         )}
       </div>

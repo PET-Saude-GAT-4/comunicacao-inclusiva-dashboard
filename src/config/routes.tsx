@@ -4,6 +4,7 @@ import {
   MdAutoStories,
   MdPermMedia,
   MdSignLanguage,
+  MdTranslate,
   MdRecentActors,
   MdLiveHelp,
   MdContentPaste,
@@ -48,6 +49,12 @@ const ROUTE_DISPLAY: Record<RoutePath, RouteDisplay> = {
     title: "SignWriting",
     subtitle: "Gerencie os SignWritings do sistema",
     icon: MdSignLanguage,
+    placement: "main",
+  },
+  "/terms": {
+    title: "Termos",
+    subtitle: "Gerencie os termos do sistema",
+    icon: MdTranslate,
     placement: "main",
   },
   "/management": {
