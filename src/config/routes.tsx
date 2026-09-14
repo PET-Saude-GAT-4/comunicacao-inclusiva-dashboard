@@ -3,9 +3,12 @@ import {
   MdDeveloperBoard,
   MdAutoStories,
   MdPermMedia,
+  MdSignLanguage,
+  MdTranslate,
   MdRecentActors,
   MdLiveHelp,
   MdContentPaste,
+  MdChat,
 } from "react-icons/md";
 import { ROUTE_ACCESS, RoutePath } from "@/config/route-access";
 
@@ -37,10 +40,28 @@ const ROUTE_DISPLAY: Record<RoutePath, RouteDisplay> = {
     icon: MdContentPaste,
     placement: "main",
   },
+  "/phrases": {
+    title: "Frases",
+    subtitle: "Gerencie as frases do sistema",
+    icon: MdChat,
+    placement: "main",
+  },
   "/pictograms": {
     title: "Pictogramas",
     subtitle: "Gerencie os pictogramas do sistema",
     icon: MdPermMedia,
+    placement: "main",
+  },
+  "/sign-writings": {
+    title: "SignWriting",
+    subtitle: "Gerencie os SignWritings do sistema",
+    icon: MdSignLanguage,
+    placement: "main",
+  },
+  "/terms": {
+    title: "Termos",
+    subtitle: "Gerencie os termos do sistema",
+    icon: MdTranslate,
     placement: "main",
   },
   "/management": {

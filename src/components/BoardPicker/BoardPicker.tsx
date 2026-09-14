@@ -36,17 +36,7 @@ export default function BoardPicker({
             <div
               key={board.uuid}
               className="flex flex-row items-center gap-md border border-outline-common rounded-md p-sm justify-between cursor-pointer"
-              onClick={() =>
-                onSelect({
-                  uuid: board.uuid,
-                  title: board.title,
-                  authorUuid: board.authorUuid,
-                  representativePictogram: board.representativePictogram,
-                  publishedAt: board.publishedAt,
-                  createdAt: board.createdAt,
-                  updatedAt: board.updatedAt,
-                })
-              }
+              onClick={() => onSelect(board)}
             >
               <Image
                 src={board.representativePictogram.fileUrl}
@@ -57,17 +47,7 @@ export default function BoardPicker({
               />
               <p className="text-text-on-primary">{board.title}</p>
               <AddButton
-                onClick={() =>
-                  onSelect({
-                    uuid: board.uuid,
-                    title: board.title,
-                    authorUuid: board.authorUuid,
-                    representativePictogram: board.representativePictogram,
-                    publishedAt: board.publishedAt,
-                    createdAt: board.createdAt,
-                    updatedAt: board.updatedAt,
-                  })
-                }
+                onClick={() => onSelect(board)}
               />
             </div>
           ))}

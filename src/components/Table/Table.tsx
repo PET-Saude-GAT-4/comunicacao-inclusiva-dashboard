@@ -60,7 +60,7 @@ function Table<T extends { id: number } | { uuid: string }>({
 
   return (
     <div className="flex flex-col bg-surface-primary font-semibold h-full overflow-hidden">
-      <div className="overflow-hidden rounded-xl border border-outline-common flex flex-col flex-1">
+      <div className="overflow-hidden border border-outline-common flex flex-col flex-1">
         <table className="w-full text-left text-sm text-gray-600">
           <thead className="sticky top-0 z-10">
             <tr className="bg-[#E8EEEC]">
