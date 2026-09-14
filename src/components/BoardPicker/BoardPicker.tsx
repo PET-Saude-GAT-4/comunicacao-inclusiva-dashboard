@@ -11,10 +11,7 @@ interface BoardPickerProps {
   onSelect: (board: BoardOutput) => void;
 }
 
-export default function BoardPicker({
-  boards,
-  onSelect,
-}: BoardPickerProps) {
+export default function BoardPicker({ boards, onSelect }: BoardPickerProps) {
   const [filter, setFilter] = useState("");
 
   const filtered = filter
@@ -46,9 +43,7 @@ export default function BoardPicker({
                 className="object-contain rounded"
               />
               <p className="text-text-on-primary">{board.title}</p>
-              <AddButton
-                onClick={() => onSelect(board)}
-              />
+              <AddButton onClick={() => onSelect(board)} />
             </div>
           ))}
         </ul>

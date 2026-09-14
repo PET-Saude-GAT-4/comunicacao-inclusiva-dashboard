@@ -5,6 +5,7 @@ import AddButton from "@/components/AddButton/AddButton";
 import Modal from "@/components/Modal/Modal";
 import Input from "@/components/Input/Input";
 import Button from "@/components/Button/Button";
+import Pagination from "@/components/Pagination/Pagination";
 import {
   getPictograms,
   createPictogram,
@@ -13,7 +14,6 @@ import {
 import { PictogramOutput } from "@/types/pictogram";
 import RemoveButton from "@/components/RemoveButton/RemoveButton";
 import PictogramCard from "../components/PictogramCard/PictogramCard";
-import { MdChevronLeft, MdChevronRight } from "react-icons/md";
 
 function Pictograms() {
   const [data, setData] = useState<PictogramOutput[]>([]);
@@ -21,7 +21,7 @@ function Pictograms() {
   const [formError, setFormError] = useState<string | null>(null);
   const [selectedIds, setSelectedIds] = useState<(string | number)[]>([]);
   const [page, setPage] = useState(1);
-  const pageSize = 20;
+  const pageSize = 12;
 
   const [description, setDescription] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
@@ -62,14 +62,9 @@ function Pictograms() {
 
   const pageCount = Math.max(1, Math.ceil(data.length / pageSize));
   const pageData = data.slice((page - 1) * pageSize, page * pageSize);
-  const goToPage = (n: number) => setPage(Math.min(Math.max(1, n), pageCount));
-
   return (
-    <div className="h-full w-full bg-surface-primary flex flex-col">
-      <div className="text-text-on-primary border-b border-outline-common text-heading px-lg py-md">
-        <p>Pictogramas</p>
-      </div>
-      <div className="flex items-center justify-end p-sm text-text-on-primary border-b border-outline-common">
+    <div className="flex flex-col w-full">
+      <div className="flex items-center justify-end p-sm text-text-on-primary">
         <div className="flex">
           <AddButton onClick={() => setIsModalOpen(true)} />
           <RemoveButton
@@ -78,57 +73,22 @@ function Pictograms() {
           />
         </div>
       </div>
-      <div className="flex-1 flex flex-col">
-        <div className="grid grid-cols-6 grid-rows-4 gap-4 p-4 h-fit">
+      <div className="flex flex-col">
+        <div className="grid grid-cols-6 gap-4 p-4">
           {pageData.map((pictogram) => (
             <div key={pictogram.uuid}>
               <PictogramCard pictogram={pictogram} />
             </div>
           ))}
         </div>
-        <div className="flex items-center justify-center bg-white">
-          {pageCount > 1 && (
-            <div className="flex items-center justify-center bg-gray-100 rounded-md gap-1 py-sm text-body-emph ">
-              <button
-                type="button"
-                onClick={() => goToPage(page - 1)}
-                disabled={page === 1}
-                aria-label="Página anterior"
-                className="grid h-8 w-8 place-items-center rounded-sm text-text-on-primary-variant hover:bg-surface-secondary disabled:opacity-30 disabled:hover:bg-transparent transition-colors"
-              >
-                <MdChevronLeft size={20} />
-              </button>
-
-              <div className="flex items-center gap-0.5">
-                {Array.from({ length: pageCount }, (_, i) => i + 1).map((n) => (
-                  <button
-                    key={n}
-                    type="button"
-                    onClick={() => goToPage(n)}
-                    aria-current={n === page ? "page" : undefined}
-                    className={[
-                      "grid h-8 min-w-8 place-items-center rounded-sm px-2 text-body transition-colors",
-                      n === page
-                        ? "font-bold text-primary-dark"
-                        : "font-regular text-text-on-primary-variant hover:bg-surface-secondary",
-                    ].join(" ")}
-                  >
-                    {n}
-                  </button>
-                ))}
-              </div>
-
-              <button
-                type="button"
-                onClick={() => goToPage(page + 1)}
-                disabled={page === pageCount}
-                aria-label="Próxima página"
-                className="grid h-8 w-8 place-items-center rounded-sm text-text-on-primary-variant hover:bg-surface-secondary disabled:opacity-30 disabled:hover:bg-transparent transition-colors"
-              >
-                <MdChevronRight size={20} />
-              </button>
-            </div>
-          )}
+        <div className="flex items-center justify-center py-4 rounded-md outline-1 outline-outline-common bg-white">
+          <Pagination
+            page={page}
+            pageCount={pageCount}
+            onPageChange={(nextPage) =>
+              setPage(Math.min(Math.max(1, nextPage), pageCount))
+            }
+          />
         </div>
       </div>
       <Modal

@@ -85,11 +85,8 @@ function SignWritings() {
   };
 
   return (
-    <div className="min-h-screen w-full bg-surface-primary">
-      <div className="text-text-on-primary border-b border-outline-common text-heading px-lg py-md">
-        <p>SignWritings</p>
-      </div>
-      <div className="flex items-center justify-end p-sm text-text-on-primary border-b border-outline-common">
+    <div className="w-full bg-surface-secondary">
+      <div className="flex items-center justify-end p-sm text-text-on-primary">
         <div className="flex">
           <AddButton onClick={() => setIsModalOpen(true)} />
           <RemoveButton
@@ -107,7 +104,6 @@ function SignWritings() {
         <Table
           data={data}
           columns={[
-            { key: "uuid", label: "Código de SignWriting" },
             {
               key: "imageUrl",
               label: "Imagem",

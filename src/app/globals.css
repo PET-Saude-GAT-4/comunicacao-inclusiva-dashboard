@@ -7,14 +7,14 @@
 
 @theme {
   /* Colors */
-  --color-primary: #78d6c7;
+  --color-primary: #115E59;
   --color-primary-dark: #006b5f;
   --color-secondary: #814c77;
 
-  --color-background: #f4fbf8;
+  --color-background: #F8FAFC;
 
-  --color-surface-primary: #f4fbf8;
-  --color-surface-secondary: #dae5e1;
+  --color-surface-primary: #ffffff;
+  --color-surface-secondary: #FBFCFD;
   --color-surface-secondary-dark: #394f46;
 
   --color-outline-common: #bec9c5;

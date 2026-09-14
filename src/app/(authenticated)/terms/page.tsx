@@ -121,11 +121,8 @@ function Terms() {
   };
 
   return (
-    <div className="min-h-screen w-full bg-surface-primary">
-      <div className="text-text-on-primary border-b border-outline-common text-heading px-lg py-md">
-        <p>Termos</p>
-      </div>
-      <div className="flex items-center justify-end p-sm text-text-on-primary border-b border-outline-common">
+    <div className="w-full bg-surface-secondary">
+      <div className="flex items-center justify-end p-sm text-text-on-primary">
         <div className="flex">
           <AddButton onClick={openModal} />
           <RemoveButton
@@ -143,7 +140,6 @@ function Terms() {
         <Table
           data={data}
           columns={[
-            { key: "uuid", label: "Código de Termo" },
             {
               key: "pictogramUrl",
               label: "Pictograma",

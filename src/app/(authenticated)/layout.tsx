@@ -20,7 +20,7 @@ export default async function AuthenticatedLayout({
     cookieStore.get("sidebar-expanded")?.value !== "false";
 
   return (
-    <div className="flex h-screen overflow-hidden">
+    <div className="flex h-screen overflow-hidden p-4 gap-lg bg-background">
       <Sidebar
         userEmail={session.email}
         userRole={session.role}
@@ -28,7 +28,7 @@ export default async function AuthenticatedLayout({
       />
       <div className="flex flex-col flex-1 overflow-hidden">
         <Header />
-        <main className="flex-1 overflow-y-auto bg-surface-primary">
+        <main className="flex-1 overflow-y-auto">
           {children}
         </main>
       </div>

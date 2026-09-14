@@ -11,7 +11,7 @@ function TabButton({
 }) {
   return (
     <button
-      className={`px-sm py-sm m-sm rounded-sm  ${active ? "bg-primary-dark" : "bg-transparent outline-1 outline-surface-secondary hover:bg-surface-secondary hover:cursor-pointer transition-colors"}`}
+      className={`px-sm py-sm m-sm rounded-sm  ${active ? "bg-primary-dark" : "bg-transparent outline-1 outline-outline-common hover:bg-surface-secondary hover:cursor-pointer transition-colors"}`}
       onClick={onClick}
     >
       <Icon

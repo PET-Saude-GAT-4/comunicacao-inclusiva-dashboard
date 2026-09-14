@@ -12,7 +12,7 @@ export default function Header() {
   );
 
   return (
-    <header className="flex items-center px-lg h-20 bg-surface-primary border border-l-0 border-outline-common shrink-0">
+    <header className="flex items-center px-lg h-20 bg-surface-primary rounded-md border border-l border-outline-common shrink-0">
       <div className="flex flex-col">
         <h1 className="text-heading font-bold text-text-on-primary uppercase">
           {route?.title ?? ""}

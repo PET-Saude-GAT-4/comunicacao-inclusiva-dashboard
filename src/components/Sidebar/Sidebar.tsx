@@ -75,7 +75,7 @@ export default function Sidebar({
 
   return (
     <nav
-      className={`flex flex-col h-screen bg-surface-primary border border-outline-common shrink-0 transition-all duration-300 ${
+      className={`flex flex-col bg-surface-primary border border-outline-common shrink-0 rounded-md transition-all duration-300 ${
         expanded ? "w-64" : "w-16"
       }`}
     >

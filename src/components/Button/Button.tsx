@@ -22,7 +22,7 @@ export default function Button({
 }: ButtonProps) {
   const baseClasses =
     variantClasses[variant] +
-    " px-lg py-sm my-md rounded-lg disabled:opacity-50 hover:cursor-pointer transition-colors";
+    " px-lg py-sm my-md rounded-lg disabled:opacity-50 hover:cursor-pointer hover:opacity-75 transition-colors";
 
   return (
     <button className={`${baseClasses} ${className}`.trim()} {...props}>

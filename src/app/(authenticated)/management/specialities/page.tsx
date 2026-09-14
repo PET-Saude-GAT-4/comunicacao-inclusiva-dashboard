@@ -78,11 +78,8 @@ function Specialities() {
   };
 
   return (
-    <div className="min-h-screen w-full bg-surface-primary">
-      <div className="text-text-on-primary border-b border-outline-common text-heading px-lg py-md">
-        <p>Especialidades Médicas</p>
-      </div>
-      <div className="flex items-center justify-between p-sm text-text-on-primary border-b border-outline-common">
+    <div className="w-full bg-surface-secondary">
+      <div className="flex items-center justify-between p-sm text-text-on-primary">
         <nav className="flex justify-between">
           <TabButton
             icon={MdPeople}

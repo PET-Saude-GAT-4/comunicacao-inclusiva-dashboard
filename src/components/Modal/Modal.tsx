@@ -37,7 +37,7 @@ function Modal({
         <div className="flex items-center justify-between border-b border-outline-common pb-sm mb-md">
           <p className="text-text-on-primary text-heading font-bold ">{title}</p>
           <button
-            className="px-sm py-sm rounded-sm bg-transparent outline-1 outline-surface-secondary hover:bg-surface-secondary hover:cursor-pointer transition-colors"
+            className="px-sm py-sm rounded-sm bg-transparent outline-1 outline-outline-common hover:bg-surface-secondary hover:cursor-pointer transition-colors"
             onClick={onClose}
           >
             <MdClose size={24} className="text-surface-secondary-dark" />

@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
-import { MdChevronLeft, MdChevronRight } from "react-icons/md";
+import CopyableUuid from "../CopyableUuid/CopyableUuid";
+import Pagination from "../Pagination/Pagination";
 
 type Column<T> = {
   key: keyof T;
@@ -10,7 +11,7 @@ type Column<T> = {
 function Table<T extends { id: number } | { uuid: string }>({
   data,
   columns,
-  pageSize = 5,
+  pageSize = 10,
   onSelectionChange,
   onRowClick,
 }: {
@@ -56,11 +57,9 @@ function Table<T extends { id: number } | { uuid: string }>({
     updateSelection(next);
   };
 
-  const goToPage = (n: number) => setPage(Math.min(Math.max(1, n), pageCount));
-
   return (
-    <div className="flex flex-col bg-surface-primary font-semibold h-full overflow-hidden">
-      <div className="overflow-hidden border border-outline-common flex flex-col flex-1">
+    <div className="flex flex-col bg-surface-primary font-semibold h-fit overflow-hidden">
+      <div className="overflow-hidden border border-outline-common rounded-md flex flex-col flex-1">
         <table className="w-full text-left text-sm text-gray-600">
           <thead className="sticky top-0 z-10">
             <tr className="bg-[#E8EEEC]">
@@ -71,6 +70,9 @@ function Table<T extends { id: number } | { uuid: string }>({
                   onChange={toggleAll}
                   className="accent-primary"
                 />
+              </th>
+              <th>
+                <span className="">Código de Identificação</span>
               </th>
               {columns.map((col) => (
                 <th
@@ -120,6 +122,9 @@ function Table<T extends { id: number } | { uuid: string }>({
                       className="accent-primary"
                     />
                   </td>
+                  <td>
+                    <CopyableUuid uuid={String(key)} />
+                  </td>
                   {columns.map((col) => (
                     <td
                       key={String(col.key)}
@@ -138,45 +143,14 @@ function Table<T extends { id: number } | { uuid: string }>({
       </div>
 
       {pageCount > 1 && (
-        <div className="flex items-center justify-center gap-1 border-t border-outline-common py-sm text-body-emph bg-surface-primary">
-          <button
-            type="button"
-            onClick={() => goToPage(page - 1)}
-            disabled={page === 1}
-            aria-label="Página anterior"
-            className="grid h-8 w-8 place-items-center rounded-sm text-text-on-primary-variant hover:bg-surface-secondary disabled:opacity-30 disabled:hover:bg-transparent transition-colors"
-          >
-            <MdChevronLeft size={20} />
-          </button>
-
-          <div className="flex items-center gap-0.5">
-            {Array.from({ length: pageCount }, (_, i) => i + 1).map((n) => (
-              <button
-                key={n}
-                type="button"
-                onClick={() => goToPage(n)}
-                aria-current={n === page ? "page" : undefined}
-                className={[
-                  "grid h-8 min-w-8 place-items-center rounded-sm px-2 text-body transition-colors",
-                  n === page
-                    ? "font-bold text-primary-dark"
-                    : "font-regular text-text-on-primary-variant hover:bg-surface-secondary",
-                ].join(" ")}
-              >
-                {n}
-              </button>
-            ))}
-          </div>
-
-          <button
-            type="button"
-            onClick={() => goToPage(page + 1)}
-            disabled={page === pageCount}
-            aria-label="Próxima página"
-            className="grid h-8 w-8 place-items-center rounded-sm text-text-on-primary-variant hover:bg-surface-secondary disabled:opacity-30 disabled:hover:bg-transparent transition-colors"
-          >
-            <MdChevronRight size={20} />
-          </button>
+        <div className="flex items-center justify-center border-t border-outline-common py-sm bg-surface-primary">
+          <Pagination
+            page={page}
+            pageCount={pageCount}
+            onPageChange={(nextPage) =>
+              setPage(Math.min(Math.max(1, nextPage), pageCount))
+            }
+          />
         </div>
       )}
     </div>

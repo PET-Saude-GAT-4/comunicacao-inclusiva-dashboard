@@ -24,11 +24,8 @@ function Library() {
   }, []);
 
   return (
-    <div className="min-h-screen w-full bg-surface-primary">
-      <div className="text-text-on-primary border-b border-outline-common text-heading px-lg py-md">
-        <p>Pranchas</p>
-      </div>
-      <div className="flex items-center justify-between p-sm text-text-on-primary border-b border-outline-common">
+    <div className="w-full bg-surface-secondary">
+      <div className="flex items-center justify-between p-sm text-text-on-primary">
         <nav className="flex justify-between">
           <TabButton icon={MdContentPaste} active={true} />
         </nav>
@@ -38,7 +35,6 @@ function Library() {
         <Table
           data={boards}
           columns={[
-            { key: "uuid", label: "Código de Prancha" },
             { key: "title", label: "Título" },
             {
               key: "authorUuid",

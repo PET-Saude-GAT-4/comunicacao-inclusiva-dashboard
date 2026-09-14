@@ -83,17 +83,14 @@ function Boards() {
   };
 
   return (
-    <div className="min-h-screen w-full bg-surface-primary">
-      <div className="text-text-on-primary border-b border-outline-common text-heading px-lg py-md">
-        <p>Pranchas</p>
-      </div>
-      <div className="flex items-center justify-end p-sm text-text-on-primary border-b border-outline-common">
+    <div className="w-full bg-surface-secondary">
+      <div className="flex items-center justify-end p-sm text-text-on-primary border-outline-common">
         <div className="flex justify-between w-full">
           <Button
-            className="bg-surface-secondary outline-1 outline-outline-common "
+            className="bg-surface-primary outline-1 outline-outline-common "
             onClick={() => setIsCreateInteractionChainModalOpen(true)}
           >
-            <p className="text-gray-600">Criar Interação Entre Pranchas</p>
+            <p className="text-gray-600 w-full h-full hover:text-text-on-primary-dark">Criar Interação Entre Pranchas</p>
           </Button>
           <div className=" flex items-center justify-center ">
             <AddButton
@@ -112,7 +109,6 @@ function Boards() {
         <Table
           data={data}
           columns={[
-            { key: "uuid", label: "Código de Prancha" },
             { key: "title", label: "Título" },
             ...(user?.role === "super_admin"
               ? [

@@ -27,7 +27,7 @@ function ReadonlyBoardDetail() {
 
   if (board === null) {
     return (
-      <div className="min-h-screen w-full bg-surface-primary">
+      <div className="w-full bg-surface-secondary">
         <div className="flex items-center justify-between border-b border-outline-common px-lg py-md">
           <p className="text-heading text-text-on-primary">
             {loading ? "Carregando..." : "Prancha não encontrada"}
@@ -38,7 +38,7 @@ function ReadonlyBoardDetail() {
   }
 
   return (
-    <div className="min-h-screen w-full bg-surface-primary">
+    <div className="w-full bg-surface-secondary">
       <div className="flex items-center justify-between border-b border-outline-common px-lg py-md">
         <div className="flex items-center gap-md text-text-on-primary">
           <p className="text-heading">{board.title}</p>
