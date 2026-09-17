@@ -29,7 +29,7 @@ function NavItem({
       } ${
         active
           ? "bg-surface-secondary text-primary-dark font-bold"
-          : "text-text-on-primary hover:bg-surface-secondary"
+          : "text-text-on-primary hover:bg-gray-100"
       }`}
     >
       <Icon size={24} />
@@ -75,7 +75,7 @@ export default function Sidebar({
 
   return (
     <nav
-      className={`flex flex-col bg-surface-primary border border-outline-common shrink-0 rounded-md transition-all duration-300 ${
+      className={`flex flex-col bg-surface-primary border border-outline-common shadow-md shrink-0 rounded-md transition-all duration-300 ${
         expanded ? "w-64" : "w-16"
       }`}
     >

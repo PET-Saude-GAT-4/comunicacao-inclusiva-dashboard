@@ -66,10 +66,16 @@ function BoardDetail() {
   );
 
   useEffect(() => {
-    refresh()
+    getBoard(uuid)
+      .then((boardData) => {
+        setBoard(boardData);
+        if (boardData) {
+          return getBoardTerms(uuid).then(setItems);
+        }
+      })
       .catch(() => setBoard(null))
       .finally(() => setLoading(false));
-  }, [refresh]);
+  }, [uuid]);
 
   const handleTogglePublish = async () => {
     if (!board) return;

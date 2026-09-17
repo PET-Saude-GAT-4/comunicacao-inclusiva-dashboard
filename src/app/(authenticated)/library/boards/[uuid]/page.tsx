@@ -16,10 +16,12 @@ function ReadonlyBoardDetail() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    Promise.all([getPublicBoard(uuid), getPublicBoardTerms(uuid)])
-      .then(([boardData, termsData]) => {
+    getPublicBoard(uuid)
+      .then((boardData) => {
         setBoard(boardData);
-        setItems(termsData);
+        if (boardData) {
+          return getPublicBoardTerms(uuid).then(setItems);
+        }
       })
       .catch(() => setBoard(null))
       .finally(() => setLoading(false));
