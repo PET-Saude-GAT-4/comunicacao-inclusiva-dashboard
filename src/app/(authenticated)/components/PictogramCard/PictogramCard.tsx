@@ -1,22 +1,43 @@
 import CopyableUuid from "@/components/CopyableUuid/CopyableUuid";
+import KebabButton from "@/components/KebabButton/KebabButton";
 import type { PictogramOutput } from "@/types/pictogram";
 import Image from "next/image";
-import { MdMoreVert, MdImage } from "react-icons/md";
+import { MdImage } from "react-icons/md";
 
 type Props = {
   pictogram: PictogramOutput;
+  onSelect: () => void;
+  onDelete: () => void;
+  isSelected: boolean;
 };
 
-export default function PictogramCard({ pictogram }: Props) {
+export default function PictogramCard({
+  pictogram,
+  onSelect,
+  onDelete,
+  isSelected,
+}: Props) {
   return (
-    <div className="flex flex-col gap-2 p-3 bg-white rounded-md border border-outline-common shadow-sm text-text-on-primary min-w-0">
-      <div className="flex w-full justify-end">
-        <button
-          type="button"
-          className="text-gray-600 hover:text-gray-900 shrink-0"
-        >
-          <MdMoreVert size={20} />
-        </button>
+    <div
+      onClick={onSelect}
+      className={`flex flex-col gap-2 p-3 bg-white rounded-md border border-outline-common shadow-sm text-text-on-primary min-w-0 transition-all duration-200 ${
+        isSelected ? "scale-95 opacity-50" : ""
+      }`}
+    >
+      <div
+        className="flex w-full justify-end"
+        onClick={(event) => event.stopPropagation()}
+      >
+        <KebabButton
+          options={[
+            {
+              label: isSelected ? "Desselecionar" : "Selecionar",
+              onClick: onSelect,
+            },
+            { label: "Excluir", onClick: onDelete, danger: true },
+          ]}
+          align="right"
+        />
       </div>
       <div className="flex items-start justify-between gap-3">
         <div className="flex flex-col items-center justify-center w-full gap-3 min-w-0">

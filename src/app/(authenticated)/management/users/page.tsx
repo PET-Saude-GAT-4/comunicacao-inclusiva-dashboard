@@ -57,6 +57,20 @@ function Users() {
     setSelectedIds([]);
   };
 
+  const handleDeleteOne = async (id: number) => {
+    await deleteUser(id);
+    setData((prev) => prev.filter((item) => item.id !== id));
+    setSelectedIds((prev) => prev.filter((selectedId) => selectedId !== id));
+  };
+
+  const toggleSelection = (id: number) => {
+    setSelectedIds((prev) =>
+      prev.includes(id)
+        ? prev.filter((selectedId) => selectedId !== id)
+        : [...prev, id],
+    );
+  };
+
   const pageCount = Math.max(1, Math.ceil(data.length / pageSize));
   const pageData = data.slice((page - 1) * pageSize, page * pageSize);
   return (
@@ -93,7 +107,12 @@ function Users() {
         <div className="grid grid-cols-3 grid-rows-4 gap-4 p-4 h-fit">
           {pageData.map((user) => (
             <div key={user.id}>
-              <UserCard user={user} />
+              <UserCard
+                user={user}
+                onSelect={() => toggleSelection(user.id)}
+                onDelete={() => handleDeleteOne(user.id)}
+                isSelected={selectedIds.includes(user.id)}
+              />
             </div>
           ))}
         </div>
