@@ -71,7 +71,7 @@ function Table<T extends { id: number } | { uuid: string }>({
                   className="accent-primary"
                 />
               </th>
-              <th>
+              <th className="border-b border-outline-common px-sm py-sm font-semibold text-text-secondary">
                 <span className="">Código de Identificação</span>
               </th>
               {columns.map((col) => (
@@ -122,7 +122,7 @@ function Table<T extends { id: number } | { uuid: string }>({
                       className="accent-primary"
                     />
                   </td>
-                  <td>
+                  <td className="px-sm py-sm text-text-on-primary">
                     <CopyableUuid uuid={String(key)} />
                   </td>
                   {columns.map((col) => (
