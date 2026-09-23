@@ -22,10 +22,11 @@ import { getTerms } from "@/services/terms";
 import TermPicker from "@/components/TermPicker/TermPicker";
 import CreateInteractionChainModal from "../../components/CreateInteractionChainModal/CreateInteractionChainModal";
 import Badge from "@/components/Badge/Badge";
-import { MdPermMedia, MdPerson } from "react-icons/md";
+import { MdFormatSize, MdPermMedia, MdPerson } from "react-icons/md";
 import { getUser } from "@/services/users";
 import { UserOutput } from "@/types/user";
 import CopyableUuid from "@/components/CopyableUuid/CopyableUuid";
+import SearchBar from "@/components/SearchBar/SearchBar";
 
 function BoardDetail() {
   const params = useParams();
@@ -33,6 +34,7 @@ function BoardDetail() {
 
   const [board, setBoard] = useState<BoardOutput | null>(null);
   const [items, setItems] = useState<BoardTermOutput[]>([]);
+  const [filteredItems, setFilteredItems] = useState<BoardTermOutput[]>([]);
   const [loading, setLoading] = useState(true);
   const [author, setAuthor] = useState<UserOutput | null>(null);
 
@@ -53,12 +55,21 @@ function BoardDetail() {
   const [selectedTerm, setSelectedTerm] = useState<TermOutput>();
 
   const [terms, setTerms] = useState<TermOutput[]>([]);
+  const [textSize, setTextSize] = useState<"Padrão" | "Grande">("Padrão");
+  const getTermSearchText = useCallback(
+    (item: BoardTermOutput) => item.description,
+    [],
+  );
 
   const clearForm = () => {
     setFormError("");
     setSelectedTerm(undefined);
   };
-  const fetchItems = () => getBoardTerms(uuid).then((data) => setItems(data));
+  const fetchItems = () =>
+    getBoardTerms(uuid).then((data) => {
+      setItems(data);
+      setFilteredItems(data);
+    });
   const fetchAuthor = () =>
     getUser(board?.authorUuid ?? "").then((data) => setAuthor(data));
 
@@ -68,6 +79,7 @@ function BoardDetail() {
         ([boardData, termsData]) => {
           setBoard(boardData);
           setItems(termsData);
+          setFilteredItems(termsData);
           fetchAuthor();
         },
       ),
@@ -148,7 +160,7 @@ function BoardDetail() {
   }
 
   return (
-    <div className="w-full">
+    <div className="flex flex-col gap-lg w-full">
       <div className="flex bg-white items-center justify-between border border-gray-200 rounded-lg px-lg py-md">
         <div className="flex items-start gap-md text-body font-semibold text-gray-600">
           <div className="flex flex-col gap-xs">
@@ -199,8 +211,18 @@ function BoardDetail() {
           {removeError}
         </p>
       )}
+      <div className="flex flex-wrap items-center bg-white border border-gray-200 rounded-md gap-lg px-lg py-md font-medium">
+        <div className="w-100">
+          <SearchBar
+            data={items}
+            onResults={setFilteredItems}
+            getSearchText={getTermSearchText}
+            placeholder="Buscar na prancha..."
+          />
+        </div>
+      </div>
       <div className="flex flex-wrap gap-md p-lg">
-        {items.map((item) => (
+        {filteredItems.map((item) => (
           <div
             key={item.uuid}
             draggable
