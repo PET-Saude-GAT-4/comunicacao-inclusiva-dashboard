@@ -8,6 +8,10 @@ export async function getUsers(): Promise<UserOutput[]> {
   return api.getUsers();
 }
 
+export async function getUser(uuid: string): Promise<UserOutput | null> {
+  return api.getUser(uuid);
+}
+
 export async function createUser(data: {
   email: string;
   password: string;

@@ -7,6 +7,12 @@ export async function getUsers(): Promise<UserOutput[]> {
   return data.users;
 }
 
+export async function getUser(uuid: string): Promise<UserOutput | null> {
+  const data = await apiFetch<{ user: UserOutput }>(`/users/${uuid}`);
+  if (!data) throw new Error("Erro ao buscar usuário.");
+  return data.user;
+}
+
 export function createUser(data: {
   email: string;
   password: string;

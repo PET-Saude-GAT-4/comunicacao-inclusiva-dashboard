@@ -21,6 +21,11 @@ import { useDragReorder } from "@/hooks/useDragReorder";
 import { getTerms } from "@/services/terms";
 import TermPicker from "@/components/TermPicker/TermPicker";
 import CreateInteractionChainModal from "../../components/CreateInteractionChainModal/CreateInteractionChainModal";
+import Badge from "@/components/Badge/Badge";
+import { MdPermMedia, MdPerson } from "react-icons/md";
+import { getUser } from "@/services/users";
+import { UserOutput } from "@/types/user";
+import CopyableUuid from "@/components/CopyableUuid/CopyableUuid";
 
 function BoardDetail() {
   const params = useParams();
@@ -29,6 +34,7 @@ function BoardDetail() {
   const [board, setBoard] = useState<BoardOutput | null>(null);
   const [items, setItems] = useState<BoardTermOutput[]>([]);
   const [loading, setLoading] = useState(true);
+  const [author, setAuthor] = useState<UserOutput | null>(null);
 
   const [isCreateBoardModalOpen, setIsCreateBoardModalOpen] = useState(false);
 
@@ -53,6 +59,8 @@ function BoardDetail() {
     setSelectedTerm(undefined);
   };
   const fetchItems = () => getBoardTerms(uuid).then((data) => setItems(data));
+  const fetchAuthor = () =>
+    getUser(board?.authorUuid ?? "").then((data) => setAuthor(data));
 
   const refresh = useCallback(
     () =>
@@ -60,6 +68,7 @@ function BoardDetail() {
         ([boardData, termsData]) => {
           setBoard(boardData);
           setItems(termsData);
+          fetchAuthor();
         },
       ),
     [uuid],
@@ -139,10 +148,25 @@ function BoardDetail() {
   }
 
   return (
-    <div className="w-full bg-surface-secondary">
-      <div className="flex items-center justify-between border-b border-outline-common px-lg py-md">
-        <div className="flex items-center gap-md text-text-on-primary">
-          <p className="text-heading">{board.title}</p>
+    <div className="w-full">
+      <div className="flex bg-white items-center justify-between border border-gray-200 rounded-lg px-lg py-md">
+        <div className="flex items-start gap-md text-body font-semibold text-gray-600">
+          <div className="flex flex-col gap-xs">
+            <p className="text-heading font-medium text-text-on-primary">
+              {board.title}
+            </p>
+            <div className="flex items-center gap-sm"></div>
+            <div className="flex items-center gap-sm">
+              <MdPermMedia className="text-primary" size={16} />
+              <p>{items.length} Pictogramas</p>
+            </div>
+            <div className="flex items-center gap-sm">
+              <MdPerson className="text-gray-400" size={18} />
+              {author ? <p>{author.email}</p> : <p>Desconhecido</p>}
+            </div>
+          </div>
+          <Badge>Público</Badge>
+          <CopyableUuid uuid={board.uuid} />
         </div>
         <div className="flex items-center gap-md">
           <Button
@@ -189,7 +213,7 @@ function BoardDetail() {
                 handleDropAtEnd(e);
               }
             }}
-            className="group relative flex flex-col items-center gap-xs bg-surface-secondary rounded-sm p-xs"
+            className="group relative flex flex-col items-center gap-xs bg-white border border-gray-200 rounded-md p-xs"
           >
             <button
               type="button"
@@ -208,6 +232,7 @@ function BoardDetail() {
                 height={80}
                 className="object-contain rounded"
               />
+
               <Image
                 src={item.signWriting.fileUrl}
                 alt=""
