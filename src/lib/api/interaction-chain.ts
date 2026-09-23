@@ -1,4 +1,7 @@
-import type { InteractionChainOutput } from "@/types/interaction-chain";
+import type {
+  ChainTrigger,
+  InteractionChainOutput,
+} from "@/types/interaction-chain";
 import { apiFetch } from "./client";
 
 export async function getInteractionChains(): Promise<
@@ -12,18 +15,19 @@ export async function getInteractionChains(): Promise<
 }
 
 export async function getInteractionChain(
-  id: number,
+  uuid: string,
 ): Promise<InteractionChainOutput | null> {
   const data = await apiFetch<{ interactionChain: InteractionChainOutput }>(
-    `/interaction-chains/${id}`,
+    `/interaction-chains/${uuid}`,
   );
   if (!data) throw new Error("Erro ao buscar cadeia de interação.");
   return data.interactionChain;
 }
 
 export function createInteractionChain(data: {
-  triggerBoardUuid: string;
+  trigger: ChainTrigger;
   responseBoardUuid: string;
+  rank?: number;
   label?: string;
 }): Promise<void> {
   return apiFetch("/interaction-chains", {
@@ -33,29 +37,36 @@ export function createInteractionChain(data: {
 }
 
 export function updateInteractionChain(
-  id: number,
+  uuid: string,
   data: {
-    triggerBoardUuid?: string;
+    trigger?: ChainTrigger;
     responseBoardUuid?: string;
+    rank?: number;
     label?: string;
   },
 ): Promise<void> {
-  return apiFetch(`/interaction-chains/${id}`, {
+  return apiFetch(`/interaction-chains/${uuid}`, {
     method: "PATCH",
     body: JSON.stringify(data),
   });
 }
 
-export async function getInteractionChainByBoardUuid(
-  triggerBoardUuid: string,
+// One path per trigger kind, mirroring the API's routes.
+export async function getInteractionChainsByTrigger(
+  trigger: ChainTrigger,
 ): Promise<InteractionChainOutput[] | null> {
+  const path =
+    trigger.type === "board"
+      ? `/interaction-chains/trigger-board/${trigger.uuid}`
+      : `/interaction-chains/trigger-phrase/${trigger.uuid}`;
+
   const data = await apiFetch<{ interactionChains: InteractionChainOutput[] }>(
-    `/interaction-chains/trigger-board/${triggerBoardUuid}`,
+    path,
   );
   if (!data) return null;
   return data.interactionChains;
 }
 
-export function deleteInteractionChain(id: number): Promise<void> {
-  return apiFetch(`/interaction-chains/${id}`, { method: "DELETE" });
+export function deleteInteractionChain(uuid: string): Promise<void> {
+  return apiFetch(`/interaction-chains/${uuid}`, { method: "DELETE" });
 }

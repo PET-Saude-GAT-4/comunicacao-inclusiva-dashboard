@@ -337,7 +337,8 @@ function BoardDetail() {
         setIsModalOpen={setIsCreateInteractionChainModalOpen}
         formError={formError}
         setFormError={setFormError}
-        incomingTriggerBoardUuid={uuid}
+        triggerKind="board"
+        incomingTrigger={{ type: "board", uuid }}
       ></CreateInteractionChainModal>
     </div>
   );
