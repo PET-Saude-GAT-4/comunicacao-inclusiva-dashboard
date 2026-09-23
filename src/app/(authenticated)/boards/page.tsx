@@ -90,7 +90,9 @@ function Boards() {
             className="bg-surface-primary outline-1 outline-outline-common "
             onClick={() => setIsCreateInteractionChainModalOpen(true)}
           >
-            <p className="text-gray-600 w-full h-full hover:text-text-on-primary-dark">Criar Interação Entre Pranchas</p>
+            <p className="text-gray-600 w-full h-full hover:text-text-on-primary-dark">
+              Criar Interação Entre Pranchas
+            </p>
           </Button>
           <div className=" flex items-center justify-center ">
             <AddButton
@@ -215,6 +217,7 @@ function Boards() {
       <CreateInteractionChainModal
         isModalOpen={isCreateInteractionChainModalOpen}
         setIsModalOpen={setIsCreateInteractionChainModalOpen}
+        triggerKind="board"
         formError={formError}
         setFormError={setFormError}
       ></CreateInteractionChainModal>
