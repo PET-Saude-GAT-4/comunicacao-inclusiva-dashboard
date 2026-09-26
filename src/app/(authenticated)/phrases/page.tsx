@@ -9,7 +9,7 @@ import Modal from "@/components/Modal/Modal";
 import Table from "@/components/Table/Table";
 import Input from "@/components/Input/Input";
 import Button from "@/components/Button/Button";
-import Badge from "@/components/Badge/Badge";
+import PhraseVisibilityBadge from "@/components/PhraseVisibilityBadge/PhraseVisibilityBadge";
 import TermPicker from "@/components/TermPicker/TermPicker";
 import PhraseSequenceEditor, {
   SequenceEntry,
@@ -22,6 +22,8 @@ import { PhraseOutput } from "@/types/phrase";
 import { TermOutput, TermPlacementOutput } from "@/types/term";
 import { SessionUser } from "@/types/session";
 import { formatList } from "@/utils/text";
+import CreateInteractionChainModal from "@/app/(authenticated)/components/CreateInteractionChainModal/CreateInteractionChainModal";
+import { PhraseVisibility, phraseVisibility } from "@/utils/phrase-visibility";
 
 const PREVIEW_LIMIT = 4;
 
@@ -31,7 +33,7 @@ type PhraseRow = {
   terms: TermPlacementOutput[];
   authorUuid: string | null;
   itemCount: number;
-  publishedAt: string | null;
+  visibility: PhraseVisibility;
   createdAt: string;
 };
 
@@ -42,7 +44,7 @@ function toRow(p: PhraseOutput): PhraseRow {
     terms: p.terms,
     authorUuid: p.authorUuid,
     itemCount: p.terms.length,
-    publishedAt: p.publishedAt,
+    visibility: phraseVisibility(p),
     createdAt: new Date(p.createdAt).toLocaleDateString("pt-BR"),
   };
 }
@@ -54,6 +56,8 @@ function Phrases() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [isChainModalOpen, setIsChainModalOpen] = useState(false);
+  const [chainFormError, setChainFormError] = useState<string | null>(null);
   const [selectedIds, setSelectedIds] = useState<(string | number)[]>([]);
 
   const [description, setDescription] = useState("");
@@ -118,12 +122,25 @@ function Phrases() {
   return (
     <div className="w-full bg-surface-secondary">
       <div className="flex items-center justify-end p-sm text-text-on-primary">
-        <div className="flex">
-          <AddButton onClick={openModal} />
-          <RemoveButton
-            active={selectedIds.length > 0}
-            onClick={handleDelete}
-          />
+        <div className="flex justify-between w-full">
+          <Button
+            className="bg-surface-primary outline-1 outline-outline-common "
+            onClick={() => {
+              setChainFormError(null);
+              setIsChainModalOpen(true);
+            }}
+          >
+            <p className="text-gray-600 w-full h-full hover:text-text-on-primary-dark">
+              Criar Interação a Partir de Frase
+            </p>
+          </Button>
+          <div className="flex">
+            <AddButton onClick={openModal} />
+            <RemoveButton
+              active={selectedIds.length > 0}
+              onClick={handleDelete}
+            />
+          </div>
         </div>
       </div>
       {deleteError && (
@@ -176,14 +193,11 @@ function Phrases() {
               : []),
             { key: "itemCount", label: "Itens" },
             {
-              key: "publishedAt",
+              key: "visibility",
               label: "Status",
-              render: (value) =>
-                value ? (
-                  <Badge>Público</Badge>
-                ) : (
-                  <Badge variant="neutral">Não publicado</Badge>
-                ),
+              render: (value) => (
+                <PhraseVisibilityBadge visibility={value as PhraseVisibility} />
+              ),
             },
             { key: "createdAt", label: "Data de Criação" },
           ]}
@@ -235,6 +249,14 @@ function Phrases() {
           </div>
         </div>
       </Modal>
+
+      <CreateInteractionChainModal
+        isModalOpen={isChainModalOpen}
+        setIsModalOpen={setIsChainModalOpen}
+        formError={chainFormError}
+        setFormError={setChainFormError}
+        triggerKind="phrase"
+      />
     </div>
   );
 }

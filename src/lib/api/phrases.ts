@@ -22,12 +22,18 @@ export function createPhrase(data: {
 
 export function updatePhrase(
   uuid: string,
-  data: { description?: string; termUuids?: string[] },
+  data: {
+    description?: string;
+    termUuids?: string[];
+    listedInLibrary?: boolean;
+  },
 ): Promise<void> {
   const body: Record<string, unknown> = {};
 
   if (data.description !== undefined) body.description = data.description;
   if (data.termUuids !== undefined) body.termUuids = data.termUuids;
+  if (data.listedInLibrary !== undefined)
+    body.listedInLibrary = data.listedInLibrary;
 
   return apiFetch(`/phrases/${uuid}`, {
     method: "PATCH",

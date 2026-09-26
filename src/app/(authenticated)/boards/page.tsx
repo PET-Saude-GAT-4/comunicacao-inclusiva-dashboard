@@ -242,6 +242,7 @@ function Boards() {
       <CreateInteractionChainModal
         isModalOpen={isCreateInteractionChainModalOpen}
         setIsModalOpen={setIsCreateInteractionChainModalOpen}
+        triggerKind="board"
         formError={formError}
         setFormError={setFormError}
       ></CreateInteractionChainModal>

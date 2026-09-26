@@ -2,7 +2,10 @@
 
 import { revalidatePath } from "next/cache";
 import { ActionResult } from "@/types/common";
-import { InteractionChainOutput } from "@/types/interaction-chain";
+import type {
+  ChainTrigger,
+  InteractionChainOutput,
+} from "@/types/interaction-chain";
 import { ApiError } from "@/lib/api/client";
 import * as api from "@/lib/api/interaction-chain";
 
@@ -12,21 +15,22 @@ export async function getInteractionChains(): Promise<
   return api.getInteractionChains();
 }
 
-export async function getInteractionChainByBoardUuid(
-  triggerBoardUuid: string,
+export async function getInteractionChainsByTrigger(
+  trigger: ChainTrigger,
 ): Promise<InteractionChainOutput[] | null> {
-  return api.getInteractionChainByBoardUuid(triggerBoardUuid);
+  return api.getInteractionChainsByTrigger(trigger);
 }
 
 export async function getInteractionChain(
-  id: number,
+  uuid: string,
 ): Promise<InteractionChainOutput | null> {
-  return api.getInteractionChain(id);
+  return api.getInteractionChain(uuid);
 }
 
 export async function createInteractionChain(data: {
-  triggerBoardUuid: string;
+  trigger: ChainTrigger;
   responseBoardUuid: string;
+  rank?: number;
   label?: string;
 }): Promise<ActionResult> {
   try {
@@ -37,7 +41,7 @@ export async function createInteractionChain(data: {
     if (e instanceof ApiError && e.status === 409) {
       return {
         success: false,
-        error: "Já existe uma cadeia de interação com essas pranchas.",
+        error: "Já existe uma interação com essa prancha de destino.",
       };
     }
     return { success: false, error: "Erro ao criar cadeia de interação." };
@@ -45,17 +49,18 @@ export async function createInteractionChain(data: {
 }
 
 export async function updateInteractionChain(
-  id: number,
+  uuid: string,
   data: {
-    triggerBoardUuid?: string;
+    trigger?: ChainTrigger;
     responseBoardUuid?: string;
+    rank?: number;
     label?: string;
   },
 ): Promise<ActionResult> {
   try {
-    await api.updateInteractionChain(id, data);
+    await api.updateInteractionChain(uuid, data);
     revalidatePath("/interaction-chains");
-    revalidatePath(`/interaction-chains/${id}`);
+    revalidatePath(`/interaction-chains/${uuid}`);
     return { success: true };
   } catch (e) {
     if (e instanceof ApiError && e.status === 404) {
@@ -64,7 +69,7 @@ export async function updateInteractionChain(
     if (e instanceof ApiError && e.status === 409) {
       return {
         success: false,
-        error: "Já existe uma cadeia de interação com essas pranchas.",
+        error: "Já existe uma interação com essa prancha de destino.",
       };
     }
     return { success: false, error: "Erro ao atualizar cadeia de interação." };
@@ -72,16 +77,16 @@ export async function updateInteractionChain(
 }
 
 export async function deleteInteractionChain(
-  id: number,
+  uuid: string,
 ): Promise<ActionResult> {
   try {
-    await api.deleteInteractionChain(id);
+    await api.deleteInteractionChain(uuid);
     revalidatePath("/interaction-chains");
     return { success: true };
   } catch {
     return {
       success: false,
-      error: `Erro ao remover cadeia de interação ${id}.`,
+      error: "Erro ao remover cadeia de interação.",
     };
   }
 }

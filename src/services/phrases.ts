@@ -50,6 +50,26 @@ export async function deletePhrase(uuid: string): Promise<ActionResult> {
   }
 }
 
+// The listing flag persists on its own, alongside publish/unpublish, rather
+// than through `updatePhrase` — the description and the term sequence are a
+// draft the author saves deliberately, and visibility is not.
+export async function setPhraseListedInLibrary(
+  uuid: string,
+  listedInLibrary: boolean,
+): Promise<ActionResult> {
+  try {
+    await api.updatePhrase(uuid, { listedInLibrary });
+    revalidatePath("/phrases");
+    revalidatePath(`/phrases/${uuid}`);
+    return { success: true };
+  } catch {
+    return {
+      success: false,
+      error: "Erro ao alterar a visibilidade da frase.",
+    };
+  }
+}
+
 export async function publishPhrase(uuid: string): Promise<ActionResult> {
   try {
     await api.publishPhrase(uuid);

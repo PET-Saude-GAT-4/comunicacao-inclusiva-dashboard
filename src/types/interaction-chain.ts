@@ -1,9 +1,14 @@
+// Mirrors the API's exclusive arc: a chain is triggered by exactly one thing.
+export type ChainTrigger =
+  | { type: "board"; uuid: string }
+  | { type: "phrase"; uuid: string };
+
 export type InteractionChainOutput = {
-  id: number;
   uuid: string;
-  createdAt: Date;
-  updatedAt: Date;
-  triggerBoardUuid: string;
+  createdAt: string;
+  updatedAt: string;
+  trigger: ChainTrigger;
   responseBoardUuid: string;
+  rank: number;
   label?: string;
 };
