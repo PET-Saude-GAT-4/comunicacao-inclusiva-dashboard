@@ -8,6 +8,7 @@ import Table from "@/components/Table/Table";
 import Input from "@/components/Input/Input";
 import Button from "@/components/Button/Button";
 import { getBoards, createBoard, deleteBoard } from "@/services/boards";
+import { getUsers } from "@/services/users";
 import { getSessionUser } from "@/services/auth";
 import { BoardOutput } from "@/types/board";
 import { SessionUser } from "@/types/session";
@@ -19,10 +20,12 @@ import { PictogramOutput } from "@/types/pictogram";
 import { getPictograms } from "@/services/pictograms";
 import AssetPicker, { Asset } from "@/components/AssetPicker/AssetPicker";
 import CreateInteractionChainModal from "../components/CreateInteractionChainModal/CreateInteractionChainModal";
+import { MdPerson } from "react-icons/md";
 
 function Boards() {
   const router = useRouter();
   const [data, setData] = useState<BoardOutput[]>([]);
+  const [authorEmails, setAuthorEmails] = useState<Record<string, string>>({});
   const [user, setUser] = useState<SessionUser | null>(null);
   const [isCreateBoardModalOpen, setIsCreateBoardModalOpen] = useState(false);
 
@@ -49,7 +52,20 @@ function Boards() {
 
   useEffect(() => {
     fetchData();
-    getSessionUser().then(setUser);
+    getSessionUser().then((sessionUser) => {
+      setUser(sessionUser);
+      if (sessionUser?.role === "super_admin") {
+        getUsers()
+          .catch(() => [])
+          .then((users) =>
+            setAuthorEmails(
+              Object.fromEntries(
+                users.map((author) => [author.uuid, author.email]),
+              ),
+            ),
+          );
+      }
+    });
   }, []);
 
   const handleCreate = async () => {
@@ -90,7 +106,9 @@ function Boards() {
             className="bg-surface-primary outline-1 outline-outline-common "
             onClick={() => setIsCreateInteractionChainModalOpen(true)}
           >
-            <p className="text-gray-600 w-full h-full hover:text-text-on-primary-dark">Criar Interação Entre Pranchas</p>
+            <p className="text-gray-600 w-full h-full hover:text-text-on-primary-dark">
+              Criar Interação Entre Pranchas
+            </p>
           </Button>
           <div className=" flex items-center justify-center ">
             <AddButton
@@ -115,8 +133,17 @@ function Boards() {
                   {
                     key: "authorUuid" as const,
                     label: "Autor",
-                    render: (value: BoardOutput[keyof BoardOutput]) =>
-                      (value as string | null) ?? "—",
+                    render: (
+                      _value: BoardOutput[keyof BoardOutput],
+                      row: BoardOutput,
+                    ) => (
+                      <div className="flex items-center gap-sm">
+                        <MdPerson className="text-gray-400" size={18} />
+                        <p>
+                          {authorEmails[row.authorUuid ?? ""] ?? "Desconhecido"}
+                        </p>
+                      </div>
+                    ),
                   },
                 ]
               : []),

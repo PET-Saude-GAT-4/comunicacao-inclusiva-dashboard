@@ -23,7 +23,7 @@ import TermPicker from "@/components/TermPicker/TermPicker";
 import CreateInteractionChainModal from "../../components/CreateInteractionChainModal/CreateInteractionChainModal";
 import Badge from "@/components/Badge/Badge";
 import { MdFormatSize, MdPermMedia, MdPerson } from "react-icons/md";
-import { getUser } from "@/services/users";
+import { getUsers } from "@/services/users";
 import { UserOutput } from "@/types/user";
 import CopyableUuid from "@/components/CopyableUuid/CopyableUuid";
 import SearchBar from "@/components/SearchBar/SearchBar";
@@ -70,27 +70,51 @@ function BoardDetail() {
       setItems(data);
       setFilteredItems(data);
     });
-  const fetchAuthor = () =>
-    getUser(board?.authorUuid ?? "").then((data) => setAuthor(data));
 
-  const refresh = useCallback(
-    () =>
-      Promise.all([getBoard(uuid), getBoardTerms(uuid)]).then(
-        ([boardData, termsData]) => {
-          setBoard(boardData);
-          setItems(termsData);
-          setFilteredItems(termsData);
-          fetchAuthor();
-        },
-      ),
-    [uuid],
-  );
+  const loadBoardData = useCallback(async () => {
+    const [boardData, termsData] = await Promise.all([
+      getBoard(uuid),
+      getBoardTerms(uuid),
+    ]);
+    const authorData = boardData?.authorUuid
+      ? ((await getUsers().catch(() => [])).find(
+          (user) => user.uuid === boardData.authorUuid,
+        ) ?? null)
+      : null;
+
+    return { boardData, termsData, authorData };
+  }, [uuid]);
+
+  const refresh = useCallback(async () => {
+    const { boardData, termsData, authorData } = await loadBoardData();
+    setBoard(boardData);
+    setItems(termsData);
+    setFilteredItems(termsData);
+    setAuthor(authorData);
+  }, [loadBoardData]);
 
   useEffect(() => {
-    refresh()
-      .catch(() => setBoard(null))
-      .finally(() => setLoading(false));
-  }, [refresh]);
+    let isActive = true;
+
+    loadBoardData()
+      .then(({ boardData, termsData, authorData }) => {
+        if (!isActive) return;
+        setBoard(boardData);
+        setItems(termsData);
+        setFilteredItems(termsData);
+        setAuthor(authorData);
+      })
+      .catch(() => {
+        if (isActive) setBoard(null);
+      })
+      .finally(() => {
+        if (isActive) setLoading(false);
+      });
+
+    return () => {
+      isActive = false;
+    };
+  }, [loadBoardData]);
 
   const handleTogglePublish = async () => {
     if (!board) return;
@@ -177,7 +201,11 @@ function BoardDetail() {
               {author ? <p>{author.email}</p> : <p>Desconhecido</p>}
             </div>
           </div>
-          <Badge>Público</Badge>
+          {board.publishedAt ? (
+            <Badge>Público</Badge>
+          ) : (
+            <Badge variant="neutral">Não publicado</Badge>
+          )}
           <CopyableUuid uuid={board.uuid} />
         </div>
         <div className="flex items-center gap-md">
