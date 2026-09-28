@@ -34,10 +34,20 @@ export async function login(
       role: data.user.role.name,
     });
   } catch (e) {
-    if (e instanceof ApiError && e.status === 403) {
-      return { message: "ACCOUNT_NOT_CONFIRMED" };
+    if (e instanceof ApiError) {
+      if (e.status === 403) {
+        return { message: "ACCOUNT_NOT_CONFIRMED" };
+      }
+      if (e.status === 401) {
+        return { message: "E-mail ou senha incorretos." };
+      }
+      if (e.status === 500) {
+        return {
+          message: "Ocorreu um erro no servidor. Tente novamente mais tarde.",
+        };
+      }
     }
-    return { message: "Email ou senha inválidos." };
+    return { message: "E-mail ou senha incorretos." };
   }
 
   redirect("/dashboard");

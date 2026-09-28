@@ -12,13 +12,20 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [resending, setResending] = useState(false);
   const [resentOk, setResentOk] = useState(false);
+  const [resentError, setResentError] = useState("");
 
   const handleResend = async () => {
     if (!email) return;
     setResending(true);
-    await resendInvitation(email);
+    setResentError("");
+    const result = await resendInvitation(email);
     setResending(false);
-    setResentOk(true);
+
+    if (result.success) {
+      setResentOk(true);
+    } else {
+      setResentError(result.error || "Erro ao reenviar convite.");
+    }
   };
 
   return (
@@ -54,14 +61,21 @@ export default function Login() {
               Novo convite enviado para {email}!
             </p>
           ) : (
-            <button
-              type="button"
-              onClick={handleResend}
-              disabled={resending || !email}
-              className="mt-2 text-xs text-amber-900 underline hover:text-amber-700 font-medium cursor-pointer disabled:opacity-50"
-            >
-              {resending ? "Enviando..." : "Reenviar convite"}
-            </button>
+            <div className="flex flex-col items-center">
+              <button
+                type="button"
+                onClick={handleResend}
+                disabled={resending || !email}
+                className="mt-2 text-xs text-amber-900 underline hover:text-amber-700 font-medium cursor-pointer disabled:opacity-50"
+              >
+                {resending ? "Enviando..." : "Reenviar convite"}
+              </button>
+              {resentError && (
+                <p className="text-red-600 text-xs text-center mt-1">
+                  {resentError}
+                </p>
+              )}
+            </div>
           )}
         </div>
       ) : state?.message ? (
