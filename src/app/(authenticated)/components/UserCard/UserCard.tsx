@@ -32,7 +32,12 @@ export default function UserCard({ user }: Props) {
               </span>
               <MdContentCopy size={14} />
             </button>
-            <Badge variant="neutral">{user.role.name}</Badge>
+            <div className="flex items-center gap-2 flex-wrap">
+              <Badge variant="neutral">{user.role.name}</Badge>
+              {user.confirmedAt === null && (
+                <Badge variant="warning">Pendente</Badge>
+              )}
+            </div>
           </div>
         </div>
         <button type="button" className="text-gray-600 hover:text-gray-900 shrink-0">
