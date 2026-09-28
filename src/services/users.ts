@@ -10,14 +10,13 @@ export async function getUsers(): Promise<UserOutput[]> {
 
 export async function createUser(data: {
   email: string;
-  password: string;
-  role: string;
+  roleId: number;
 }): Promise<ActionResult> {
   try {
     await api.createUser(data);
     return { success: true };
   } catch {
-    return { success: false, error: "Erro ao criar usuário." };
+    return { success: false, error: "Erro ao convidar usuário." };
   }
 }
 
