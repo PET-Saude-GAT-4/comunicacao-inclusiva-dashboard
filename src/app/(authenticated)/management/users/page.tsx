@@ -153,7 +153,7 @@ function Users() {
               id="roleId"
               value={roleId}
               onChange={(e) => setRoleId(Number(e.target.value))}
-              className="focus:outline-none focus:ring-1 focus:ring-primary-dark text-text-on-primary p-sm px-lg bg-surface-secondary rounded-md"
+              className="border border-outline-common focus:border-primary-dark focus:outline-none focus:ring-1 focus:ring-primary-dark text-text-on-primary p-sm px-lg bg-surface-secondary rounded-md"
             >
               <option value={0} disabled>
                 Selecione uma permissão
