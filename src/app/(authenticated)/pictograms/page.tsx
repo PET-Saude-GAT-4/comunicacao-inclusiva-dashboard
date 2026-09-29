@@ -19,6 +19,7 @@ function Pictograms() {
   const [data, setData] = useState<PictogramOutput[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
   const [selectedIds, setSelectedIds] = useState<(string | number)[]>([]);
   const [page, setPage] = useState(1);
   const pageSize = 12;
@@ -55,9 +56,41 @@ function Pictograms() {
   };
 
   const handleDelete = async () => {
-    await Promise.all(selectedIds.map((id) => deletePictogram(String(id))));
-    setData((prev) => prev.filter((item) => !selectedIds.includes(item.uuid)));
-    setSelectedIds([]);
+    const results = await Promise.all(
+      selectedIds.map(async (id) => ({
+        id: String(id),
+        result: await deletePictogram(String(id)),
+      })),
+    );
+    const deletedIds = results
+      .filter(({ result }) => result.success)
+      .map(({ id }) => id);
+    const failure = results.find(({ result }) => !result.success);
+
+    setData((prev) => prev.filter((item) => !deletedIds.includes(item.uuid)));
+    setSelectedIds((prev) =>
+      prev.filter((id) => !deletedIds.includes(String(id))),
+    );
+    setDeleteError(failure?.result.error ?? null);
+  };
+
+  const handleDeleteOne = async (uuid: string) => {
+    const result = await deletePictogram(uuid);
+    if (result.success) {
+      setData((prev) => prev.filter((item) => item.uuid !== uuid));
+      setSelectedIds((prev) =>
+        prev.filter((selectedId) => selectedId !== uuid),
+      );
+    }
+    setDeleteError(result.success ? null : (result.error ?? null));
+  };
+
+  const toggleSelection = (uuid: string) => {
+    setSelectedIds((prev) =>
+      prev.includes(uuid)
+        ? prev.filter((selectedId) => selectedId !== uuid)
+        : [...prev, uuid],
+    );
   };
 
   const pageCount = Math.max(1, Math.ceil(data.length / pageSize));
@@ -73,11 +106,19 @@ function Pictograms() {
           />
         </div>
       </div>
+      {deleteError && (
+        <p className="px-4 text-sm text-red-500">{deleteError}</p>
+      )}
       <div className="flex flex-col">
         <div className="grid grid-cols-6 gap-4 p-4">
           {pageData.map((pictogram) => (
             <div key={pictogram.uuid}>
-              <PictogramCard pictogram={pictogram} />
+              <PictogramCard
+                pictogram={pictogram}
+                onSelect={() => toggleSelection(pictogram.uuid)}
+                onDelete={() => handleDeleteOne(pictogram.uuid)}
+                isSelected={selectedIds.includes(pictogram.uuid)}
+              />
             </div>
           ))}
         </div>
