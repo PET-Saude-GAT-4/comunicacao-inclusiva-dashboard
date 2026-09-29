@@ -1,4 +1,4 @@
-export type BadgeVariant = "success" | "secondary" | "neutral";
+export type BadgeVariant = "success" | "secondary" | "neutral" | "warning";
 
 function Badge({
   children,
@@ -11,6 +11,7 @@ function Badge({
     success: "bg-success-secondary text-success",
     secondary: "bg-secondary/25 text-secondary",
     neutral: "bg-surface-secondary text-text-on-primary-variant",
+    warning: "bg-amber-100 text-amber-800",
   };
 
   return (

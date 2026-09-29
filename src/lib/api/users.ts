@@ -15,10 +15,9 @@ export async function getUser(uuid: string): Promise<UserOutput | null> {
 
 export function createUser(data: {
   email: string;
-  password: string;
-  role: string;
+  roleId: number;
 }): Promise<void> {
-  return apiFetch("/auth/register", {
+  return apiFetch("/users", {
     method: "POST",
     body: JSON.stringify(data),
   });

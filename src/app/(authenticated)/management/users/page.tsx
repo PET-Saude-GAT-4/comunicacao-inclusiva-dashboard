@@ -16,7 +16,9 @@ import {
   MdLocalPolice,
 } from "react-icons/md";
 import { getUsers, createUser, deleteUser } from "@/services/users";
+import { getRoles } from "@/services/roles";
 import { UserOutput } from "@/types/user";
+import { RoleOutput } from "@/types/role";
 import UserCard from "../../components/UserCard/UserCard";
 
 function Users() {
@@ -28,26 +30,34 @@ function Users() {
   const pageSize = 10;
 
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [role, setRole] = useState("");
+  const [roles, setRoles] = useState<RoleOutput[]>([]);
+  const [roleId, setRoleId] = useState<number>(0);
 
   const fetchData = () => getUsers().then((users) => setData(users));
 
   useEffect(() => {
     fetchData();
+    getRoles().then(setRoles);
   }, []);
 
   const handleCreate = async () => {
-    const result = await createUser({ email, password, role });
+    if (!email) {
+      setFormError("Informe o email.");
+      return;
+    }
+    if (!roleId || roleId === 0) {
+      setFormError("Selecione uma permissão.");
+      return;
+    }
+    const result = await createUser({ email, roleId });
     if (result.success) {
       setIsModalOpen(false);
       setFormError(null);
       setEmail("");
-      setPassword("");
-      setRole("");
+      setRoleId(0);
       fetchData();
     } else {
-      setFormError(result.error ?? "Erro ao criar usuário.");
+      setFormError(result.error ?? "Erro ao convidar usuário.");
     }
   };
 
@@ -154,25 +164,29 @@ function Users() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
-          <Input
-            id="password"
-            label="Senha"
-            type="password"
-            placeholder="Senha"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-          <Input
-            id="role"
-            label="Permissão"
-            type="text"
-            placeholder="ex: admin"
-            value={role}
-            onChange={(e) => setRole(e.target.value)}
-          />
+          <div className="flex flex-col">
+            <label className="text-text-on-primary" htmlFor="roleId">
+              Permissão
+            </label>
+            <select
+              id="roleId"
+              value={roleId}
+              onChange={(e) => setRoleId(Number(e.target.value))}
+              className="border border-outline-common focus:border-primary-dark focus:outline-none focus:ring-1 focus:ring-primary-dark text-text-on-primary p-sm px-lg bg-surface-secondary rounded-md"
+            >
+              <option value={0} disabled>
+                Selecione uma permissão
+              </option>
+              {roles.map((r) => (
+                <option key={r.id} value={r.id}>
+                  {r.name}
+                </option>
+              ))}
+            </select>
+          </div>
           {formError && <p className="text-sm text-red-500">{formError}</p>}
           <Button type="button" onClick={handleCreate}>
-            Criar
+            Convidar
           </Button>
         </div>
       </Modal>

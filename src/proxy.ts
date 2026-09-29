@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { isRouteAuthorized } from "@/config/route-access";
 import type { SessionPayload } from "@/types/session";
 
-const publicPaths = ["/", "/login", "/sign-up"];
+const publicPaths = ["/", "/login", "/invitation/accept"];
 
 function parseSession(cookieValue: string | undefined): SessionPayload | null {
   if (!cookieValue) return null;
