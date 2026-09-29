@@ -74,8 +74,8 @@ function Users() {
   const pageCount = Math.max(1, Math.ceil(data.length / pageSize));
   const pageData = data.slice((page - 1) * pageSize, page * pageSize);
   return (
-    <div className="w-full bg-surface-secondary flex flex-col">
-      <div className="flex items-center justify-between p-sm text-text-on-primary">
+    <div className="flex w-full flex-col gap-lg">
+      <div className="flex items-center justify-between rounded-lg border border-gray-200 bg-white px-lg py-md text-text-on-primary">
         <nav className="flex justify-between">
           <TabButton icon={MdPeople} active={true} />
           <TabButton
@@ -103,10 +103,10 @@ function Users() {
           />
         </div>
       </div>
-      <div className="flex-1 flex flex-col">
-        <div className="grid grid-cols-3 grid-rows-4 gap-4 p-4 h-fit">
+      <div>
+        <div className="grid grid-cols-3 auto-rows-max gap-4">
           {pageData.map((user) => (
-            <div key={user.id}>
+            <div key={user.id} className="self-start">
               <UserCard
                 user={user}
                 onSelect={() => toggleSelection(user.id)}

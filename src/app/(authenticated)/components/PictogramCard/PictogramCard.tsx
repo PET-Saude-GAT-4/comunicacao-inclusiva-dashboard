@@ -2,10 +2,11 @@ import CopyableUuid from "@/components/CopyableUuid/CopyableUuid";
 import KebabButton from "@/components/KebabButton/KebabButton";
 import type { PictogramOutput } from "@/types/pictogram";
 import Image from "next/image";
-import { MdImage } from "react-icons/md";
+import { MdImage, MdPerson } from "react-icons/md";
 
 type Props = {
   pictogram: PictogramOutput;
+  authorEmail: string | null;
   onSelect: () => void;
   onDelete: () => void;
   isSelected: boolean;
@@ -13,6 +14,7 @@ type Props = {
 
 export default function PictogramCard({
   pictogram,
+  authorEmail,
   onSelect,
   onDelete,
   isSelected,
@@ -68,6 +70,12 @@ export default function PictogramCard({
       <div className="flex flex-col gap-xs items-center text-body">
         <span className="font-bold">Data de Criação</span>
         <span>{new Date(pictogram.createdAt).toLocaleDateString("pt-BR")}</span>
+      </div>
+      <div className="flex items-center justify-center gap-sm min-w-0 text-body">
+        <MdPerson className="text-gray-400 shrink-0" size={18} />
+        <p className="truncate" title={authorEmail ?? "Desconhecido"}>
+          {authorEmail ?? "Desconhecido"}
+        </p>
       </div>
     </div>
   );

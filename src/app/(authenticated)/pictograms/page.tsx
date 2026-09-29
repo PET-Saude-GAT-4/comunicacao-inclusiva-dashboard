@@ -11,12 +11,14 @@ import {
   createPictogram,
   deletePictogram,
 } from "@/services/pictograms";
+import { getUsers } from "@/services/users";
 import { PictogramOutput } from "@/types/pictogram";
 import RemoveButton from "@/components/RemoveButton/RemoveButton";
 import PictogramCard from "../components/PictogramCard/PictogramCard";
 
 function Pictograms() {
   const [data, setData] = useState<PictogramOutput[]>([]);
+  const [authorEmails, setAuthorEmails] = useState<Record<string, string>>({});
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
@@ -32,6 +34,15 @@ function Pictograms() {
 
   useEffect(() => {
     fetchData();
+    getUsers()
+      .catch(() => [])
+      .then((users) =>
+        setAuthorEmails(
+          Object.fromEntries(
+            users.map((author) => [author.uuid, author.email]),
+          ),
+        ),
+      );
   }, []);
 
   const handleCreate = async () => {
@@ -96,8 +107,8 @@ function Pictograms() {
   const pageCount = Math.max(1, Math.ceil(data.length / pageSize));
   const pageData = data.slice((page - 1) * pageSize, page * pageSize);
   return (
-    <div className="flex flex-col w-full">
-      <div className="flex items-center justify-end p-sm text-text-on-primary">
+    <div className="flex w-full flex-col gap-lg">
+      <div className="flex items-center justify-end rounded-lg border border-gray-200 bg-white px-lg py-md text-text-on-primary">
         <div className="flex">
           <AddButton onClick={() => setIsModalOpen(true)} />
           <RemoveButton
@@ -115,6 +126,7 @@ function Pictograms() {
             <div key={pictogram.uuid}>
               <PictogramCard
                 pictogram={pictogram}
+                authorEmail={authorEmails[pictogram.authorUuid ?? ""] ?? null}
                 onSelect={() => toggleSelection(pictogram.uuid)}
                 onDelete={() => handleDeleteOne(pictogram.uuid)}
                 isSelected={selectedIds.includes(pictogram.uuid)}

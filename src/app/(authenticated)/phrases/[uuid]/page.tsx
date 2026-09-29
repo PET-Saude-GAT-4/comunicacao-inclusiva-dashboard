@@ -246,8 +246,8 @@ function PhraseDetail() {
       : "A frase sairá da biblioteca, mas continuará chegando aos aplicativos com suas interações.";
 
   return (
-    <div className="w-full bg-surface-secondary">
-      <div className="flex items-center justify-between border-b border-outline-common px-lg py-md">
+    <div className="flex w-full flex-col gap-lg">
+      <div className="flex items-center justify-between rounded-lg border border-gray-200 bg-white px-lg py-md">
         <div className="flex items-center gap-md text-text-on-primary">
           <p className="text-heading">{phrase.description}</p>
           <PhraseVisibilityBadge visibility={visibility} />
@@ -255,7 +255,6 @@ function PhraseDetail() {
         <div className="flex items-center gap-md">
           <Button
             type="button"
-            variant="neutral"
             onClick={() => {
               setVisibilityError(null);
               setVisibilityChoice(visibility);
@@ -268,7 +267,7 @@ function PhraseDetail() {
         </div>
       </div>
 
-      <div className="flex flex-col gap-lg p-lg">
+      <div className="flex flex-col gap-lg rounded-lg border border-gray-200 bg-white p-lg">
         <Input
           id="description"
           label="Descrição"
@@ -304,8 +303,8 @@ function PhraseDetail() {
         </div>
       </div>
 
-      <div className="border-t border-outline-common">
-        <div className="flex items-center justify-between border-b border-outline-common px-lg py-md">
+      <div className="overflow-hidden rounded-lg border border-gray-200 bg-white">
+        <div className="flex items-center justify-between border-b border-gray-200 px-lg py-md">
           <div className="flex flex-col">
             <p className="text-body-emph text-text-on-primary font-semibold">
               Interações
@@ -346,7 +345,7 @@ function PhraseDetail() {
             chains.map((chain, index) => (
               <div
                 key={chain.uuid}
-                className="flex items-center justify-between border border-outline-common bg-surface-primary rounded-md px-sm py-xs text-text-on-primary"
+                className="flex items-center justify-between rounded-md border border-gray-200 bg-surface-secondary px-sm py-xs text-text-on-primary"
               >
                 <div className="flex items-center gap-md px-sm">
                   <span className="text-text-on-primary-variant text-sm">
@@ -474,7 +473,7 @@ function PhraseDetail() {
                 className={`flex items-start gap-sm rounded-md border px-sm py-sm cursor-pointer ${
                   visibilityChoice === value
                     ? "border-primary bg-surface-secondary"
-                    : "border-outline-common"
+                    : "border-gray-200"
                 }`}
               >
                 <input
