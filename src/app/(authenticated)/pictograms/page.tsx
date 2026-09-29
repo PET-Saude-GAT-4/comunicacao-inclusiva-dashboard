@@ -107,8 +107,8 @@ function Pictograms() {
   const pageCount = Math.max(1, Math.ceil(data.length / pageSize));
   const pageData = data.slice((page - 1) * pageSize, page * pageSize);
   return (
-    <div className="flex flex-col w-full">
-      <div className="flex items-center justify-end p-sm text-text-on-primary">
+    <div className="flex w-full flex-col gap-lg">
+      <div className="flex items-center justify-end rounded-lg border border-gray-200 bg-white px-lg py-md text-text-on-primary">
         <div className="flex">
           <AddButton onClick={() => setIsModalOpen(true)} />
           <RemoveButton

@@ -36,16 +36,17 @@ function Library() {
   }, []);
 
   return (
-    <div className="w-full bg-surface-secondary">
-      <div className="flex items-center justify-between p-sm text-text-on-primary">
+    <div className="flex w-full flex-col gap-lg">
+      <div className="flex items-center justify-between rounded-lg border border-gray-200 bg-white px-lg py-md text-text-on-primary">
         <nav className="flex justify-between">
           <TabButton icon={MdContentPaste} active={true} />
         </nav>
         <div className="flex w-full justify-around">{/* <SearchBar/> */}</div>
       </div>
-      <div className="flex-1">
+      <div>
         <Table
           data={boards}
+          frameClassName="border-gray-200 rounded-lg"
           columns={[
             { key: "title", label: "Título" },
             {

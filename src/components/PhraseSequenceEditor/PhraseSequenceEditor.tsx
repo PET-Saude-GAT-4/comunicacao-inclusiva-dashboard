@@ -91,7 +91,7 @@ export default function PhraseSequenceEditor({
     <div className="flex flex-col w-full gap-md">
       <p className="text-text-on-primary">Sequência da Frase:</p>
       <div
-        className="flex flex-wrap items-start gap-md border border-outline-common rounded-md p-md min-h-40"
+        className="flex min-h-40 flex-wrap items-start gap-md rounded-lg border border-gray-200 bg-surface-secondary p-md"
         onDragOver={handleDragOver}
         onDrop={(e) => handleDrop(e, items.length)}
       >
@@ -105,7 +105,7 @@ export default function PhraseSequenceEditor({
               e.stopPropagation();
               handleDrop(e, index);
             }}
-            className={`group relative flex flex-col items-center gap-xs bg-surface-secondary rounded-sm p-xs cursor-move${
+            className={`group relative flex flex-col items-center gap-xs rounded-md border border-gray-200 bg-white p-xs cursor-move${
               draggedKey === item.key ? " opacity-50" : ""
             }`}
           >
