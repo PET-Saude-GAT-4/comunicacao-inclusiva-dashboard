@@ -5,11 +5,13 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   error?: string;
 }
 
-export default function Input({ label, error, id, className = "", ...props }: InputProps) {
-  const borderClasses = error
-    ? "border-red-500 focus:ring-red-500"
-    : "border-outline-common focus:border-primary-dark focus:ring-primary-dark";
-
+export default function Input({
+  label,
+  error,
+  id,
+  className = "",
+  ...props
+}: InputProps) {
   return (
     <div className="flex flex-col">
       {label && (
@@ -19,7 +21,7 @@ export default function Input({ label, error, id, className = "", ...props }: In
       )}
       <input
         id={id}
-        className={`border ${borderClasses} focus:outline-none focus:ring-1 text-text-on-primary p-sm px-lg bg-surface-secondary rounded-md ${className}`.trim()}
+        className={`focus:outline-none focus:ring-1 focus:ring-primary-dark text-text-on-primary p-sm px-lg bg-gray-100 outline-1 outline-gray-200 rounded-md ${className}`}
         {...props}
       />
       {error && <p className="text-sm text-red-500">{error}</p>}

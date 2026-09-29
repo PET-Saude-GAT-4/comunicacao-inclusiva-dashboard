@@ -61,8 +61,8 @@ function Roles() {
   };
 
   return (
-    <div className="w-full bg-surface-secondary">
-      <div className="flex items-center justify-between p-sm text-text-on-primary">
+    <div className="flex w-full flex-col gap-lg">
+      <div className="flex items-center justify-between rounded-lg border border-gray-200 bg-white px-lg py-md text-text-on-primary">
         <nav className="flex justify-between">
           <TabButton
             icon={MdPeople}

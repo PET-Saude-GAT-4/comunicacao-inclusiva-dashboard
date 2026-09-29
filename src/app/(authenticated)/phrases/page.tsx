@@ -120,9 +120,9 @@ function Phrases() {
   };
 
   return (
-    <div className="w-full bg-surface-secondary">
-      <div className="flex items-center justify-end p-sm text-text-on-primary">
-        <div className="flex justify-between w-full">
+    <div className="flex w-full flex-col gap-lg">
+      <div className="flex items-center justify-end rounded-lg border border-gray-200 bg-white px-lg py-md text-text-on-primary">
+        <div className="flex items-center justify-between w-full">
           <Button
             className="bg-surface-primary outline-1 outline-outline-common "
             onClick={() => {
@@ -148,7 +148,7 @@ function Phrases() {
           {deleteError}
         </p>
       )}
-      <div className="flex-1">
+      <div>
         <Table
           data={data}
           columns={[

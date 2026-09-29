@@ -11,14 +11,17 @@ import {
   createPictogram,
   deletePictogram,
 } from "@/services/pictograms";
+import { getUsers } from "@/services/users";
 import { PictogramOutput } from "@/types/pictogram";
 import RemoveButton from "@/components/RemoveButton/RemoveButton";
 import PictogramCard from "../components/PictogramCard/PictogramCard";
 
 function Pictograms() {
   const [data, setData] = useState<PictogramOutput[]>([]);
+  const [authorEmails, setAuthorEmails] = useState<Record<string, string>>({});
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
   const [selectedIds, setSelectedIds] = useState<(string | number)[]>([]);
   const [page, setPage] = useState(1);
   const pageSize = 12;
@@ -31,6 +34,15 @@ function Pictograms() {
 
   useEffect(() => {
     fetchData();
+    getUsers()
+      .catch(() => [])
+      .then((users) =>
+        setAuthorEmails(
+          Object.fromEntries(
+            users.map((author) => [author.uuid, author.email]),
+          ),
+        ),
+      );
   }, []);
 
   const handleCreate = async () => {
@@ -55,16 +67,48 @@ function Pictograms() {
   };
 
   const handleDelete = async () => {
-    await Promise.all(selectedIds.map((id) => deletePictogram(String(id))));
-    setData((prev) => prev.filter((item) => !selectedIds.includes(item.uuid)));
-    setSelectedIds([]);
+    const results = await Promise.all(
+      selectedIds.map(async (id) => ({
+        id: String(id),
+        result: await deletePictogram(String(id)),
+      })),
+    );
+    const deletedIds = results
+      .filter(({ result }) => result.success)
+      .map(({ id }) => id);
+    const failure = results.find(({ result }) => !result.success);
+
+    setData((prev) => prev.filter((item) => !deletedIds.includes(item.uuid)));
+    setSelectedIds((prev) =>
+      prev.filter((id) => !deletedIds.includes(String(id))),
+    );
+    setDeleteError(failure?.result.error ?? null);
+  };
+
+  const handleDeleteOne = async (uuid: string) => {
+    const result = await deletePictogram(uuid);
+    if (result.success) {
+      setData((prev) => prev.filter((item) => item.uuid !== uuid));
+      setSelectedIds((prev) =>
+        prev.filter((selectedId) => selectedId !== uuid),
+      );
+    }
+    setDeleteError(result.success ? null : (result.error ?? null));
+  };
+
+  const toggleSelection = (uuid: string) => {
+    setSelectedIds((prev) =>
+      prev.includes(uuid)
+        ? prev.filter((selectedId) => selectedId !== uuid)
+        : [...prev, uuid],
+    );
   };
 
   const pageCount = Math.max(1, Math.ceil(data.length / pageSize));
   const pageData = data.slice((page - 1) * pageSize, page * pageSize);
   return (
-    <div className="flex flex-col w-full">
-      <div className="flex items-center justify-end p-sm text-text-on-primary">
+    <div className="flex w-full flex-col gap-lg">
+      <div className="flex items-center justify-end rounded-lg border border-gray-200 bg-white px-lg py-md text-text-on-primary">
         <div className="flex">
           <AddButton onClick={() => setIsModalOpen(true)} />
           <RemoveButton
@@ -73,11 +117,20 @@ function Pictograms() {
           />
         </div>
       </div>
+      {deleteError && (
+        <p className="px-4 text-sm text-red-500">{deleteError}</p>
+      )}
       <div className="flex flex-col">
         <div className="grid grid-cols-6 gap-4 p-4">
           {pageData.map((pictogram) => (
             <div key={pictogram.uuid}>
-              <PictogramCard pictogram={pictogram} />
+              <PictogramCard
+                pictogram={pictogram}
+                authorEmail={authorEmails[pictogram.authorUuid ?? ""] ?? null}
+                onSelect={() => toggleSelection(pictogram.uuid)}
+                onDelete={() => handleDeleteOne(pictogram.uuid)}
+                isSelected={selectedIds.includes(pictogram.uuid)}
+              />
             </div>
           ))}
         </div>

@@ -38,6 +38,10 @@ function translateUserError(status: number, rawMessage?: string): string {
   return "Erro ao convidar usuário. Verifique os dados.";
 }
 
+export async function getUser(uuid: string): Promise<UserOutput | null> {
+  return api.getUser(uuid);
+}
+
 export async function createUser(data: {
   email: string;
   roleId: number;

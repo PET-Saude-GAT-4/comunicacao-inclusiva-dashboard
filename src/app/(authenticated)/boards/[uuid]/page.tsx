@@ -21,6 +21,12 @@ import { useDragReorder } from "@/hooks/useDragReorder";
 import { getTerms } from "@/services/terms";
 import TermPicker from "@/components/TermPicker/TermPicker";
 import CreateInteractionChainModal from "../../components/CreateInteractionChainModal/CreateInteractionChainModal";
+import Badge from "@/components/Badge/Badge";
+import { MdFormatSize, MdPermMedia, MdPerson } from "react-icons/md";
+import { getUsers } from "@/services/users";
+import { UserOutput } from "@/types/user";
+import CopyableUuid from "@/components/CopyableUuid/CopyableUuid";
+import SearchBar from "@/components/SearchBar/SearchBar";
 
 function BoardDetail() {
   const params = useParams();
@@ -28,7 +34,9 @@ function BoardDetail() {
 
   const [board, setBoard] = useState<BoardOutput | null>(null);
   const [items, setItems] = useState<BoardTermOutput[]>([]);
+  const [filteredItems, setFilteredItems] = useState<BoardTermOutput[]>([]);
   const [loading, setLoading] = useState(true);
+  const [author, setAuthor] = useState<UserOutput | null>(null);
 
   const [isCreateBoardModalOpen, setIsCreateBoardModalOpen] = useState(false);
 
@@ -47,29 +55,66 @@ function BoardDetail() {
   const [selectedTerm, setSelectedTerm] = useState<TermOutput>();
 
   const [terms, setTerms] = useState<TermOutput[]>([]);
+  const [textSize, setTextSize] = useState<"Padrão" | "Grande">("Padrão");
+  const getTermSearchText = useCallback(
+    (item: BoardTermOutput) => item.description,
+    [],
+  );
 
   const clearForm = () => {
     setFormError("");
     setSelectedTerm(undefined);
   };
-  const fetchItems = () => getBoardTerms(uuid).then((data) => setItems(data));
+  const fetchItems = () =>
+    getBoardTerms(uuid).then((data) => {
+      setItems(data);
+      setFilteredItems(data);
+    });
 
-  const refresh = useCallback(
-    () =>
-      Promise.all([getBoard(uuid), getBoardTerms(uuid)]).then(
-        ([boardData, termsData]) => {
-          setBoard(boardData);
-          setItems(termsData);
-        },
-      ),
-    [uuid],
-  );
+  const loadBoardData = useCallback(async () => {
+    const [boardData, termsData] = await Promise.all([
+      getBoard(uuid),
+      getBoardTerms(uuid),
+    ]);
+    const authorData = boardData?.authorUuid
+      ? ((await getUsers().catch(() => [])).find(
+          (user) => user.uuid === boardData.authorUuid,
+        ) ?? null)
+      : null;
+
+    return { boardData, termsData, authorData };
+  }, [uuid]);
+
+  const refresh = useCallback(async () => {
+    const { boardData, termsData, authorData } = await loadBoardData();
+    setBoard(boardData);
+    setItems(termsData);
+    setFilteredItems(termsData);
+    setAuthor(authorData);
+  }, [loadBoardData]);
 
   useEffect(() => {
-    refresh()
-      .catch(() => setBoard(null))
-      .finally(() => setLoading(false));
-  }, [refresh]);
+    let isActive = true;
+
+    loadBoardData()
+      .then(({ boardData, termsData, authorData }) => {
+        if (!isActive) return;
+        setBoard(boardData);
+        setItems(termsData);
+        setFilteredItems(termsData);
+        setAuthor(authorData);
+      })
+      .catch(() => {
+        if (isActive) setBoard(null);
+      })
+      .finally(() => {
+        if (isActive) setLoading(false);
+      });
+
+    return () => {
+      isActive = false;
+    };
+  }, [loadBoardData]);
 
   const handleTogglePublish = async () => {
     if (!board) return;
@@ -139,10 +184,29 @@ function BoardDetail() {
   }
 
   return (
-    <div className="w-full bg-surface-secondary">
-      <div className="flex items-center justify-between border-b border-outline-common px-lg py-md">
-        <div className="flex items-center gap-md text-text-on-primary">
-          <p className="text-heading">{board.title}</p>
+    <div className="flex flex-col gap-lg w-full">
+      <div className="flex bg-white items-center justify-between border border-gray-200 rounded-lg px-lg py-md">
+        <div className="flex items-start gap-md text-body font-semibold text-gray-600">
+          <div className="flex flex-col gap-xs">
+            <p className="text-heading font-medium text-text-on-primary">
+              {board.title}
+            </p>
+            <div className="flex items-center gap-sm"></div>
+            <div className="flex items-center gap-sm">
+              <MdPermMedia className="text-primary" size={16} />
+              <p>{items.length} Pictogramas</p>
+            </div>
+            <div className="flex items-center gap-sm">
+              <MdPerson className="text-gray-400" size={18} />
+              {author ? <p>{author.email}</p> : <p>Desconhecido</p>}
+            </div>
+          </div>
+          {board.publishedAt ? (
+            <Badge>Público</Badge>
+          ) : (
+            <Badge variant="neutral">Não publicado</Badge>
+          )}
+          <CopyableUuid uuid={board.uuid} />
         </div>
         <div className="flex items-center gap-md">
           <Button
@@ -175,8 +239,18 @@ function BoardDetail() {
           {removeError}
         </p>
       )}
+      <div className="flex flex-wrap items-center bg-white border border-gray-200 rounded-md gap-lg px-lg py-md font-medium">
+        <div className="w-100">
+          <SearchBar
+            data={items}
+            onResults={setFilteredItems}
+            getSearchText={getTermSearchText}
+            placeholder="Buscar na prancha..."
+          />
+        </div>
+      </div>
       <div className="flex flex-wrap gap-md p-lg">
-        {items.map((item) => (
+        {filteredItems.map((item) => (
           <div
             key={item.uuid}
             draggable
@@ -189,7 +263,7 @@ function BoardDetail() {
                 handleDropAtEnd(e);
               }
             }}
-            className="group relative flex flex-col items-center gap-xs bg-surface-secondary rounded-sm p-xs"
+            className="group relative flex flex-col items-center gap-xs bg-white border border-gray-200 rounded-md p-xs"
           >
             <button
               type="button"
@@ -208,6 +282,7 @@ function BoardDetail() {
                 height={80}
                 className="object-contain rounded"
               />
+
               <Image
                 src={item.signWriting.fileUrl}
                 alt=""
