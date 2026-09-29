@@ -46,7 +46,6 @@ function Library() {
       <div>
         <Table
           data={boards}
-          frameClassName="border-gray-200 rounded-lg"
           columns={[
             { key: "title", label: "Título" },
             {

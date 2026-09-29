@@ -95,7 +95,6 @@ function Roles() {
       <div className="flex-1">
         <Table
           data={data}
-          frameClassName="border-gray-200 rounded-lg"
           columns={[
             { key: "id", label: "ID" },
             { key: "name", label: "Nível de Permissão" },

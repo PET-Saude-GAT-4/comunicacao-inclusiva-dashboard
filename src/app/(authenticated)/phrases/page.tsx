@@ -151,7 +151,6 @@ function Phrases() {
       <div>
         <Table
           data={data}
-          frameClassName="border-gray-200 rounded-lg"
           columns={[
             { key: "description", label: "Descrição" },
             {

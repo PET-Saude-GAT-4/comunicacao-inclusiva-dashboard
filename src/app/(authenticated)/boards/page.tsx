@@ -126,7 +126,6 @@ function Boards() {
       <div>
         <Table
           data={data}
-          frameClassName="border-gray-200 rounded-lg"
           columns={[
             { key: "title", label: "Título" },
             ...(user?.role === "super_admin"
