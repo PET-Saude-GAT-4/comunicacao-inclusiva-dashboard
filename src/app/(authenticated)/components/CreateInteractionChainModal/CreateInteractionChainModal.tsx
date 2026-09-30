@@ -10,9 +10,7 @@ import PhrasePicker from "@/components/PhrasePicker/PhrasePicker";
 import { getBoards, getBoard } from "@/services/boards";
 import { getPhrases, getPhrase } from "@/services/phrases";
 
-import Image from "next/image";
-
-import { MdClose } from "react-icons/md";
+import { MdArrowBack, MdListAlt } from "react-icons/md";
 
 import {
   createInteractionChain,
@@ -52,6 +50,10 @@ export default function CreateInteractionChainModal({
   const [triggerPhrase, setTriggerPhrase] = useState<PhraseOutput | null>(null);
   const [responseBoard, setResponseBoard] = useState<BoardOutput | null>(null);
   const [label, setLabel] = useState("");
+  const [step, setStep] = useState<"trigger" | "response">(
+    incomingTrigger ? "response" : "trigger",
+  );
+  const [showInteractions, setShowInteractions] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [removeError, setRemoveError] = useState<string | null>(null);
 
@@ -118,6 +120,8 @@ export default function CreateInteractionChainModal({
     setTriggerPhrase(null);
     setResponseBoard(null);
     setLabel("");
+    setStep("trigger");
+    setShowInteractions(false);
     setInteractionList([]);
     setRemoveError(null);
   };
@@ -176,16 +180,45 @@ export default function CreateInteractionChainModal({
   };
 
   const handleShownBoards = () => {
-    let filtered = [...data];
+    return data.filter((board) => board.uuid !== triggerBoard?.uuid);
+  };
 
-    if (triggerBoard) {
-      filtered = filtered.filter((p) => p.uuid !== triggerBoard.uuid);
-    }
-    if (responseBoard) {
-      filtered = filtered.filter((p) => p.uuid !== responseBoard.uuid);
-    }
+  // A trigger may point at a board only once, so its existing responses are
+  // left out of the picker. Matching on each chain's own trigger keeps this
+  // right while interactionList still holds all chains or a previous trigger's.
+  const handleShownResponseBoards = () => {
+    if (!trigger) return handleShownBoards();
 
-    return filtered;
+    const linked = new Set(
+      interactionList
+        .filter(
+          (ic) =>
+            ic.trigger.type === trigger.type &&
+            ic.trigger.uuid === trigger.uuid,
+        )
+        .map((ic) => ic.responseBoardUuid),
+    );
+
+    return handleShownBoards().filter((board) => !linked.has(board.uuid));
+  };
+
+  const handleSelectTriggerBoard = (board: BoardOutput) => {
+    setTriggerBoard(board);
+    setTriggerPhrase(null);
+    setResponseBoard(null);
+    setStep("response");
+  };
+
+  const handleSelectTriggerPhrase = (phrase: PhraseOutput) => {
+    setTriggerPhrase(phrase);
+    setTriggerBoard(null);
+    setResponseBoard(null);
+    setStep("response");
+  };
+
+  const handleChangeTrigger = () => {
+    setResponseBoard(null);
+    setStep("trigger");
   };
 
   const handleRemoveInteraction = async (uuid: string) => {
@@ -210,195 +243,225 @@ export default function CreateInteractionChainModal({
       }}
       title="Nova Interação"
     >
-      {formError && <p className="text-sm text-red-500">{formError}</p>}
-      {removeError && <p className="text-sm text-red-500">{removeError}</p>}
-
-      <div
-        id="parent-container"
-        className="flex flex-row justify-center w-fit m-xl mb-xs text-text-on-primary divide-x divide-outline-common"
-      >
-        {/* Column 1 */}
-        <div id="column-1" className="flex flex-col w-full gap-lg pr-xl">
-          <p className="text-gray-500 text-heading font-semibold">
-            Crie uma Nova Interação
-          </p>
-          <Input
-            id="label"
-            label="Nome da Interação (Opcional):"
-            placeholder="ex: fluxo_prancha1_prancha2"
-            value={label}
-            onChange={(e) => setLabel(e.target.value)}
-          />
-          <div className="flex flex-row gap-xl">
-            <div className="flex flex-col items-center gap-md text-text-on-primary">
-              <button
-                className="flex flex-row items-center gap-md bg-gray-200 rounded-md px-sm py-xs "
-                onClick={() => {
-                  setTriggerBoard(null);
-                  setTriggerPhrase(null);
-                }}
+      <div className="w-[min(64rem,calc(100vw-3rem))] font-medium text-text-on-primary">
+        {showInteractions ? (
+          <section aria-label="Lista de interações">
+            <div className="mb-md flex items-center justify-between gap-md">
+              <div>
+                <h2 className="text-heading font-semibold">Interações</h2>
+                <p className="text-sm text-gray-500">
+                  {trigger ? (
+                    <>
+                      Origem:{" "}
+                      <span className="font-semibold">
+                        {getTriggerTitle(trigger)}
+                      </span>
+                    </>
+                  ) : (
+                    "Todas as origens"
+                  )}
+                </p>
+              </div>
+              <Button
+                type="button"
+                variant="neutral"
+                className="my-0 inline-flex items-center gap-sm"
+                onClick={() => setShowInteractions(false)}
               >
-                <div className="text-gray-500 hover:text-text-on-primary-dark rounded-4xl hover:bg-red-400 hover:cursor-pointer transition-colors">
-                  <MdClose />
-                </div>
-                <p className=" font-bold text-gray-500">Origem</p>
-              </button>
-              {triggerBoard ? (
-                <div className="flex flex-col items-center gap-md">
-                  <Image
-                    src={triggerBoard.representativePictogram.fileUrl}
-                    alt=""
-                    width="200"
-                    height="200"
-                    className="border border-outline-common object-contain rounded-md"
-                  />
-                  <p className="text-text-on-primary text-center font-bold text-md">
-                    {triggerBoard.title}
-                  </p>
-                </div>
-              ) : triggerPhrase ? (
-                <div className="border border-outline-common flex items-center justify-center rounded-md w-50 h-50 bg-surface-primary p-5">
-                  <p className="text-text-on-primary text-center font-bold text-md">
-                    {triggerPhrase.description}
-                  </p>
-                </div>
-              ) : (
-                <div className="border border-outline-common flex items-center rounded-md w-50 h-50 bg-red-50 p-5">
-                  <p className="text-error-primary text-center font-bold text-md">
-                    {isPhraseTrigger
-                      ? "Nenhuma frase origem selecionada."
-                      : "Nenhuma prancha origem selecionada."}
-                  </p>
-                </div>
-              )}
+                <MdArrowBack aria-hidden="true" /> Voltar
+              </Button>
             </div>
-            <div className="flex flex-col items-center gap-md text-text-on-primary">
-              <button
-                className="flex flex-row items-center gap-md bg-gray-200 rounded-md px-sm py-xs "
-                onClick={() => setResponseBoard(null)}
-              >
-                <div className="text-gray-500 hover:text-text-on-primary-dark rounded-4xl hover:bg-red-400 hover:cursor-pointer transition-colors">
-                  <MdClose />
-                </div>
-                <p className=" font-bold text-gray-500">Destino</p>
-              </button>
-              {responseBoard ? (
-                <div className="flex flex-col items-center gap-md">
-                  <Image
-                    src={responseBoard.representativePictogram.fileUrl}
-                    alt=""
-                    width="200"
-                    height="200"
-                    className="border border-outline-common object-contain rounded-md"
-                  />
-                  <p className="text-text-on-primary text-center font-bold text-md">
-                    {responseBoard.title}
-                  </p>
-                </div>
-              ) : (
-                <div className="border border-outline-common flex items-center rounded-md w-50 h-50 bg-red-50 p-5">
-                  <p className="text-error-primary text-center font-bold text-md">
-                    Nenhuma prancha destino selecionada.
-                  </p>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {duplicateInteraction && (
-            <div className="border border-error-primary bg-red-50 rounded-md px-sm py-xs">
-              <p className="text-error-primary text-sm font-semibold">
-                Já existe uma interação com essa prancha de destino
-                {duplicateInteraction.label
-                  ? ` ("${duplicateInteraction.label}")`
-                  : ""}
-                .
-              </p>
-            </div>
-          )}
-        </div>
-        {/* Column 2 */}
-        <div id="column-2" className="w-full px-xl">
-          {!trigger && (
-            <div className="flex flex-col gap-lg text-text-on-primary ">
-              <p className="text-gray-500 text-heading font-semibold">
-                Escolha a {isPhraseTrigger ? "Frase" : "Prancha"} de{" "}
-                <span className="text-green-500">Origem</span>
-              </p>
-              {isPhraseTrigger ? (
-                <PhrasePicker phrases={phrases} onSelect={setTriggerPhrase} />
-              ) : (
-                <BoardPicker
-                  boards={handleShownBoards()}
-                  onSelect={setTriggerBoard}
-                />
-              )}
-            </div>
-          )}
-          {trigger && (
-            <div className="flex flex-col gap-lg text-text-on-primary">
-              <p className="text-gray-500 text-heading font-semibold">
-                Escolha a Prancha de{" "}
-                <span className="text-green-500 ">Destino</span>
-              </p>
-              <BoardPicker
-                boards={handleShownBoards()}
-                onSelect={setResponseBoard}
-                requirePublished
-              />
-            </div>
-          )}
-        </div>
-        {/* Column 3 */}
-        {(!trigger || interactionList.length > 0) && (
-          <div id="column-3" className="flex flex-col w-full gap-lg pl-xl">
-            <p className="text-gray-500 font-semibold text-heading">
-              {trigger
-                ? isPhraseTrigger
-                  ? "Interações que partem dessa frase:"
-                  : "Interações que partem dessa prancha:"
-                : "Todas as Interações:"}
-            </p>
-            <div className="flex flex-col rounded-sm gap-sm">
+            {removeError && (
+              <p className="mb-sm text-sm text-red-500">{removeError}</p>
+            )}
+            <div className="max-h-96 overflow-y-auto">
               {interactionList.length === 0 ? (
-                <p className="text-gray-400 text-sm px-sm py-sm">
+                <p className="rounded-md border border-outline-common p-md text-sm text-gray-500">
                   Nenhuma interação encontrada.
                 </p>
               ) : (
-                interactionList.map((ic) => (
-                  <div
-                    key={ic.uuid}
-                    className="flex items-center justify-between border border-outline-common bg-background rounded-md px-sm py-sm text-sm text-text-on-primary"
-                  >
-                    <span className="flex items-center justify-between w-full px-5 font-semibold text-body-emph">
-                      {ic.label?.trim()
-                        ? ic.label
-                        : `${getTriggerTitle(ic.trigger)} → ${getBoardTitle(
-                            ic.responseBoardUuid,
-                          )}`}
-                      <div>
-                        <RemoveButton
-                          active
-                          onClick={() => handleRemoveInteraction(ic.uuid)}
-                        />
-                      </div>
-                    </span>
-                  </div>
-                ))
+                <ul className="flex flex-col gap-sm">
+                  {interactionList.map((ic) => (
+                    <li
+                      key={ic.uuid}
+                      className="flex items-center justify-between gap-md rounded-md border border-outline-common bg-background px-md py-sm"
+                    >
+                      <span className="min-w-0 wrap-break-word font-semibold">
+                        {ic.label?.trim()
+                          ? ic.label
+                          : `${getTriggerTitle(ic.trigger)} → ${getBoardTitle(
+                              ic.responseBoardUuid,
+                            )}`}
+                      </span>
+                      <RemoveButton
+                        active
+                        onClick={() => handleRemoveInteraction(ic.uuid)}
+                      />
+                    </li>
+                  ))}
+                </ul>
               )}
             </div>
-          </div>
-        )}
-      </div>
+          </section>
+        ) : (
+          <>
+            <div className="mb-md flex justify-end">
+              <Button
+                type="button"
+                variant="neutral"
+                className="my-0 inline-flex shrink-0 items-center gap-sm"
+                onClick={() => setShowInteractions(true)}
+              >
+                <MdListAlt aria-hidden="true" />
+                {trigger ? "Interações desta origem" : "Todas as interações"}
+              </Button>
+            </div>
 
-      <div className="flex justify-end gap-md">
-        <Button
-          type="button"
-          onClick={handleCreate}
-          disabled={isSubmitting || !!duplicateInteraction}
-        >
-          {isSubmitting ? "Criando..." : "Criar Interação"}
-        </Button>
+            {formError && (
+              <p className="mb-md text-sm text-red-500">{formError}</p>
+            )}
+
+            <div className="flex flex-col gap-lg">
+              <aside className="flex flex-col gap-md border-b border-outline-common pb-md">
+                <div className="flex items-center justify-center gap-sm" aria-label="Etapas">
+                  {["trigger", "response"].map((item, index) => {
+                    const active = step === item;
+                    const complete = item === "trigger" && !!trigger;
+                    return (
+                      <div key={item} className="flex items-center gap-sm">
+                        {index > 0 && (
+                          <span className="h-px w-6 bg-outline-common" />
+                        )}
+                        <span
+                          className={`flex h-7 w-7 items-center justify-center rounded-full text-sm font-semibold ${
+                            active || complete
+                              ? "bg-primary-dark text-white"
+                              : "bg-surface-secondary text-gray-500"
+                          }`}
+                          aria-current={active ? "step" : undefined}
+                        >
+                          {index + 1}
+                        </span>
+                        <span
+                          className={`text-sm text-gray-600 ${active ? "font-semibold" : ""}`}
+                        >
+                          {index === 0 ? "Origem" : "Destino"}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {step === "trigger" ? (
+                  <div>
+                    <h2 className="text-heading font-semibold">
+                      1. Escolha a {isPhraseTrigger ? "frase" : "prancha"} de
+                      origem
+                    </h2>
+                    <p className="mt-sm text-sm text-gray-500">
+                      Esta é a origem que iniciará a interação.
+                    </p>
+                  </div>
+                ) : (
+                  <>
+                    <div className="grid grid-cols-2 items-center gap-lg px-xxl">
+                      <div className="flex min-w-0 flex-col gap-sm">
+                        <div>
+                          <h2 className="text-heading font-semibold">
+                            2. Escolha a prancha de destino
+                          </h2>
+                          <p className="mt-sm wrap-break-word text-sm text-gray-500">
+                            Origem:{" "}
+                            <span className="font-semibold">
+                              {trigger ? getTriggerTitle(trigger) : ""}
+                            </span>
+                          </p>
+                          <p className="wrap-break-word text-sm text-gray-500">
+                            Destino:{" "}
+                            {responseBoard ? (
+                              <span className="font-semibold">
+                                {responseBoard.title}
+                              </span>
+                            ) : (
+                              <span className="italic">nenhuma selecionada</span>
+                            )}
+                          </p>
+                        </div>
+                        <button
+                          type="button"
+                          className="self-start text-sm font-semibold text-primary-dark underline"
+                          onClick={handleChangeTrigger}
+                        >
+                          Alterar origem
+                        </button>
+                      </div>
+                      <div className="min-w-0">
+                        <Input
+                          id="label"
+                          label="Descrição da interação (opcional)"
+                          placeholder="Ex.: abrir prancha de alimentação"
+                          value={label}
+                          onChange={(e) => setLabel(e.target.value)}
+                        />
+                      </div>
+                    </div>
+                    {duplicateInteraction && (
+                      <p className="rounded-md border border-error-primary bg-red-50 px-sm py-xs text-sm text-error-primary">
+                        Já existe uma interação com essa prancha de destino
+                        {duplicateInteraction.label
+                          ? ` ("${duplicateInteraction.label}")`
+                          : ""}
+                        .
+                      </p>
+                    )}
+                    <div className="mt-auto flex justify-end gap-sm">
+                      <Button
+                        type="button"
+                        variant="neutral"
+                        onClick={handleChangeTrigger}
+                      >
+                        Voltar
+                      </Button>
+                      <Button
+                        type="button"
+                        onClick={handleCreate}
+                        disabled={
+                          isSubmitting ||
+                          !responseBoard ||
+                          !!duplicateInteraction
+                        }
+                      >
+                        {isSubmitting ? "Criando..." : "Criar interação"}
+                      </Button>
+                    </div>
+                  </>
+                )}
+              </aside>
+
+              <div className="min-w-0">
+                {step === "trigger" ? (
+                  isPhraseTrigger ? (
+                    <PhrasePicker
+                      phrases={phrases}
+                      onSelect={handleSelectTriggerPhrase}
+                    />
+                  ) : (
+                    <BoardPicker
+                      boards={handleShownBoards()}
+                      onSelect={handleSelectTriggerBoard}
+                    />
+                  )
+                ) : (
+                  <BoardPicker
+                    boards={handleShownResponseBoards()}
+                    onSelect={setResponseBoard}
+                    requirePublished
+                  />
+                )}
+              </div>
+            </div>
+          </>
+        )}
       </div>
     </Modal>
   );

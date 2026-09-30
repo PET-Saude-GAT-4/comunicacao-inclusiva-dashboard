@@ -11,7 +11,7 @@ const variantClasses: Record<ButtonVariant, string> = {
   primary: "bg-primary-dark text-white hover:bg-primary",
   danger: "bg-error-primary text-text-on-primary-dark hover:bg-error-secondary",
   neutral:
-    "bg-surface-secondary text-text-on-primary hover:bg-surface-secondary-dark",
+    "bg-surface-secondary text-text-on-primary font-medium outline outline-1 outline-gray-200 hover:bg-surface-secondary-dark",
 };
 
 export default function Button({

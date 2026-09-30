@@ -23,7 +23,7 @@ import TermPicker from "@/components/TermPicker/TermPicker";
 import CreateInteractionChainModal from "../../components/CreateInteractionChainModal/CreateInteractionChainModal";
 import Badge from "@/components/Badge/Badge";
 import { MdFormatSize, MdPermMedia, MdPerson } from "react-icons/md";
-import { getUsers } from "@/services/users";
+import { getUser } from "@/services/users";
 import { UserOutput } from "@/types/user";
 import CopyableUuid from "@/components/CopyableUuid/CopyableUuid";
 import SearchBar from "@/components/SearchBar/SearchBar";
@@ -76,33 +76,26 @@ function BoardDetail() {
       getBoard(uuid),
       getBoardTerms(uuid),
     ]);
-    const authorData = boardData?.authorUuid
-      ? ((await getUsers().catch(() => [])).find(
-          (user) => user.uuid === boardData.authorUuid,
-        ) ?? null)
-      : null;
 
-    return { boardData, termsData, authorData };
+    return { boardData, termsData };
   }, [uuid]);
 
   const refresh = useCallback(async () => {
-    const { boardData, termsData, authorData } = await loadBoardData();
+    const { boardData, termsData } = await loadBoardData();
     setBoard(boardData);
     setItems(termsData);
     setFilteredItems(termsData);
-    setAuthor(authorData);
   }, [loadBoardData]);
 
   useEffect(() => {
     let isActive = true;
 
     loadBoardData()
-      .then(({ boardData, termsData, authorData }) => {
+      .then(({ boardData, termsData }) => {
         if (!isActive) return;
         setBoard(boardData);
         setItems(termsData);
         setFilteredItems(termsData);
-        setAuthor(authorData);
       })
       .catch(() => {
         if (isActive) setBoard(null);
@@ -115,6 +108,25 @@ function BoardDetail() {
       isActive = false;
     };
   }, [loadBoardData]);
+
+  // Kept apart from loadBoardData so the author is fetched once per board,
+  // not again on every refresh after a term or publish change.
+  const authorUuid = board?.authorUuid ?? null;
+
+  useEffect(() => {
+    if (!authorUuid) return;
+    let isActive = true;
+
+    getUser(authorUuid)
+      .catch(() => null)
+      .then((user) => {
+        if (isActive) setAuthor(user);
+      });
+
+    return () => {
+      isActive = false;
+    };
+  }, [authorUuid]);
 
   const handleTogglePublish = async () => {
     if (!board) return;

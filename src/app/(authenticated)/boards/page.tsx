@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import AddButton from "@/components/AddButton/AddButton";
 import Modal from "@/components/Modal/Modal";
 import Table from "@/components/Table/Table";
-import Input from "@/components/Input/Input";
+import Input from "@/components/Input/Input"; 
 import Button from "@/components/Button/Button";
 import { getBoards, createBoard, deleteBoard } from "@/services/boards";
 import { getUsers } from "@/services/users";
