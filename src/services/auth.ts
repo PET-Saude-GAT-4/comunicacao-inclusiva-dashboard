@@ -1,11 +1,13 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { LoginFormSchema, RegisterFormSchema } from "@/schemas/auth";
-import { LoginFormState, RegisterFormState } from "@/types/auth";
+import { flattenError } from "zod";
+import { LoginFormSchema } from "@/schemas/auth";
+import { LoginFormState } from "@/types/auth";
 import { SessionUser } from "@/types/session";
 import { createSession, deleteSession, getSession } from "@/utils/session";
-import { loginRequest, registerRequest } from "@/lib/api/auth";
+import { loginRequest } from "@/lib/api/auth";
+import { ApiError } from "@/lib/api/client";
 
 export async function login(
   state: LoginFormState,
@@ -17,7 +19,7 @@ export async function login(
   });
 
   if (!validated.success) {
-    return { errors: validated.error.flatten().fieldErrors };
+    return { errors: flattenError(validated.error).fieldErrors };
   }
 
   try {
@@ -32,33 +34,23 @@ export async function login(
       role: data.user.role.name,
     });
   } catch (e) {
-    return { message: e instanceof Error ? e.message : String(e) };
+    if (e instanceof ApiError) {
+      if (e.status === 403) {
+        return { message: "ACCOUNT_NOT_CONFIRMED" };
+      }
+      if (e.status === 401) {
+        return { message: "E-mail ou senha incorretos." };
+      }
+      if (e.status === 500) {
+        return {
+          message: "Ocorreu um erro no servidor. Tente novamente mais tarde.",
+        };
+      }
+    }
+    return { message: "E-mail ou senha incorretos." };
   }
 
   redirect("/dashboard");
-}
-
-export async function register(
-  state: RegisterFormState,
-  formData: FormData,
-): Promise<RegisterFormState> {
-  const validated = RegisterFormSchema.safeParse({
-    email: formData.get("email"),
-    password: formData.get("password"),
-    confirmPassword: formData.get("confirmPassword"),
-  });
-
-  if (!validated.success) {
-    return { errors: validated.error.flatten().fieldErrors };
-  }
-
-  try {
-    await registerRequest(validated.data.email, validated.data.password);
-  } catch (e) {
-    return { message: e instanceof Error ? e.message : String(e) };
-  }
-
-  redirect("/login");
 }
 
 export async function logout() {

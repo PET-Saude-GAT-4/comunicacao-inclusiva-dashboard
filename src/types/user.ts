@@ -5,6 +5,7 @@ export type UserOutput = {
   uuid: string;
   email: string;
   role: RoleOutput;
+  confirmedAt: string | null;
   createdAt: string;
   updatedAt: string;
 };
