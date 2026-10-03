@@ -12,3 +12,22 @@ export async function loginRequest(
   if (!data) throw new Error("Resposta inesperada do servidor.");
   return data;
 }
+
+export async function requestPasswordResetRequest(
+  email: string,
+): Promise<void> {
+  await apiFetch<{ message: string }>("/auth/password-reset", {
+    method: "POST",
+    body: JSON.stringify({ email }),
+  });
+}
+
+export async function confirmPasswordResetRequest(
+  token: string,
+  password: string,
+): Promise<void> {
+  await apiFetch<{ message: string }>("/auth/password-reset/confirm", {
+    method: "POST",
+    body: JSON.stringify({ token, password }),
+  });
+}

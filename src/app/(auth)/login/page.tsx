@@ -1,13 +1,18 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState, useState } from "react";
+import { use, useActionState, useState } from "react";
 import { login } from "@/services/auth";
 import { resendInvitation } from "@/services/invitations";
 import Input from "@/components/Input/Input";
 import Button from "@/components/Button/Button";
 
-export default function Login() {
+export default function Login({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}) {
+  const passwordWasReset = use(searchParams).reset === "success";
   const [state, action, pending] = useActionState(login, undefined);
   const [email, setEmail] = useState("");
   const [resending, setResending] = useState(false);
@@ -33,6 +38,11 @@ export default function Login() {
       <h1 className="text-title text-text-on-primary font-bold text-center my-md">
         Entrar
       </h1>
+      {passwordWasReset && !state && (
+        <div className="bg-green-50 border border-green-200 rounded-lg p-3 text-sm text-green-800 text-center">
+          Senha redefinida com sucesso. Entre com sua nova senha.
+        </div>
+      )}
       <Input
         type="email"
         name="email"
