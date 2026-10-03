@@ -1,4 +1,4 @@
-import { getSession } from "@/utils/session";
+import { getSession, deleteSession } from "@/utils/session";
 
 export class ApiError extends Error {
   constructor(
@@ -25,7 +25,15 @@ export async function apiFetch<T>(
     },
   });
 
-  if (!res.ok) throw new ApiError(res.status, await res.text());
+  if (!res.ok) {
+    if (res.status === 401 && !path.startsWith("/auth/")) {
+      await deleteSession();
+      // Use Next.js redirect to automatically send the user to the login page
+      const { redirect } = await import("next/navigation");
+      redirect("/login");
+    }
+    throw new ApiError(res.status, await res.text());
+  }
 
   const text = await res.text();
   if (!text) return undefined;
