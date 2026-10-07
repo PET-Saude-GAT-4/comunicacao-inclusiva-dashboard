@@ -40,6 +40,7 @@ function Boards() {
   ] = useState(false);
 
   const [formError, setFormError] = useState<string | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
   const [pictograms, setPictograms] = useState<PictogramOutput[]>([]);
 
   const [title, setTitle] = useState("");
@@ -110,8 +111,20 @@ function Boards() {
   };
 
   const handleDelete = async () => {
-    await Promise.all(selectedIds.map((id) => deleteBoard(String(id))));
-    setData((prev) => prev.filter((item) => !selectedIds.includes(item.uuid)));
+    setDeleteError(null);
+    const results = await Promise.all(
+      selectedIds.map((id) => deleteBoard(String(id))),
+    );
+
+    // Only boards the API actually deleted leave the list; one it refused,
+    // like a board at a triage level, stays and says why.
+    const deleted = selectedIds.filter((_, i) => results[i].success);
+    setData((prev) => prev.filter((item) => !deleted.includes(item.uuid)));
+
+    const failure = results.find((result) => !result.success);
+    if (failure) {
+      setDeleteError(failure.error ?? "Erro ao remover pranchas.");
+    }
   };
 
   const listPictograms = async () => {
@@ -162,6 +175,9 @@ function Boards() {
           </div>
         </div>
       </div>
+      {deleteError && (
+        <p className="text-sm text-red-500 px-lg py-sm">{deleteError}</p>
+      )}
       <div>
         <Table
           key={typeFilter}

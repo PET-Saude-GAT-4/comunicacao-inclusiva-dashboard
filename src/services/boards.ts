@@ -72,7 +72,15 @@ export async function deleteBoard(uuid: string): Promise<ActionResult> {
     await api.deleteBoard(uuid);
     revalidatePath("/boards");
     return { success: true };
-  } catch {
+  } catch (e) {
+    // The API refuses to delete a board placed at a triage level.
+    if (e instanceof ApiError && e.status === 409) {
+      return {
+        success: false,
+        error:
+          "Uma prancha selecionada está em um nível de triagem; remova-a do nível antes de excluí-la.",
+      };
+    }
     return { success: false, error: `Erro ao remover prancha ${uuid}.` };
   }
 }
