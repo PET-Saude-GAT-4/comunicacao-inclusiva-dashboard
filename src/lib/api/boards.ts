@@ -46,6 +46,16 @@ export function createBoard(data: {
   return apiFetch("/boards", { method: "POST", body: JSON.stringify(data) });
 }
 
+export function updateBoard(
+  uuid: string,
+  data: { title?: string; type?: BoardType; representativeUuid?: string },
+): Promise<void> {
+  return apiFetch(`/boards/${uuid}`, {
+    method: "PATCH",
+    body: JSON.stringify(data),
+  });
+}
+
 export function deleteBoard(uuid: string): Promise<void> {
   return apiFetch(`/boards/${uuid}`, { method: "DELETE" });
 }

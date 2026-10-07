@@ -45,6 +45,28 @@ export async function createBoard(data: {
   }
 }
 
+export async function updateBoardType(
+  uuid: string,
+  type: BoardType,
+): Promise<ActionResult> {
+  try {
+    await api.updateBoard(uuid, { type });
+    revalidatePath("/boards");
+    revalidatePath(`/boards/${uuid}`);
+    return { success: true };
+  } catch (e) {
+    // The API refuses to retype a board placed at a triage level.
+    if (e instanceof ApiError && e.status === 409) {
+      return {
+        success: false,
+        error:
+          "Esta prancha está em um nível de triagem; remova-a do nível antes de mudar o tipo.",
+      };
+    }
+    return { success: false, error: "Erro ao mudar o tipo da prancha." };
+  }
+}
+
 export async function deleteBoard(uuid: string): Promise<ActionResult> {
   try {
     await api.deleteBoard(uuid);

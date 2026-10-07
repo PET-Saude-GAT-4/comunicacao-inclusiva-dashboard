@@ -9,8 +9,14 @@ import {
   removeTermFromBoard,
   publishBoard,
   unpublishBoard,
+  updateBoardType,
 } from "@/services/boards";
-import { BoardOutput } from "@/types/board";
+import {
+  BOARD_TYPE_LABELS,
+  BOARD_TYPES,
+  BoardOutput,
+  BoardType,
+} from "@/types/board";
 import { BoardTermOutput, TermOutput } from "@/types/term";
 import AddButton from "@/components/AddButton/AddButton";
 import Modal from "@/components/Modal/Modal";
@@ -26,6 +32,7 @@ import { MdFormatSize, MdPermMedia, MdPerson } from "react-icons/md";
 import { getUser } from "@/services/users";
 import { UserOutput } from "@/types/user";
 import CopyableUuid from "@/components/CopyableUuid/CopyableUuid";
+import KebabButton from "@/components/KebabButton/KebabButton";
 import SearchBar from "@/components/SearchBar/SearchBar";
 
 function BoardDetail() {
@@ -50,6 +57,9 @@ function BoardDetail() {
 
   const [publishLoading, setPublishLoading] = useState(false);
   const [publishError, setPublishError] = useState<string | null>(null);
+
+  const [typeLoading, setTypeLoading] = useState(false);
+  const [typeError, setTypeError] = useState<string | null>(null);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
 
   const [selectedTerm, setSelectedTerm] = useState<TermOutput>();
@@ -145,6 +155,19 @@ function BoardDetail() {
     setPublishLoading(false);
   };
 
+  const handleChangeType = async (type: BoardType) => {
+    if (!board || type === board.type) return;
+    setTypeLoading(true);
+    setTypeError(null);
+    const result = await updateBoardType(uuid, type);
+    if (result.success) {
+      await refresh();
+    } else {
+      setTypeError(result.error ?? "Erro ao mudar o tipo da prancha.");
+    }
+    setTypeLoading(false);
+  };
+
   const handleAdd = async () => {
     if (!selectedTerm?.uuid) {
       setFormError("Selecionar termo é obrigatório.");
@@ -218,6 +241,9 @@ function BoardDetail() {
           ) : (
             <Badge variant="neutral">Não publicado</Badge>
           )}
+          <Badge variant={board.type === "emergency" ? "warning" : "secondary"}>
+            {BOARD_TYPE_LABELS[board.type]}
+          </Badge>
           <CopyableUuid uuid={board.uuid} />
         </div>
         <div className="flex items-center gap-md">
@@ -244,8 +270,20 @@ function BoardDetail() {
               listTerms();
             }}
           />
+          <KebabButton
+            options={BOARD_TYPES.map((type) => ({
+              label: `Tornar ${BOARD_TYPE_LABELS[type]}`,
+              onClick: () => handleChangeType(type),
+              disabled: typeLoading || type === board.type,
+            }))}
+          />
         </div>
       </div>
+      {typeError && (
+        <p className="text-sm text-red-500 px-lg py-sm border-b border-outline-common">
+          {typeError}
+        </p>
+      )}
       {removeError && (
         <p className="text-sm text-red-500 px-lg py-sm border-b border-outline-common">
           {removeError}
