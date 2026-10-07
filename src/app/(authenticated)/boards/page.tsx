@@ -7,6 +7,7 @@ import Modal from "@/components/Modal/Modal";
 import Table from "@/components/Table/Table";
 import Input from "@/components/Input/Input"; 
 import Button from "@/components/Button/Button";
+import Dropdown from "@/components/Dropdown/Dropdown";
 import { getBoards, createBoard, deleteBoard } from "@/services/boards";
 import { getUsers } from "@/services/users";
 import { getSessionUser } from "@/services/auth";
@@ -145,24 +146,20 @@ function Boards() {
             </p>
           </Button>
           <div className=" flex items-center justify-center ">
-            <label className="sr-only" htmlFor="typeFilter">
-              Filtrar por tipo
-            </label>
-            <select
-              id="typeFilter"
-              value={typeFilter}
-              onChange={(e) =>
-                changeTypeFilter(e.target.value as BoardType | "all")
-              }
-              className="mr-md focus:outline-none focus:ring-1 focus:ring-primary-dark text-text-on-primary p-sm px-lg bg-gray-100 outline-1 outline-gray-200 rounded-md"
-            >
-              <option value="all">Todos os tipos</option>
-              {BOARD_TYPES.map((type) => (
-                <option key={type} value={type}>
-                  {BOARD_TYPE_LABELS[type]}
-                </option>
-              ))}
-            </select>
+            <div className="mr-md w-48">
+              <Dropdown<BoardType | "all">
+                id="typeFilter"
+                value={typeFilter}
+                onChange={changeTypeFilter}
+                options={[
+                  { value: "all", label: "Todos os tipos" },
+                  ...BOARD_TYPES.map((type) => ({
+                    value: type,
+                    label: BOARD_TYPE_LABELS[type],
+                  })),
+                ]}
+              />
+            </div>
             <AddButton
               onClick={() => {
                 listPictograms();
@@ -268,23 +265,16 @@ function Boards() {
               value={title}
               onChange={(e) => setTitle(e.target.value)}
             />
-            <div className="flex flex-col">
-              <label className="text-text-on-primary" htmlFor="boardType">
-                Tipo:
-              </label>
-              <select
-                id="boardType"
-                value={boardType}
-                onChange={(e) => setBoardType(e.target.value as BoardType)}
-                className="focus:outline-none focus:ring-1 focus:ring-primary-dark text-text-on-primary p-sm px-lg bg-gray-100 outline-1 outline-gray-200 rounded-md"
-              >
-                {BOARD_TYPES.map((type) => (
-                  <option key={type} value={type}>
-                    {BOARD_TYPE_LABELS[type]}
-                  </option>
-                ))}
-              </select>
-            </div>
+            <Dropdown<BoardType>
+              id="boardType"
+              label="Tipo:"
+              value={boardType}
+              onChange={setBoardType}
+              options={BOARD_TYPES.map((type) => ({
+                value: type,
+                label: BOARD_TYPE_LABELS[type],
+              }))}
+            />
             <Input
               id="representativeUuid"
               label="Pictograma Representante"
