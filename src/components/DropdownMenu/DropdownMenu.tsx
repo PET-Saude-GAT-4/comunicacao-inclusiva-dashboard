@@ -48,9 +48,11 @@ function DropdownMenu({
     >
       {renderTrigger({ open, toggle: () => setOpen((prev) => !prev) })}
 
+      {/* z-20 keeps the menu above Table's sticky header (z-10), which comes
+          later in the page and would otherwise cover it; Modal is z-50. */}
       {open && (
         <div
-          className={`absolute overflow-hidden mt-2 font-semibold bg-surface-secondary outline-1 outline-gray-100 rounded-md shadow-lg z-10 ${
+          className={`absolute overflow-hidden mt-2 font-semibold bg-surface-secondary outline-1 outline-gray-100 rounded-md shadow-lg z-20 ${
             fullWidth ? "w-full" : "w-40"
           } ${align === "right" ? "right-0" : "left-0"}`}
           role="menu"
