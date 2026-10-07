@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { ActionResult } from "@/types/common";
-import { BoardOutput } from "@/types/board";
+import { BoardOutput, BoardType } from "@/types/board";
 import { BoardTermOutput } from "@/types/term";
 import { ApiError } from "@/lib/api/client";
 import * as api from "@/lib/api/boards";
@@ -33,6 +33,7 @@ export async function getPublicBoardTerms(
 
 export async function createBoard(data: {
   title: string;
+  type: BoardType;
   representativeUuid: string;
 }): Promise<ActionResult> {
   try {

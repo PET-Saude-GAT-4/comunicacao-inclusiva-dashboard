@@ -10,7 +10,12 @@ import Button from "@/components/Button/Button";
 import { getBoards, createBoard, deleteBoard } from "@/services/boards";
 import { getUsers } from "@/services/users";
 import { getSessionUser } from "@/services/auth";
-import { BoardOutput } from "@/types/board";
+import {
+  BOARD_TYPE_LABELS,
+  BOARD_TYPES,
+  BoardOutput,
+  BoardType,
+} from "@/types/board";
 import { SessionUser } from "@/types/session";
 import { boardHref } from "@/utils/board";
 import Image from "next/image";
@@ -38,6 +43,7 @@ function Boards() {
   const [pictograms, setPictograms] = useState<PictogramOutput[]>([]);
 
   const [title, setTitle] = useState("");
+  const [boardType, setBoardType] = useState<BoardType>("common");
 
   const [selectedPictogram, setSelectedPictogram] = useState<Asset>();
 
@@ -45,6 +51,7 @@ function Boards() {
 
   const clearForm = () => {
     setTitle("");
+    setBoardType("common");
     setSelectedPictogram(undefined);
   };
 
@@ -77,6 +84,7 @@ function Boards() {
     }
     const result = await createBoard({
       title: title,
+      type: boardType,
       representativeUuid: selectedPictogram.uuid,
     });
     if (result.success) {
@@ -201,6 +209,23 @@ function Boards() {
               value={title}
               onChange={(e) => setTitle(e.target.value)}
             />
+            <div className="flex flex-col">
+              <label className="text-text-on-primary" htmlFor="boardType">
+                Tipo:
+              </label>
+              <select
+                id="boardType"
+                value={boardType}
+                onChange={(e) => setBoardType(e.target.value as BoardType)}
+                className="focus:outline-none focus:ring-1 focus:ring-primary-dark text-text-on-primary p-sm px-lg bg-gray-100 outline-1 outline-gray-200 rounded-md"
+              >
+                {BOARD_TYPES.map((type) => (
+                  <option key={type} value={type}>
+                    {BOARD_TYPE_LABELS[type]}
+                  </option>
+                ))}
+              </select>
+            </div>
             <Input
               id="representativeUuid"
               label="Pictograma Representante"
