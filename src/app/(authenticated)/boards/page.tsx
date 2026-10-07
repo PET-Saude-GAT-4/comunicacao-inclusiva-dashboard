@@ -49,6 +49,19 @@ function Boards() {
 
   const [selectedIds, setSelectedIds] = useState<(string | number)[]>([]);
 
+  const [typeFilter, setTypeFilter] = useState<BoardType | "all">("all");
+  const visibleBoards =
+    typeFilter === "all"
+      ? data
+      : data.filter((board) => board.type === typeFilter);
+
+  // Remounting the table (keyed on the filter below) resets its page and
+  // selection, so a delete never reaches rows the filter is hiding.
+  const changeTypeFilter = (value: BoardType | "all") => {
+    setTypeFilter(value);
+    setSelectedIds([]);
+  };
+
   const clearForm = () => {
     setTitle("");
     setBoardType("common");
@@ -119,6 +132,24 @@ function Boards() {
             </p>
           </Button>
           <div className=" flex items-center justify-center ">
+            <label className="sr-only" htmlFor="typeFilter">
+              Filtrar por tipo
+            </label>
+            <select
+              id="typeFilter"
+              value={typeFilter}
+              onChange={(e) =>
+                changeTypeFilter(e.target.value as BoardType | "all")
+              }
+              className="mr-md focus:outline-none focus:ring-1 focus:ring-primary-dark text-text-on-primary p-sm px-lg bg-gray-100 outline-1 outline-gray-200 rounded-md"
+            >
+              <option value="all">Todos os tipos</option>
+              {BOARD_TYPES.map((type) => (
+                <option key={type} value={type}>
+                  {BOARD_TYPE_LABELS[type]}
+                </option>
+              ))}
+            </select>
             <AddButton
               onClick={() => {
                 listPictograms();
@@ -133,9 +164,21 @@ function Boards() {
       </div>
       <div>
         <Table
-          data={data}
+          key={typeFilter}
+          data={visibleBoards}
           columns={[
             { key: "title", label: "Título" },
+            {
+              key: "type",
+              label: "Tipo",
+              render: (value) => (
+                <Badge
+                  variant={value === "emergency" ? "warning" : "secondary"}
+                >
+                  {BOARD_TYPE_LABELS[value as BoardType]}
+                </Badge>
+              ),
+            },
             ...(user?.role === "super_admin"
               ? [
                   {
