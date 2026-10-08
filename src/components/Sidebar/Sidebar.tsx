@@ -4,7 +4,13 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { MdPerson, MdLogout, MdMenuOpen, MdMenu } from "react-icons/md";
+import {
+  MdExpandMore,
+  MdPerson,
+  MdLogout,
+  MdMenuOpen,
+  MdMenu,
+} from "react-icons/md";
 import {
   FOOTER_NAV,
   MAIN_NAV,
@@ -93,6 +99,10 @@ function NavGroupDrawer({
     >
       <Icon size={24} />
       {expanded && <span>{group.title}</span>}
+      {/* Marks the rows that open a drawer, apart from plain links. */}
+      {expanded && (
+        <MdExpandMore aria-hidden size={24} className="ml-auto mr-[12px]" />
+      )}
     </button>
   );
 
