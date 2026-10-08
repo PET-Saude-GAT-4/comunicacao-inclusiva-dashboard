@@ -51,7 +51,7 @@ export default function Header({ userRole }: { userRole: Role }) {
           </button>
         </div>
       </div>
-      {group && (
+      {group?.headerTabs && (
         <nav aria-label={group.title} className="px-lg pb-lg">
           <ul className="flex w-fit rounded-t-[5px] bg-outline-common/40 overflow-hidden">
             {group.pages.map((page) => {
