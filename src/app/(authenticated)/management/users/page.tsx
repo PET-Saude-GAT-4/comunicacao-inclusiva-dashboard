@@ -1,20 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { redirect } from "next/navigation";
-import TabButton from "@/components/TabButton/TabButton";
+import ManagementTabs from "@/components/ManagementTabs/ManagementTabs";
 import RemoveButton from "@/components/RemoveButton/RemoveButton";
 import AddButton from "@/components/AddButton/AddButton";
 import Modal from "@/components/Modal/Modal";
 import Input from "@/components/Input/Input";
 import Button from "@/components/Button/Button";
 import Pagination from "@/components/Pagination/Pagination";
-import {
-  MdPeople,
-  MdAssignmentInd,
-  MdMedicalInformation,
-  MdLocalPolice,
-} from "react-icons/md";
 import { getUsers, createUser, deleteUser } from "@/services/users";
 import { getRoles } from "@/services/roles";
 import { UserOutput } from "@/types/user";
@@ -86,24 +79,7 @@ function Users() {
   return (
     <div className="flex w-full flex-col gap-lg">
       <div className="flex items-center justify-between rounded-lg border border-gray-200 bg-white px-lg py-md text-text-on-primary">
-        <nav className="flex justify-between">
-          <TabButton icon={MdPeople} active={true} />
-          <TabButton
-            icon={MdAssignmentInd}
-            active={false}
-            onClick={() => redirect("/management/professions")}
-          />
-          <TabButton
-            icon={MdMedicalInformation}
-            active={false}
-            onClick={() => redirect("/management/specialities")}
-          />
-          <TabButton
-            icon={MdLocalPolice}
-            active={false}
-            onClick={() => redirect("/management/roles")}
-          />
-        </nav>
+        <ManagementTabs />
         <div className="flex w-full justify-around">{/* <SearchBar/> */}</div>
         <div className="flex">
           <AddButton onClick={() => setIsModalOpen(true)} />
