@@ -7,10 +7,16 @@ import Modal from "@/components/Modal/Modal";
 import Table from "@/components/Table/Table";
 import Input from "@/components/Input/Input"; 
 import Button from "@/components/Button/Button";
+import Dropdown from "@/components/Dropdown/Dropdown";
 import { getBoards, createBoard, deleteBoard } from "@/services/boards";
 import { getUsers } from "@/services/users";
 import { getSessionUser } from "@/services/auth";
-import { BoardOutput } from "@/types/board";
+import {
+  BOARD_TYPE_LABELS,
+  BOARD_TYPES,
+  BoardOutput,
+  BoardType,
+} from "@/types/board";
 import { SessionUser } from "@/types/session";
 import { boardHref } from "@/utils/board";
 import Image from "next/image";
@@ -35,16 +41,32 @@ function Boards() {
   ] = useState(false);
 
   const [formError, setFormError] = useState<string | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
   const [pictograms, setPictograms] = useState<PictogramOutput[]>([]);
 
   const [title, setTitle] = useState("");
+  const [boardType, setBoardType] = useState<BoardType>("common");
 
   const [selectedPictogram, setSelectedPictogram] = useState<Asset>();
 
   const [selectedIds, setSelectedIds] = useState<(string | number)[]>([]);
 
+  const [typeFilter, setTypeFilter] = useState<BoardType | "all">("all");
+  const visibleBoards =
+    typeFilter === "all"
+      ? data
+      : data.filter((board) => board.type === typeFilter);
+
+  // Remounting the table (keyed on the filter below) resets its page and
+  // selection, so a delete never reaches rows the filter is hiding.
+  const changeTypeFilter = (value: BoardType | "all") => {
+    setTypeFilter(value);
+    setSelectedIds([]);
+  };
+
   const clearForm = () => {
     setTitle("");
+    setBoardType("common");
     setSelectedPictogram(undefined);
   };
 
@@ -77,6 +99,7 @@ function Boards() {
     }
     const result = await createBoard({
       title: title,
+      type: boardType,
       representativeUuid: selectedPictogram.uuid,
     });
     if (result.success) {
@@ -89,8 +112,20 @@ function Boards() {
   };
 
   const handleDelete = async () => {
-    await Promise.all(selectedIds.map((id) => deleteBoard(String(id))));
-    setData((prev) => prev.filter((item) => !selectedIds.includes(item.uuid)));
+    setDeleteError(null);
+    const results = await Promise.all(
+      selectedIds.map((id) => deleteBoard(String(id))),
+    );
+
+    // Only boards the API actually deleted leave the list; one it refused,
+    // like a board at a triage level, stays and says why.
+    const deleted = selectedIds.filter((_, i) => results[i].success);
+    setData((prev) => prev.filter((item) => !deleted.includes(item.uuid)));
+
+    const failure = results.find((result) => !result.success);
+    if (failure) {
+      setDeleteError(failure.error ?? "Erro ao remover pranchas.");
+    }
   };
 
   const listPictograms = async () => {
@@ -111,6 +146,20 @@ function Boards() {
             </p>
           </Button>
           <div className=" flex items-center justify-center ">
+            <div className="mr-md w-48">
+              <Dropdown<BoardType | "all">
+                id="typeFilter"
+                value={typeFilter}
+                onChange={changeTypeFilter}
+                options={[
+                  { value: "all", label: "Todos os tipos" },
+                  ...BOARD_TYPES.map((type) => ({
+                    value: type,
+                    label: BOARD_TYPE_LABELS[type],
+                  })),
+                ]}
+              />
+            </div>
             <AddButton
               onClick={() => {
                 listPictograms();
@@ -123,11 +172,26 @@ function Boards() {
           </div>
         </div>
       </div>
+      {deleteError && (
+        <p className="text-sm text-red-500 px-lg py-sm">{deleteError}</p>
+      )}
       <div>
         <Table
-          data={data}
+          key={typeFilter}
+          data={visibleBoards}
           columns={[
             { key: "title", label: "Título" },
+            {
+              key: "type",
+              label: "Tipo",
+              render: (value) => (
+                <Badge
+                  variant={value === "emergency" ? "warning" : "secondary"}
+                >
+                  {BOARD_TYPE_LABELS[value as BoardType]}
+                </Badge>
+              ),
+            },
             ...(user?.role === "super_admin"
               ? [
                   {
@@ -200,6 +264,16 @@ function Boards() {
               placeholder="ex: Rotina matinal"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
+            />
+            <Dropdown<BoardType>
+              id="boardType"
+              label="Tipo:"
+              value={boardType}
+              onChange={setBoardType}
+              options={BOARD_TYPES.map((type) => ({
+                value: type,
+                label: BOARD_TYPE_LABELS[type],
+              }))}
             />
             <Input
               id="representativeUuid"

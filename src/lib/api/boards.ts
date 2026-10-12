@@ -1,4 +1,4 @@
-import { BoardOutput } from "@/types/board";
+import { BoardOutput, BoardType } from "@/types/board";
 import { BoardTermOutput } from "@/types/term";
 import { apiFetch } from "./client";
 
@@ -40,9 +40,20 @@ export async function getPublicBoardTerms(
 
 export function createBoard(data: {
   title: string;
+  type: BoardType;
   representativeUuid: string;
 }): Promise<void> {
   return apiFetch("/boards", { method: "POST", body: JSON.stringify(data) });
+}
+
+export function updateBoard(
+  uuid: string,
+  data: { title?: string; type?: BoardType; representativeUuid?: string },
+): Promise<void> {
+  return apiFetch(`/boards/${uuid}`, {
+    method: "PATCH",
+    body: JSON.stringify(data),
+  });
 }
 
 export function deleteBoard(uuid: string): Promise<void> {
