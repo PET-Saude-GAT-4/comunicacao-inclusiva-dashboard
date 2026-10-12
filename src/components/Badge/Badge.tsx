@@ -3,9 +3,14 @@ export type BadgeVariant = "success" | "secondary" | "neutral" | "warning";
 function Badge({
   children,
   variant = "success",
+  title,
+  className = "",
 }: {
   children: React.ReactNode;
   variant?: BadgeVariant;
+  // Shown on hover, e.g. the full text of a badge cut short to fit.
+  title?: string;
+  className?: string;
 }) {
   const variantClasses: Record<BadgeVariant, string> = {
     success: "bg-success-secondary text-success",
@@ -16,7 +21,8 @@ function Badge({
 
   return (
     <span
-      className={`px-sm py-xs rounded-sm text-body font-bold ${variantClasses[variant]}`}
+      title={title}
+      className={`px-sm py-xs rounded-sm text-body font-bold ${variantClasses[variant]} ${className}`}
     >
       {children}
     </span>

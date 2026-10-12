@@ -2,6 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import AddButton from "@/components/AddButton/AddButton";
+import PillTabs from "@/components/PillTabs/PillTabs";
+import { TERM_SECTIONS } from "@/config/navigation";
 import Modal from "@/components/Modal/Modal";
 import Input from "@/components/Input/Input";
 import Button from "@/components/Button/Button";
@@ -12,13 +14,19 @@ import {
   deletePictogram,
 } from "@/services/pictograms";
 import { getUsers } from "@/services/users";
+import { getTerms } from "@/services/terms";
+import { termBadge, termNamesByPart } from "@/utils/term";
 import { PictogramOutput } from "@/types/pictogram";
 import RemoveButton from "@/components/RemoveButton/RemoveButton";
-import PictogramCard from "../components/PictogramCard/PictogramCard";
+import AssetCard from "../components/AssetCard/AssetCard";
 
 function Pictograms() {
   const [data, setData] = useState<PictogramOutput[]>([]);
   const [authorEmails, setAuthorEmails] = useState<Record<string, string>>({});
+  // Null until the terms load, so no card claims "Sem termo" too early.
+  const [termNames, setTermNames] = useState<Record<string, string[]> | null>(
+    null,
+  );
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
@@ -34,6 +42,9 @@ function Pictograms() {
 
   useEffect(() => {
     fetchData();
+    getTerms()
+      .then((terms) => setTermNames(termNamesByPart(terms, "pictogram")))
+      .catch(() => {});
     getUsers()
       .catch(() => [])
       .then((users) =>
@@ -108,7 +119,8 @@ function Pictograms() {
   const pageData = data.slice((page - 1) * pageSize, page * pageSize);
   return (
     <div className="flex w-full flex-col gap-lg">
-      <div className="flex items-center justify-end rounded-lg border border-gray-200 bg-white px-lg py-md text-text-on-primary">
+      <div className="flex items-center justify-between rounded-lg border border-gray-200 bg-white px-lg py-md text-text-on-primary">
+        <PillTabs label="Termos" pages={TERM_SECTIONS} />
         <div className="flex">
           <AddButton onClick={() => setIsModalOpen(true)} />
           <RemoveButton
@@ -124,8 +136,14 @@ function Pictograms() {
         <div className="grid grid-cols-6 gap-4 p-4">
           {pageData.map((pictogram) => (
             <div key={pictogram.uuid}>
-              <PictogramCard
-                pictogram={pictogram}
+              <AssetCard
+                title={pictogram.description}
+                uuid={pictogram.uuid}
+                createdAt={pictogram.createdAt}
+                images={[{ src: pictogram.fileUrl, label: "Pictograma" }]}
+                badge={
+                  termNames ? termBadge(termNames[pictogram.uuid]) : undefined
+                }
                 authorEmail={authorEmails[pictogram.authorUuid ?? ""] ?? null}
                 onSelect={() => toggleSelection(pictogram.uuid)}
                 onDelete={() => handleDeleteOne(pictogram.uuid)}

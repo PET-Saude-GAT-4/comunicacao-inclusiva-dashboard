@@ -2,8 +2,11 @@
 
 import { useEffect, useRef, useState } from "react";
 import AddButton from "@/components/AddButton/AddButton";
+import PillTabs from "@/components/PillTabs/PillTabs";
+import { TERM_SECTIONS } from "@/config/navigation";
 import Modal from "@/components/Modal/Modal";
-import Table from "@/components/Table/Table";
+import Pagination from "@/components/Pagination/Pagination";
+import AssetCard from "../components/AssetCard/AssetCard";
 import Input from "@/components/Input/Input";
 import Button from "@/components/Button/Button";
 import {
@@ -12,40 +15,33 @@ import {
   deleteSignWriting,
 } from "@/services/sign-writings";
 import { SignWritingOutput } from "@/types/sign-writing";
-import Image from "next/image";
+import { getTerms } from "@/services/terms";
+import { termBadge, termNamesByPart } from "@/utils/term";
 import RemoveButton from "@/components/RemoveButton/RemoveButton";
 
-type SignWritingRow = {
-  uuid: string;
-  imageUrl: string;
-  description: string;
-  createdAt: string;
-};
-
-function toRow(s: SignWritingOutput): SignWritingRow {
-  return {
-    uuid: s.uuid,
-    imageUrl: s.fileUrl,
-    description: s.description,
-    createdAt: new Date(s.createdAt).toLocaleDateString("pt-BR"),
-  };
-}
-
 function SignWritings() {
-  const [data, setData] = useState<SignWritingRow[]>([]);
+  const [data, setData] = useState<SignWritingOutput[]>([]);
+  // Null until the terms load, so no card claims "Sem termo" too early.
+  const [termNames, setTermNames] = useState<Record<string, string[]> | null>(
+    null,
+  );
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [selectedIds, setSelectedIds] = useState<(string | number)[]>([]);
+  const [page, setPage] = useState(1);
+  const pageSize = 12;
 
   const [description, setDescription] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
 
-  const fetchData = () =>
-    getSignWritings().then((rows) => setData(rows.map(toRow)));
+  const fetchData = () => getSignWritings().then(setData);
 
   useEffect(() => {
     fetchData();
+    getTerms()
+      .then((terms) => setTermNames(termNamesByPart(terms, "signWriting")))
+      .catch(() => {});
   }, []);
 
   const handleCreate = async () => {
@@ -84,9 +80,31 @@ function SignWritings() {
     setDeleteError(failure?.result.error ?? null);
   };
 
+  const handleDeleteOne = async (uuid: string) => {
+    const result = await deleteSignWriting(uuid);
+    if (result.success) {
+      setData((prev) => prev.filter((item) => item.uuid !== uuid));
+      setSelectedIds((prev) =>
+        prev.filter((selectedId) => selectedId !== uuid),
+      );
+    }
+    setDeleteError(result.success ? null : (result.error ?? null));
+  };
+
+  const toggleSelection = (uuid: string) => {
+    setSelectedIds((prev) =>
+      prev.includes(uuid)
+        ? prev.filter((selectedId) => selectedId !== uuid)
+        : [...prev, uuid],
+    );
+  };
+
+  const pageCount = Math.max(1, Math.ceil(data.length / pageSize));
+  const pageData = data.slice((page - 1) * pageSize, page * pageSize);
   return (
-    <div className="w-full bg-surface-secondary">
-      <div className="flex items-center justify-end p-sm text-text-on-primary">
+    <div className="flex w-full flex-col gap-lg">
+      <div className="flex items-center justify-between rounded-lg border border-gray-200 bg-white px-lg py-md text-text-on-primary">
+        <PillTabs label="Termos" pages={TERM_SECTIONS} />
         <div className="flex">
           <AddButton onClick={() => setIsModalOpen(true)} />
           <RemoveButton
@@ -96,32 +114,38 @@ function SignWritings() {
         </div>
       </div>
       {deleteError && (
-        <p className="text-sm text-red-500 px-lg py-sm border-b border-outline-common">
-          {deleteError}
-        </p>
+        <p className="px-4 text-sm text-red-500">{deleteError}</p>
       )}
-      <div className="flex-1">
-        <Table
-          data={data}
-          columns={[
-            {
-              key: "imageUrl",
-              label: "Imagem",
-              render: (value) => (
-                <Image
-                  src={String(value)}
-                  alt=""
-                  width={40}
-                  height={40}
-                  className="object-contain rounded"
-                />
-              ),
-            },
-            { key: "description", label: "Descrição" },
-            { key: "createdAt", label: "Data de Criação" },
-          ]}
-          onSelectionChange={setSelectedIds}
-        />
+      <div className="flex flex-col">
+        <div className="grid grid-cols-6 gap-4 p-4">
+          {pageData.map((signWriting) => (
+            <div key={signWriting.uuid}>
+              {/* SignWritings record no author. */}
+              <AssetCard
+                title={signWriting.description}
+                uuid={signWriting.uuid}
+                createdAt={signWriting.createdAt}
+                images={[{ src: signWriting.fileUrl, label: "SignWriting" }]}
+                badge={
+                  termNames ? termBadge(termNames[signWriting.uuid]) : undefined
+                }
+                authorEmail={null}
+                onSelect={() => toggleSelection(signWriting.uuid)}
+                onDelete={() => handleDeleteOne(signWriting.uuid)}
+                isSelected={selectedIds.includes(signWriting.uuid)}
+              />
+            </div>
+          ))}
+        </div>
+        <div className="flex items-center justify-center py-4 rounded-md outline-1 outline-outline-common bg-white">
+          <Pagination
+            page={page}
+            pageCount={pageCount}
+            onPageChange={(nextPage) =>
+              setPage(Math.min(Math.max(1, nextPage), pageCount))
+            }
+          />
+        </div>
       </div>
       <Modal
         isOpen={isModalOpen}

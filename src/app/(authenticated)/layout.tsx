@@ -27,7 +27,7 @@ export default async function AuthenticatedLayout({
         initialExpanded={sidebarExpanded}
       />
       <div className="flex flex-col flex-1 overflow-hidden">
-        <Header />
+        <Header userRole={session.role} />
         <main className="flex-1 overflow-y-auto">
           {children}
         </main>

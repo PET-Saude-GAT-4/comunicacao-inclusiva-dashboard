@@ -1,20 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { redirect } from "next/navigation";
-import TabButton from "@/components/TabButton/TabButton";
+import PillTabs from "@/components/PillTabs/PillTabs";
+import { MANAGEMENT_GROUP } from "@/config/navigation";
 import RemoveButton from "@/components/RemoveButton/RemoveButton";
 import AddButton from "@/components/AddButton/AddButton";
 import Modal from "@/components/Modal/Modal";
 import Table from "@/components/Table/Table";
 import Input from "@/components/Input/Input";
 import Button from "@/components/Button/Button";
-import {
-  MdPeople,
-  MdAssignmentInd,
-  MdMedicalInformation,
-  MdLocalPolice,
-} from "react-icons/md";
 import {
   getSpecialities,
   createSpeciality,
@@ -80,24 +74,7 @@ function Specialities() {
   return (
     <div className="flex w-full flex-col gap-lg">
       <div className="flex items-center justify-between rounded-lg border border-gray-200 bg-white px-lg py-md text-text-on-primary">
-        <nav className="flex justify-between">
-          <TabButton
-            icon={MdPeople}
-            active={false}
-            onClick={() => redirect("/management/users")}
-          />
-          <TabButton
-            icon={MdAssignmentInd}
-            active={false}
-            onClick={() => redirect("/management/professions")}
-          />
-          <TabButton icon={MdMedicalInformation} active={true} />
-          <TabButton
-            icon={MdLocalPolice}
-            active={false}
-            onClick={() => redirect("/management/roles")}
-          />
-        </nav>
+        <PillTabs label={MANAGEMENT_GROUP.title} pages={MANAGEMENT_GROUP.pages} />
         <div className="flex">{/* <SearchBar/> */}</div>
         <div className="flex">
           <AddButton onClick={() => setIsModalOpen(true)} />
