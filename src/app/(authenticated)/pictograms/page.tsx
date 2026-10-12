@@ -16,7 +16,7 @@ import {
 import { getUsers } from "@/services/users";
 import { PictogramOutput } from "@/types/pictogram";
 import RemoveButton from "@/components/RemoveButton/RemoveButton";
-import PictogramCard from "../components/PictogramCard/PictogramCard";
+import AssetCard from "../components/AssetCard/AssetCard";
 
 function Pictograms() {
   const [data, setData] = useState<PictogramOutput[]>([]);
@@ -127,8 +127,11 @@ function Pictograms() {
         <div className="grid grid-cols-6 gap-4 p-4">
           {pageData.map((pictogram) => (
             <div key={pictogram.uuid}>
-              <PictogramCard
-                pictogram={pictogram}
+              <AssetCard
+                title={pictogram.description}
+                uuid={pictogram.uuid}
+                createdAt={pictogram.createdAt}
+                images={[{ src: pictogram.fileUrl, label: "Pictograma" }]}
                 authorEmail={authorEmails[pictogram.authorUuid ?? ""] ?? null}
                 onSelect={() => toggleSelection(pictogram.uuid)}
                 onDelete={() => handleDeleteOne(pictogram.uuid)}
