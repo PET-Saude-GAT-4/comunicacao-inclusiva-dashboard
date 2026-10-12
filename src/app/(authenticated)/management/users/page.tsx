@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import ManagementTabs from "@/components/ManagementTabs/ManagementTabs";
+import PillTabs from "@/components/PillTabs/PillTabs";
+import { MANAGEMENT_GROUP } from "@/config/navigation";
 import RemoveButton from "@/components/RemoveButton/RemoveButton";
 import AddButton from "@/components/AddButton/AddButton";
 import Modal from "@/components/Modal/Modal";
@@ -79,7 +80,7 @@ function Users() {
   return (
     <div className="flex w-full flex-col gap-lg">
       <div className="flex items-center justify-between rounded-lg border border-gray-200 bg-white px-lg py-md text-text-on-primary">
-        <ManagementTabs />
+        <PillTabs label={MANAGEMENT_GROUP.title} pages={MANAGEMENT_GROUP.pages} />
         <div className="flex w-full justify-around">{/* <SearchBar/> */}</div>
         <div className="flex">
           <AddButton onClick={() => setIsModalOpen(true)} />
