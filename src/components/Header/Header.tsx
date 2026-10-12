@@ -7,7 +7,7 @@ import { ROUTES } from "@/config/routes";
 import {
   MAIN_NAV,
   findActiveGroup,
-  isPathActive,
+  isPageActive,
   navForRole,
 } from "@/config/navigation";
 import { Role } from "@/types/role";
@@ -55,7 +55,7 @@ export default function Header({ userRole }: { userRole: Role }) {
         <nav aria-label={group.title} className="px-lg pb-lg">
           <ul className="flex w-fit rounded-t-[5px] bg-outline-common/40 overflow-hidden">
             {group.pages.map((page) => {
-              const active = isPathActive(pathname, page.path);
+              const active = isPageActive(pathname, page);
               return (
                 <li key={page.path}>
                   <Link

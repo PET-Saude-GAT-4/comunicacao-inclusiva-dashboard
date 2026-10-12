@@ -17,6 +17,7 @@ import {
   NavGroup,
   NavLink,
   findActiveGroup,
+  isPageActive,
   isPathActive,
   navForRole,
 } from "@/config/navigation";
@@ -110,7 +111,7 @@ function NavGroupDrawer({
   if (!expanded || !open) return header;
 
   const activeIndex = group.pages.findIndex((p) =>
-    isPathActive(pathname, p.path),
+    isPageActive(pathname, p),
   );
   const dotCenter = (index: number) =>
     index * SUB_ROW_STEP + SUB_ROW_HEIGHT / 2;

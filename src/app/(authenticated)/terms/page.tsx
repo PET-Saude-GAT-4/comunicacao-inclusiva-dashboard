@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import AddButton from "@/components/AddButton/AddButton";
+import PillTabs from "@/components/PillTabs/PillTabs";
+import { TERM_SECTIONS } from "@/config/navigation";
 import Modal from "@/components/Modal/Modal";
 import Table from "@/components/Table/Table";
 import Input from "@/components/Input/Input";
@@ -122,7 +124,8 @@ function Terms() {
 
   return (
     <div className="w-full bg-surface-secondary">
-      <div className="flex items-center justify-end p-sm text-text-on-primary">
+      <div className="flex items-center justify-between p-sm text-text-on-primary">
+        <PillTabs label="Termos" pages={TERM_SECTIONS} />
         <div className="flex">
           <AddButton onClick={openModal} />
           <RemoveButton

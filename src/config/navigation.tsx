@@ -5,7 +5,10 @@ import {
   MdLocalPolice,
   MdMedicalInformation,
   MdPeople,
+  MdPermMedia,
   MdRecentActors,
+  MdSignLanguage,
+  MdTranslate,
 } from "react-icons/md";
 import { RoutePath, isRouteAuthorized } from "@/config/route-access";
 import { ROUTES } from "@/config/routes";
@@ -16,8 +19,11 @@ type IconComponent = React.ComponentType<{ size?: number }>;
 export type NavPage = {
   path: string;
   label: string;
-  // Only pages shown as icon pills (Gerenciamento's switcher) need one.
+  // Only pages shown as icon pills (PillTabs) need one.
   icon?: IconComponent;
+  // Other pages that count as this one, e.g. a term's pictograms and
+  // SignWritings, which are reached from inside Termos.
+  matches?: string[];
 };
 
 // A group opens as a drawer in the side panel; its pages are also the page's
@@ -98,19 +104,36 @@ export const MAIN_NAV: NavEntry[] = [
     headerTabs: true,
     pages: [
       { path: "/boards", label: "Pranchas" },
-      { path: "/terms", label: "Termos" },
+      {
+        path: "/terms",
+        label: "Termos",
+        matches: ["/pictograms", "/sign-writings"],
+      },
       { path: "/phrases", label: "Frases" },
     ],
   },
-  link("/pictograms"),
-  link("/sign-writings"),
   MANAGEMENT_GROUP,
+];
+
+// A term is never without its pictogram and its SignWriting, so the three are
+// sections of Termos, switched with pills in their toolbars rather than
+// listed in the side panel.
+export const TERM_SECTIONS: NavPage[] = [
+  { path: "/terms", label: "Termos", icon: MdTranslate },
+  { path: "/pictograms", label: "Pictogramas", icon: MdPermMedia },
+  { path: "/sign-writings", label: "SignWriting", icon: MdSignLanguage },
 ];
 
 export const FOOTER_NAV: NavLink[] = [link("/settings"), link("/help")];
 
 export function isPathActive(pathname: string, path: string): boolean {
   return pathname === path || pathname.startsWith(path + "/");
+}
+
+export function isPageActive(pathname: string, page: NavPage): boolean {
+  return [page.path, ...(page.matches ?? [])].some((path) =>
+    isPathActive(pathname, path),
+  );
 }
 
 // Drops what the role may not open; a group with no page left disappears.
@@ -133,6 +156,6 @@ export function findActiveGroup(
   return entries.find(
     (entry): entry is NavGroup =>
       entry.kind === "group" &&
-      entry.pages.some((p) => isPathActive(pathname, p.path)),
+      entry.pages.some((p) => isPageActive(pathname, p)),
   );
 }

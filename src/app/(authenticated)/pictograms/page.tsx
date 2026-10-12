@@ -2,6 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import AddButton from "@/components/AddButton/AddButton";
+import PillTabs from "@/components/PillTabs/PillTabs";
+import { TERM_SECTIONS } from "@/config/navigation";
 import Modal from "@/components/Modal/Modal";
 import Input from "@/components/Input/Input";
 import Button from "@/components/Button/Button";
@@ -108,7 +110,8 @@ function Pictograms() {
   const pageData = data.slice((page - 1) * pageSize, page * pageSize);
   return (
     <div className="flex w-full flex-col gap-lg">
-      <div className="flex items-center justify-end rounded-lg border border-gray-200 bg-white px-lg py-md text-text-on-primary">
+      <div className="flex items-center justify-between rounded-lg border border-gray-200 bg-white px-lg py-md text-text-on-primary">
+        <PillTabs label="Termos" pages={TERM_SECTIONS} />
         <div className="flex">
           <AddButton onClick={() => setIsModalOpen(true)} />
           <RemoveButton
