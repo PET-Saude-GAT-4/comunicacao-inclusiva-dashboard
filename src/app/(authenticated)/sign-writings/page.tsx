@@ -15,10 +15,16 @@ import {
   deleteSignWriting,
 } from "@/services/sign-writings";
 import { SignWritingOutput } from "@/types/sign-writing";
+import { getTerms } from "@/services/terms";
+import { termBadge, termNamesByPart } from "@/utils/term";
 import RemoveButton from "@/components/RemoveButton/RemoveButton";
 
 function SignWritings() {
   const [data, setData] = useState<SignWritingOutput[]>([]);
+  // Null until the terms load, so no card claims "Sem termo" too early.
+  const [termNames, setTermNames] = useState<Record<string, string[]> | null>(
+    null,
+  );
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
@@ -33,6 +39,9 @@ function SignWritings() {
 
   useEffect(() => {
     fetchData();
+    getTerms()
+      .then((terms) => setTermNames(termNamesByPart(terms, "signWriting")))
+      .catch(() => {});
   }, []);
 
   const handleCreate = async () => {
@@ -117,6 +126,9 @@ function SignWritings() {
                 uuid={signWriting.uuid}
                 createdAt={signWriting.createdAt}
                 images={[{ src: signWriting.fileUrl, label: "SignWriting" }]}
+                badge={
+                  termNames ? termBadge(termNames[signWriting.uuid]) : undefined
+                }
                 authorEmail={null}
                 onSelect={() => toggleSelection(signWriting.uuid)}
                 onDelete={() => handleDeleteOne(signWriting.uuid)}

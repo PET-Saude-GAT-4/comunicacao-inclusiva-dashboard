@@ -14,6 +14,8 @@ import {
   deletePictogram,
 } from "@/services/pictograms";
 import { getUsers } from "@/services/users";
+import { getTerms } from "@/services/terms";
+import { termBadge, termNamesByPart } from "@/utils/term";
 import { PictogramOutput } from "@/types/pictogram";
 import RemoveButton from "@/components/RemoveButton/RemoveButton";
 import AssetCard from "../components/AssetCard/AssetCard";
@@ -21,6 +23,10 @@ import AssetCard from "../components/AssetCard/AssetCard";
 function Pictograms() {
   const [data, setData] = useState<PictogramOutput[]>([]);
   const [authorEmails, setAuthorEmails] = useState<Record<string, string>>({});
+  // Null until the terms load, so no card claims "Sem termo" too early.
+  const [termNames, setTermNames] = useState<Record<string, string[]> | null>(
+    null,
+  );
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
@@ -36,6 +42,9 @@ function Pictograms() {
 
   useEffect(() => {
     fetchData();
+    getTerms()
+      .then((terms) => setTermNames(termNamesByPart(terms, "pictogram")))
+      .catch(() => {});
     getUsers()
       .catch(() => [])
       .then((users) =>
@@ -132,6 +141,9 @@ function Pictograms() {
                 uuid={pictogram.uuid}
                 createdAt={pictogram.createdAt}
                 images={[{ src: pictogram.fileUrl, label: "Pictograma" }]}
+                badge={
+                  termNames ? termBadge(termNames[pictogram.uuid]) : undefined
+                }
                 authorEmail={authorEmails[pictogram.authorUuid ?? ""] ?? null}
                 onSelect={() => toggleSelection(pictogram.uuid)}
                 onDelete={() => handleDeleteOne(pictogram.uuid)}
