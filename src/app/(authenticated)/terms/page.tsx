@@ -5,7 +5,8 @@ import AddButton from "@/components/AddButton/AddButton";
 import PillTabs from "@/components/PillTabs/PillTabs";
 import { TERM_SECTIONS } from "@/config/navigation";
 import Modal from "@/components/Modal/Modal";
-import Table from "@/components/Table/Table";
+import Pagination from "@/components/Pagination/Pagination";
+import AssetCard from "../components/AssetCard/AssetCard";
 import Input from "@/components/Input/Input";
 import Button from "@/components/Button/Button";
 import { getTerms, createTerm, deleteTerm } from "@/services/terms";
@@ -20,30 +21,14 @@ import RemoveButton from "@/components/RemoveButton/RemoveButton";
 import AssetPicker, { Asset } from "@/components/AssetPicker/AssetPicker";
 import { formatList } from "@/utils/text";
 
-type TermRow = {
-  uuid: string;
-  pictogramUrl: string;
-  signWritingUrl: string;
-  description: string;
-  createdAt: string;
-};
-
-function toRow(t: TermOutput): TermRow {
-  return {
-    uuid: t.uuid,
-    pictogramUrl: t.pictogram.fileUrl,
-    signWritingUrl: t.signWriting.fileUrl,
-    description: t.description,
-    createdAt: new Date(t.createdAt).toLocaleDateString("pt-BR"),
-  };
-}
-
 function Terms() {
-  const [data, setData] = useState<TermRow[]>([]);
+  const [data, setData] = useState<TermOutput[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [selectedIds, setSelectedIds] = useState<(string | number)[]>([]);
+  const [page, setPage] = useState(1);
+  const pageSize = 12;
 
   const [description, setDescription] = useState("");
   const [descriptionEdited, setDescriptionEdited] = useState(false);
@@ -52,7 +37,7 @@ function Terms() {
   const [selectedPictogram, setSelectedPictogram] = useState<Asset>();
   const [selectedSignWriting, setSelectedSignWriting] = useState<Asset>();
 
-  const fetchData = () => getTerms().then((rows) => setData(rows.map(toRow)));
+  const fetchData = () => getTerms().then(setData);
 
   useEffect(() => {
     fetchData();
@@ -122,9 +107,30 @@ function Terms() {
     setDeleteError(failure?.result.error ?? null);
   };
 
+  const handleDeleteOne = async (uuid: string) => {
+    const result = await deleteTerm(uuid);
+    if (result.success) {
+      setData((prev) => prev.filter((item) => item.uuid !== uuid));
+      setSelectedIds((prev) =>
+        prev.filter((selectedId) => selectedId !== uuid),
+      );
+    }
+    setDeleteError(result.success ? null : (result.error ?? null));
+  };
+
+  const toggleSelection = (uuid: string) => {
+    setSelectedIds((prev) =>
+      prev.includes(uuid)
+        ? prev.filter((selectedId) => selectedId !== uuid)
+        : [...prev, uuid],
+    );
+  };
+
+  const pageCount = Math.max(1, Math.ceil(data.length / pageSize));
+  const pageData = data.slice((page - 1) * pageSize, page * pageSize);
   return (
-    <div className="w-full bg-surface-secondary">
-      <div className="flex items-center justify-between p-sm text-text-on-primary">
+    <div className="flex w-full flex-col gap-lg">
+      <div className="flex items-center justify-between rounded-lg border border-gray-200 bg-white px-lg py-md text-text-on-primary">
         <PillTabs label="Termos" pages={TERM_SECTIONS} />
         <div className="flex">
           <AddButton onClick={openModal} />
@@ -135,45 +141,38 @@ function Terms() {
         </div>
       </div>
       {deleteError && (
-        <p className="text-sm text-red-500 px-lg py-sm border-b border-outline-common">
-          {deleteError}
-        </p>
+        <p className="px-4 text-sm text-red-500">{deleteError}</p>
       )}
-      <div className="flex-1">
-        <Table
-          data={data}
-          columns={[
-            {
-              key: "pictogramUrl",
-              label: "Pictograma",
-              render: (value) => (
-                <Image
-                  src={String(value)}
-                  alt=""
-                  width={40}
-                  height={40}
-                  className="object-contain rounded"
-                />
-              ),
-            },
-            {
-              key: "signWritingUrl",
-              label: "SignWriting",
-              render: (value) => (
-                <Image
-                  src={String(value)}
-                  alt=""
-                  width={40}
-                  height={40}
-                  className="object-contain rounded"
-                />
-              ),
-            },
-            { key: "description", label: "Descrição" },
-            { key: "createdAt", label: "Data de Criação" },
-          ]}
-          onSelectionChange={setSelectedIds}
-        />
+      <div className="flex flex-col">
+        <div className="grid grid-cols-6 gap-4 p-4">
+          {pageData.map((term) => (
+            <div key={term.uuid}>
+              {/* Terms record no author. */}
+              <AssetCard
+                title={term.description}
+                uuid={term.uuid}
+                createdAt={term.createdAt}
+                images={[
+                  { src: term.pictogram.fileUrl, label: "Pictograma" },
+                  { src: term.signWriting.fileUrl, label: "SignWriting" },
+                ]}
+                authorEmail={null}
+                onSelect={() => toggleSelection(term.uuid)}
+                onDelete={() => handleDeleteOne(term.uuid)}
+                isSelected={selectedIds.includes(term.uuid)}
+              />
+            </div>
+          ))}
+        </div>
+        <div className="flex items-center justify-center py-4 rounded-md outline-1 outline-outline-common bg-white">
+          <Pagination
+            page={page}
+            pageCount={pageCount}
+            onPageChange={(nextPage) =>
+              setPage(Math.min(Math.max(1, nextPage), pageCount))
+            }
+          />
+        </div>
       </div>
       <Modal
         isOpen={isModalOpen}
