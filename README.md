@@ -2,16 +2,16 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 ## Getting Started
 
-First, run the development server:
+Install the dependencies. The repository ships its own Yarn 4.12.0 binary, so any `yarn` on your machine runs it:
 
 ```bash
-npm run dev
-# or
+yarn install
+```
+
+Then run the development server:
+
+```bash
 yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
