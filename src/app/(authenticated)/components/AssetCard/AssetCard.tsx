@@ -32,14 +32,20 @@ type Props = {
 
 function SingleImage({ image, alt }: { image: AssetCardImage; alt: string }) {
   return (
-    <div className="flex items-center justify-center w-24 h-24 shrink-0 rounded-full bg-surface-secondary-dark text-white overflow-hidden">
+    <div
+      className={`relative flex items-center justify-center w-24 h-24 shrink-0 rounded-md overflow-hidden ${
+        image.src
+          ? "bg-white border border-outline-common"
+          : "bg-surface-secondary-dark text-white"
+      }`}
+    >
       {image.src ? (
         <Image
           src={image.src}
           alt={alt}
           width={96}
           height={96}
-          className="w-full h-full object-cover"
+          className="absolute inset-0 w-full h-full p-xs object-contain"
         />
       ) : (
         <MdImage size={48} />
@@ -56,14 +62,17 @@ function ImagePair({ images }: { images: AssetCardImage[] }) {
           key={image.label}
           className="flex flex-col items-center gap-xs p-sm min-w-0"
         >
-          <div className="flex items-center justify-center w-full aspect-square">
+          {/* The image is taken out of flow so a tall one cannot stretch the
+              square past its aspect ratio; object-contain shrinks it and
+              leaves white space around it instead. */}
+          <div className="relative flex items-center justify-center w-full aspect-square bg-white">
             {image.src ? (
               <Image
                 src={image.src}
                 alt={image.label}
                 width={96}
                 height={96}
-                className="w-full h-full object-contain"
+                className="absolute inset-0 w-full h-full object-contain"
               />
             ) : (
               <MdImage size={48} className="text-text-on-primary-variant" />
