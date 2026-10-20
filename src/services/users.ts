@@ -41,10 +41,6 @@ function translateUserError(status: number, rawMessage?: string): string {
   return "Erro ao convidar usuário. Verifique os dados.";
 }
 
-export async function getUser(uuid: string): Promise<UserOutput | null> {
-  return api.getUser(uuid);
-}
-
 // The emails of the given users, by uuid; one that cannot be read, because it
 // is gone or the caller may not see it, is left out. The client runs Server
 // Functions one at a time, so the authors on screen are asked for together

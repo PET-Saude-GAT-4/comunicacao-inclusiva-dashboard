@@ -2,7 +2,7 @@ import { BoardOutput } from "@/types/board";
 import { SessionUser } from "@/types/session";
 
 export function canEditBoard(
-  board: BoardOutput,
+  board: Pick<BoardOutput, "authorUuid">,
   user: SessionUser | null,
 ): boolean {
   if (!user) return false;
@@ -10,7 +10,7 @@ export function canEditBoard(
 }
 
 export function boardHref(
-  board: BoardOutput,
+  board: Pick<BoardOutput, "uuid" | "authorUuid">,
   user: SessionUser | null,
 ): string {
   return canEditBoard(board, user)

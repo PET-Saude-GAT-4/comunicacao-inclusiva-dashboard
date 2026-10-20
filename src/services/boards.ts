@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { ActionResult, ListQuery, Paginated } from "@/types/common";
-import { BoardOutput, BoardType } from "@/types/board";
+import { BoardOutput, BoardType, PublicBoardOutput } from "@/types/board";
 import { BoardTermOutput } from "@/types/term";
 import { ApiError } from "@/lib/api/client";
 import * as api from "@/lib/api/boards";
@@ -18,13 +18,13 @@ export async function getBoard(uuid: string): Promise<BoardOutput | null> {
   return api.getBoard(uuid);
 }
 
-export async function getPublicBoards(): Promise<BoardOutput[]> {
+export async function getPublicBoards(): Promise<PublicBoardOutput[]> {
   return api.getPublicBoards();
 }
 
 export async function getPublicBoard(
   uuid: string,
-): Promise<BoardOutput | null> {
+): Promise<PublicBoardOutput | null> {
   return api.getPublicBoard(uuid);
 }
 

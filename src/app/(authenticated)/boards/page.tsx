@@ -29,7 +29,7 @@ import { PictogramOutput } from "@/types/pictogram";
 import { getPictogramPage } from "@/services/pictograms";
 import AssetPicker, { Asset } from "@/components/AssetPicker/AssetPicker";
 import CreateInteractionChainModal from "../components/CreateInteractionChainModal/CreateInteractionChainModal";
-import AuthorEmail from "../components/AuthorEmail/AuthorEmail";
+import AuthorLabel from "../components/AuthorLabel/AuthorLabel";
 
 // The type comes from the URL, so anything other than a known type is dropped
 // instead of reaching the API as a 400.
@@ -194,12 +194,12 @@ function Boards() {
             ...(user?.role === "super_admin"
               ? [
                   {
-                    key: "authorUuid" as const,
+                    key: "author" as const,
                     label: "Autor",
                     render: (
                       _value: BoardOutput[keyof BoardOutput],
                       row: BoardOutput,
-                    ) => <AuthorEmail uuid={row.authorUuid} />,
+                    ) => <AuthorLabel email={row.author?.email ?? null} />,
                   },
                 ]
               : []),

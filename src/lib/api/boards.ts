@@ -1,5 +1,5 @@
 import { ListQuery, Paginated } from "@/types/common";
-import { BoardOutput, BoardType } from "@/types/board";
+import { BoardOutput, BoardType, PublicBoardOutput } from "@/types/board";
 import { BoardTermOutput } from "@/types/term";
 import { apiFetch, listQueryString } from "./client";
 
@@ -20,16 +20,20 @@ export async function getBoard(uuid: string): Promise<BoardOutput | null> {
   return data.board;
 }
 
-export async function getPublicBoards(): Promise<BoardOutput[]> {
-  const data = await apiFetch<{ boards: BoardOutput[] }>("/public/boards");
+export async function getPublicBoards(): Promise<PublicBoardOutput[]> {
+  const data = await apiFetch<{ boards: PublicBoardOutput[] }>(
+    "/public/boards",
+  );
   if (!data) throw new Error("Erro ao buscar pranchas.");
   return data.boards;
 }
 
 export async function getPublicBoard(
   uuid: string,
-): Promise<BoardOutput | null> {
-  const data = await apiFetch<{ board: BoardOutput }>(`/public/boards/${uuid}`);
+): Promise<PublicBoardOutput | null> {
+  const data = await apiFetch<{ board: PublicBoardOutput }>(
+    `/public/boards/${uuid}`,
+  );
   if (!data) throw new Error("Erro ao buscar prancha.");
   return data.board;
 }

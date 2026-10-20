@@ -4,14 +4,14 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Image from "next/image";
 import { getPublicBoard, getPublicBoardTerms } from "@/services/boards";
-import { BoardOutput } from "@/types/board";
+import { PublicBoardOutput } from "@/types/board";
 import { BoardTermOutput } from "@/types/term";
 
 function ReadonlyBoardDetail() {
   const params = useParams();
   const uuid = String(params.uuid);
 
-  const [board, setBoard] = useState<BoardOutput | null>(null);
+  const [board, setBoard] = useState<PublicBoardOutput | null>(null);
   const [items, setItems] = useState<BoardTermOutput[]>([]);
   const [loading, setLoading] = useState(true);
 

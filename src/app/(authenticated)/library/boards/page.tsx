@@ -10,7 +10,7 @@ import ListToolbar from "@/components/ListToolbar/ListToolbar";
 import Image from "next/image";
 import { getPublicBoards } from "@/services/boards";
 import { getSessionUser } from "@/services/auth";
-import { BoardOutput } from "@/types/board";
+import { PublicBoardOutput } from "@/types/board";
 import { PictogramOutput } from "@/types/pictogram";
 import { SessionUser } from "@/types/session";
 import { boardHref } from "@/utils/board";
@@ -18,14 +18,14 @@ import AuthorEmail from "../../components/AuthorEmail/AuthorEmail";
 
 // Defined once so SearchBar, which filters whenever it changes, filters only
 // when the list or the query does.
-const boardSearchText = (board: BoardOutput) => board.title;
+const boardSearchText = (board: PublicBoardOutput) => board.title;
 
 function Library() {
   const router = useRouter();
-  const [boards, setBoards] = useState<BoardOutput[]>([]);
+  const [boards, setBoards] = useState<PublicBoardOutput[]>([]);
   // GET /public/boards is not paginated by design, so this page searches the
   // list it already has instead of asking the API.
-  const [filteredBoards, setFilteredBoards] = useState<BoardOutput[]>([]);
+  const [filteredBoards, setFilteredBoards] = useState<PublicBoardOutput[]>([]);
   const [user, setUser] = useState<SessionUser | null>(null);
 
   useEffect(() => {
