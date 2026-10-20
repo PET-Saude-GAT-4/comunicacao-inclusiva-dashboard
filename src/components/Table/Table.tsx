@@ -35,10 +35,14 @@ function Table<T extends { id: number } | { uuid: string }>({
 
   const rowKey = (row: T): number | string => ("id" in row ? row.id : row.uuid);
 
-  const page = isControlled ? controlledPage : internalPage;
   const pageCount = isControlled
     ? Math.max(1, controlledPageCount ?? 1)
     : Math.max(1, Math.ceil(data.length / pageSize));
+  // Clamped so that a list that shrinks, like a narrowed search, never leaves
+  // the table on a page past its end.
+  const page = isControlled
+    ? controlledPage
+    : Math.min(internalPage, pageCount);
   const pageData = useMemo(() => {
     if (isControlled) return data;
     const start = (page - 1) * pageSize;

@@ -1,12 +1,18 @@
 "use server";
 
-import { ActionResult } from "@/types/common";
+import { ActionResult, ListQuery, Paginated } from "@/types/common";
 import { UserOutput } from "@/types/user";
 import * as api from "@/lib/api/users";
 import { ApiError } from "@/lib/api/client";
 
 export async function getUsers(): Promise<UserOutput[]> {
   return api.getUsers();
+}
+
+export async function getUserPage(
+  query: ListQuery,
+): Promise<Paginated<"users", UserOutput>> {
+  return api.getUserPage(query);
 }
 
 function translateUserError(status: number, rawMessage?: string): string {

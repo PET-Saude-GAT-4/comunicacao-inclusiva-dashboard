@@ -1,12 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import AddButton from "@/components/AddButton/AddButton";
 import RemoveButton from "@/components/RemoveButton/RemoveButton";
 import Modal from "@/components/Modal/Modal";
 import Table from "@/components/Table/Table";
+import SearchBar from "@/components/SearchBar/SearchBar";
+import { usePaginatedList } from "@/hooks/usePaginatedList";
 import Input from "@/components/Input/Input";
 import Button from "@/components/Button/Button";
 import PhraseVisibilityBadge from "@/components/PhraseVisibilityBadge/PhraseVisibilityBadge";
@@ -15,7 +17,7 @@ import PhraseSequenceEditor, {
   SequenceEntry,
   entryFromTerm,
 } from "@/components/PhraseSequenceEditor/PhraseSequenceEditor";
-import { getPhrases, createPhrase, deletePhrase } from "@/services/phrases";
+import { getPhrasePage, createPhrase, deletePhrase } from "@/services/phrases";
 import { getTerms } from "@/services/terms";
 import { getSessionUser } from "@/services/auth";
 import { PhraseOutput } from "@/types/phrase";
@@ -51,23 +53,20 @@ function toRow(p: PhraseOutput): PhraseRow {
 
 function Phrases() {
   const router = useRouter();
-  const [data, setData] = useState<PhraseRow[]>([]);
+  const list = usePaginatedList("phrases", getPhrasePage, { pageSize: 10 });
+  const { selectedIds } = list;
   const [user, setUser] = useState<SessionUser | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [isChainModalOpen, setIsChainModalOpen] = useState(false);
   const [chainFormError, setChainFormError] = useState<string | null>(null);
-  const [selectedIds, setSelectedIds] = useState<(string | number)[]>([]);
 
   const [description, setDescription] = useState("");
   const [items, setItems] = useState<SequenceEntry[]>([]);
   const [terms, setTerms] = useState<TermOutput[]>([]);
 
-  const fetchData = () => getPhrases().then((rows) => setData(rows.map(toRow)));
-
   useEffect(() => {
-    fetchData();
     getSessionUser().then(setUser);
   }, []);
 
@@ -98,7 +97,7 @@ function Phrases() {
     if (result.success) {
       setIsModalOpen(false);
       clearForm();
-      fetchData();
+      list.refresh();
     } else {
       setFormError(result.error ?? "Erro ao criar frase.");
     }
@@ -111,11 +110,8 @@ function Phrases() {
         result: await deletePhrase(String(id)),
       })),
     );
-    // Rows that the API refused to remove stay in the table.
-    const removed = results.filter((r) => r.result.success).map((r) => r.uuid);
     const failure = results.find((r) => !r.result.success);
-    setData((prev) => prev.filter((item) => !removed.includes(item.uuid)));
-    setSelectedIds([]);
+    list.refresh();
     setDeleteError(failure?.result.error ?? null);
   };
 
@@ -134,6 +130,13 @@ function Phrases() {
               Criar Interação a Partir de Frase
             </p>
           </Button>
+          <div className="mx-lg w-100">
+            <SearchBar
+              value={list.search}
+              onChange={list.setSearch}
+              placeholder="Buscar frases"
+            />
+          </div>
           <div className="flex">
             <AddButton onClick={openModal} />
             <RemoveButton
@@ -150,7 +153,11 @@ function Phrases() {
       )}
       <div>
         <Table
-          data={data}
+          key={list.listKey}
+          data={list.items.map(toRow)}
+          page={list.page}
+          pageCount={list.pageCount}
+          onPageChange={list.setPage}
           columns={[
             { key: "description", label: "Descrição" },
             {
@@ -202,7 +209,7 @@ function Phrases() {
             { key: "createdAt", label: "Data de Criação" },
           ]}
           onRowClick={(row) => router.push(`/phrases/${row.uuid}`)}
-          onSelectionChange={setSelectedIds}
+          onSelectionChange={list.setSelectedIds}
         />
       </div>
       <Modal
@@ -261,4 +268,10 @@ function Phrases() {
   );
 }
 
-export default Phrases;
+export default function PhrasesPage() {
+  return (
+    <Suspense>
+      <Phrases />
+    </Suspense>
+  );
+}

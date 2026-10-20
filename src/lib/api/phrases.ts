@@ -1,10 +1,21 @@
+import { ListQuery, Paginated } from "@/types/common";
 import { PhraseOutput } from "@/types/phrase";
-import { apiFetch } from "./client";
+import { apiFetch, listQueryString } from "./client";
 
 export async function getPhrases(): Promise<PhraseOutput[]> {
   const data = await apiFetch<{ phrases: PhraseOutput[] }>("/phrases");
   if (!data) throw new Error("Erro ao buscar frases.");
   return data.phrases;
+}
+
+export async function getPhrasePage(
+  query: ListQuery,
+): Promise<Paginated<"phrases", PhraseOutput>> {
+  const data = await apiFetch<Paginated<"phrases", PhraseOutput>>(
+    `/phrases${listQueryString(query)}`,
+  );
+  if (!data) throw new Error("Erro ao buscar frases.");
+  return data;
 }
 
 export async function getPhrase(uuid: string): Promise<PhraseOutput | null> {

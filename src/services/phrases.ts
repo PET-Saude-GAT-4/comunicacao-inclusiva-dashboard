@@ -1,12 +1,18 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { ActionResult } from "@/types/common";
+import { ActionResult, ListQuery, Paginated } from "@/types/common";
 import { PhraseOutput } from "@/types/phrase";
 import * as api from "@/lib/api/phrases";
 
 export async function getPhrases(): Promise<PhraseOutput[]> {
   return api.getPhrases();
+}
+
+export async function getPhrasePage(
+  query: ListQuery,
+): Promise<Paginated<"phrases", PhraseOutput>> {
+  return api.getPhrasePage(query);
 }
 
 export async function getPhrase(uuid: string): Promise<PhraseOutput | null> {

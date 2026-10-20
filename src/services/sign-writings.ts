@@ -1,13 +1,19 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { ActionResult } from "@/types/common";
+import { ActionResult, ListQuery, Paginated } from "@/types/common";
 import { SignWritingOutput } from "@/types/sign-writing";
 import { ApiError } from "@/lib/api/client";
 import * as api from "@/lib/api/sign-writings";
 
 export async function getSignWritings(): Promise<SignWritingOutput[]> {
   return api.getSignWritings();
+}
+
+export async function getSignWritingPage(
+  query: ListQuery,
+): Promise<Paginated<"signWritings", SignWritingOutput>> {
+  return api.getSignWritingPage(query);
 }
 
 export async function getSignWriting(

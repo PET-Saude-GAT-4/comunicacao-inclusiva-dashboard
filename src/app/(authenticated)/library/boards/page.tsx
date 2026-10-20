@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { MdContentPaste } from "react-icons/md";
 import TabButton from "@/components/TabButton/TabButton";
 import Table from "@/components/Table/Table";
+import SearchBar from "@/components/SearchBar/SearchBar";
 import Image from "next/image";
 import { getPublicBoards } from "@/services/boards";
 import { getUsers } from "@/services/users";
@@ -15,9 +16,16 @@ import { SessionUser } from "@/types/session";
 import { boardHref } from "@/utils/board";
 import { MdPerson } from "react-icons/md";
 
+// Defined once so SearchBar, which filters whenever it changes, filters only
+// when the list or the query does.
+const boardSearchText = (board: BoardOutput) => board.title;
+
 function Library() {
   const router = useRouter();
   const [boards, setBoards] = useState<BoardOutput[]>([]);
+  // GET /public/boards is not paginated by design, so this page searches the
+  // list it already has instead of asking the API.
+  const [filteredBoards, setFilteredBoards] = useState<BoardOutput[]>([]);
   const [authorEmails, setAuthorEmails] = useState<Record<string, string>>({});
   const [user, setUser] = useState<SessionUser | null>(null);
 
@@ -41,7 +49,14 @@ function Library() {
         <nav className="flex justify-between">
           <TabButton icon={MdContentPaste} active={true} />
         </nav>
-        <div className="flex w-full justify-around">{/* <SearchBar/> */}</div>
+        <div className="mx-lg w-100">
+          <SearchBar
+            data={filteredBoards}
+            onResults={setFilteredBoards}
+            getSearchText={boardSearchText}
+            placeholder="Buscar pranchas"
+          />
+        </div>
       </div>
       <div>
         <Table

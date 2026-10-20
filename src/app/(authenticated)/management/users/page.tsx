@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import PillTabs from "@/components/PillTabs/PillTabs";
 import { MANAGEMENT_GROUP } from "@/config/navigation";
 import RemoveButton from "@/components/RemoveButton/RemoveButton";
@@ -9,28 +9,24 @@ import Modal from "@/components/Modal/Modal";
 import Input from "@/components/Input/Input";
 import Button from "@/components/Button/Button";
 import Pagination from "@/components/Pagination/Pagination";
-import { getUsers, createUser, deleteUser } from "@/services/users";
+import SearchBar from "@/components/SearchBar/SearchBar";
+import { usePaginatedList } from "@/hooks/usePaginatedList";
+import { getUserPage, createUser, deleteUser } from "@/services/users";
 import { getRoles } from "@/services/roles";
-import { UserOutput } from "@/types/user";
 import { RoleOutput } from "@/types/role";
 import UserCard from "../../components/UserCard/UserCard";
 
 function Users() {
-  const [data, setData] = useState<UserOutput[]>([]);
-  const [selectedIds, setSelectedIds] = useState<(number | string)[]>([]);
+  const list = usePaginatedList("users", getUserPage, { pageSize: 10 });
+  const { selectedIds, setSelectedIds } = list;
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
-  const [page, setPage] = useState(1);
-  const pageSize = 10;
 
   const [email, setEmail] = useState("");
   const [roles, setRoles] = useState<RoleOutput[]>([]);
   const [roleId, setRoleId] = useState<number>(0);
 
-  const fetchData = () => getUsers().then((users) => setData(users));
-
   useEffect(() => {
-    fetchData();
     getRoles().then(setRoles);
   }, []);
 
@@ -49,7 +45,7 @@ function Users() {
       setFormError(null);
       setEmail("");
       setRoleId(0);
-      fetchData();
+      list.refresh();
     } else {
       setFormError(result.error ?? "Erro ao convidar usuário.");
     }
@@ -57,14 +53,12 @@ function Users() {
 
   const handleDelete = async () => {
     await Promise.all(selectedIds.map((id) => deleteUser(Number(id))));
-    setData((prev) => prev.filter((item) => !selectedIds.includes(item.id)));
-    setSelectedIds([]);
+    list.refresh();
   };
 
   const handleDeleteOne = async (id: number) => {
     await deleteUser(id);
-    setData((prev) => prev.filter((item) => item.id !== id));
-    setSelectedIds((prev) => prev.filter((selectedId) => selectedId !== id));
+    list.refresh();
   };
 
   const toggleSelection = (id: number) => {
@@ -75,13 +69,20 @@ function Users() {
     );
   };
 
-  const pageCount = Math.max(1, Math.ceil(data.length / pageSize));
-  const pageData = data.slice((page - 1) * pageSize, page * pageSize);
   return (
     <div className="flex w-full flex-col gap-lg">
       <div className="flex items-center justify-between rounded-lg border border-gray-200 bg-white px-lg py-md text-text-on-primary">
-        <PillTabs label={MANAGEMENT_GROUP.title} pages={MANAGEMENT_GROUP.pages} />
-        <div className="flex w-full justify-around">{/* <SearchBar/> */}</div>
+        <PillTabs
+          label={MANAGEMENT_GROUP.title}
+          pages={MANAGEMENT_GROUP.pages}
+        />
+        <div className="mx-lg w-100">
+          <SearchBar
+            value={list.search}
+            onChange={list.setSearch}
+            placeholder="Buscar usuários"
+          />
+        </div>
         <div className="flex">
           <AddButton onClick={() => setIsModalOpen(true)} />
           <RemoveButton
@@ -92,7 +93,7 @@ function Users() {
       </div>
       <div>
         <div className="grid grid-cols-3 auto-rows-max gap-4">
-          {pageData.map((user) => (
+          {list.items.map((user) => (
             <div key={user.id} className="self-start">
               <UserCard
                 user={user}
@@ -103,15 +104,18 @@ function Users() {
             </div>
           ))}
         </div>
+        {list.loaded && list.items.length === 0 && (
+          <p className="py-lg text-center text-text-secondary">
+            Nenhum item encontrado
+          </p>
+        )}
 
-        {pageCount > 1 && (
+        {list.pageCount > 1 && (
           <div className="flex items-center justify-center border-t border-outline-common py-sm bg-surface-primary">
             <Pagination
-              page={page}
-              pageCount={pageCount}
-              onPageChange={(nextPage) =>
-                setPage(Math.min(Math.max(1, nextPage), pageCount))
-              }
+              page={list.page}
+              pageCount={list.pageCount}
+              onPageChange={list.setPage}
             />
           </div>
         )}
@@ -171,4 +175,10 @@ function Users() {
   );
 }
 
-export default Users;
+export default function UsersPage() {
+  return (
+    <Suspense>
+      <Users />
+    </Suspense>
+  );
+}

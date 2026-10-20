@@ -36,8 +36,7 @@ export function usePaginatedList<K extends string, T>(
   const searchParams = useSearchParams();
 
   const parsedPage = Number(searchParams.get("page"));
-  const page =
-    Number.isInteger(parsedPage) && parsedPage > 1 ? parsedPage : 1;
+  const page = Number.isInteger(parsedPage) && parsedPage > 1 ? parsedPage : 1;
   const q = searchParams.get("q") ?? "";
   const filters: Filters = Object.fromEntries(
     filterKeys.map((name) => [name, searchParams.get(name) ?? undefined]),
@@ -75,7 +74,9 @@ export function usePaginatedList<K extends string, T>(
 
   const setPage = (nextPage: number) => {
     const pageCount = result?.meta.pageCount ?? nextPage;
-    updateUrl({ page: Math.min(Math.max(1, nextPage), Math.max(1, pageCount)) });
+    updateUrl({
+      page: Math.min(Math.max(1, nextPage), Math.max(1, pageCount)),
+    });
     setSelectedIds([]);
   };
 

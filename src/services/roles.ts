@@ -1,12 +1,18 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { ActionResult } from "@/types/common";
+import { ActionResult, ListQuery, Paginated } from "@/types/common";
 import { RoleOutput } from "@/types/role";
 import * as api from "@/lib/api/roles";
 
 export async function getRoles(): Promise<RoleOutput[]> {
   return api.getRoles();
+}
+
+export async function getRolePage(
+  query: ListQuery,
+): Promise<Paginated<"roles", RoleOutput>> {
+  return api.getRolePage(query);
 }
 
 export async function createRole(data: {

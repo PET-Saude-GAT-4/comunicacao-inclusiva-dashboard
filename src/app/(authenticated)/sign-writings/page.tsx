@@ -1,26 +1,30 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import AddButton from "@/components/AddButton/AddButton";
 import PillTabs from "@/components/PillTabs/PillTabs";
 import { TERM_SECTIONS } from "@/config/navigation";
 import Modal from "@/components/Modal/Modal";
 import Pagination from "@/components/Pagination/Pagination";
+import SearchBar from "@/components/SearchBar/SearchBar";
+import { usePaginatedList } from "@/hooks/usePaginatedList";
 import AssetCard from "../components/AssetCard/AssetCard";
 import Input from "@/components/Input/Input";
 import Button from "@/components/Button/Button";
 import {
-  getSignWritings,
+  getSignWritingPage,
   createSignWriting,
   deleteSignWriting,
 } from "@/services/sign-writings";
-import { SignWritingOutput } from "@/types/sign-writing";
 import { getTerms } from "@/services/terms";
 import { termBadge, termNamesByPart } from "@/utils/term";
 import RemoveButton from "@/components/RemoveButton/RemoveButton";
 
 function SignWritings() {
-  const [data, setData] = useState<SignWritingOutput[]>([]);
+  const list = usePaginatedList("signWritings", getSignWritingPage, {
+    pageSize: 12,
+  });
+  const { selectedIds, setSelectedIds } = list;
   // Null until the terms load, so no card claims "Sem termo" too early.
   const [termNames, setTermNames] = useState<Record<string, string[]> | null>(
     null,
@@ -28,17 +32,11 @@ function SignWritings() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
-  const [selectedIds, setSelectedIds] = useState<(string | number)[]>([]);
-  const [page, setPage] = useState(1);
-  const pageSize = 12;
 
   const [description, setDescription] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
 
-  const fetchData = () => getSignWritings().then(setData);
-
   useEffect(() => {
-    fetchData();
     getTerms()
       .then((terms) => setTermNames(termNamesByPart(terms, "signWriting")))
       .catch(() => {});
@@ -59,7 +57,7 @@ function SignWritings() {
       setFormError(null);
       setDescription("");
       if (fileRef.current) fileRef.current.value = "";
-      fetchData();
+      list.refresh();
     } else {
       setFormError(result.error ?? "Erro ao criar SignWriting.");
     }
@@ -72,22 +70,14 @@ function SignWritings() {
         result: await deleteSignWriting(String(id)),
       })),
     );
-    // Rows that the API refused to remove stay in the table.
-    const removed = results.filter((r) => r.result.success).map((r) => r.uuid);
     const failure = results.find((r) => !r.result.success);
-    setData((prev) => prev.filter((item) => !removed.includes(item.uuid)));
-    setSelectedIds([]);
+    list.refresh();
     setDeleteError(failure?.result.error ?? null);
   };
 
   const handleDeleteOne = async (uuid: string) => {
     const result = await deleteSignWriting(uuid);
-    if (result.success) {
-      setData((prev) => prev.filter((item) => item.uuid !== uuid));
-      setSelectedIds((prev) =>
-        prev.filter((selectedId) => selectedId !== uuid),
-      );
-    }
+    if (result.success) list.refresh();
     setDeleteError(result.success ? null : (result.error ?? null));
   };
 
@@ -99,12 +89,17 @@ function SignWritings() {
     );
   };
 
-  const pageCount = Math.max(1, Math.ceil(data.length / pageSize));
-  const pageData = data.slice((page - 1) * pageSize, page * pageSize);
   return (
     <div className="flex w-full flex-col gap-lg">
       <div className="flex items-center justify-between rounded-lg border border-gray-200 bg-white px-lg py-md text-text-on-primary">
         <PillTabs label="Termos" pages={TERM_SECTIONS} />
+        <div className="mx-lg w-100">
+          <SearchBar
+            value={list.search}
+            onChange={list.setSearch}
+            placeholder="Buscar SignWritings"
+          />
+        </div>
         <div className="flex">
           <AddButton onClick={() => setIsModalOpen(true)} />
           <RemoveButton
@@ -118,7 +113,7 @@ function SignWritings() {
       )}
       <div className="flex flex-col">
         <div className="grid grid-cols-6 gap-4 p-4">
-          {pageData.map((signWriting) => (
+          {list.items.map((signWriting) => (
             <div key={signWriting.uuid}>
               {/* SignWritings record no author. */}
               <AssetCard
@@ -137,13 +132,16 @@ function SignWritings() {
             </div>
           ))}
         </div>
+        {list.loaded && list.items.length === 0 && (
+          <p className="py-lg text-center text-text-secondary">
+            Nenhum item encontrado
+          </p>
+        )}
         <div className="flex items-center justify-center py-4 rounded-md outline-1 outline-outline-common bg-white">
           <Pagination
-            page={page}
-            pageCount={pageCount}
-            onPageChange={(nextPage) =>
-              setPage(Math.min(Math.max(1, nextPage), pageCount))
-            }
+            page={list.page}
+            pageCount={list.pageCount}
+            onPageChange={list.setPage}
           />
         </div>
       </div>
@@ -183,4 +181,10 @@ function SignWritings() {
   );
 }
 
-export default SignWritings;
+export default function SignWritingsPage() {
+  return (
+    <Suspense>
+      <SignWritings />
+    </Suspense>
+  );
+}
