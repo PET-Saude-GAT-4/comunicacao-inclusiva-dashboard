@@ -6,6 +6,7 @@ import { MdContentPaste } from "react-icons/md";
 import TabButton from "@/components/TabButton/TabButton";
 import Table from "@/components/Table/Table";
 import SearchBar from "@/components/SearchBar/SearchBar";
+import ListToolbar from "@/components/ListToolbar/ListToolbar";
 import Image from "next/image";
 import { getPublicBoards } from "@/services/boards";
 import { getUsers } from "@/services/users";
@@ -45,19 +46,21 @@ function Library() {
 
   return (
     <div className="flex w-full flex-col gap-lg">
-      <div className="flex items-center justify-between rounded-lg border border-gray-200 bg-white px-lg py-md text-text-on-primary">
-        <nav className="flex justify-between">
-          <TabButton icon={MdContentPaste} active={true} />
-        </nav>
-        <div className="mx-lg w-100">
+      <ListToolbar
+        start={
+          <nav>
+            <TabButton icon={MdContentPaste} active={true} />
+          </nav>
+        }
+        search={
           <SearchBar
             data={boards}
             onResults={setFilteredBoards}
             getSearchText={boardSearchText}
             placeholder="Buscar pranchas"
           />
-        </div>
-      </div>
+        }
+      />
       <div>
         <Table
           data={filteredBoards}

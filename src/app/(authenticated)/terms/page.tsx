@@ -7,6 +7,7 @@ import { TERM_SECTIONS } from "@/config/navigation";
 import Modal from "@/components/Modal/Modal";
 import Pagination from "@/components/Pagination/Pagination";
 import SearchBar from "@/components/SearchBar/SearchBar";
+import ListToolbar from "@/components/ListToolbar/ListToolbar";
 import ListStatus from "@/components/ListStatus/ListStatus";
 import { usePaginatedList } from "@/hooks/usePaginatedList";
 import AssetCard from "../components/AssetCard/AssetCard";
@@ -120,23 +121,25 @@ function Terms() {
 
   return (
     <div className="flex w-full flex-col gap-lg">
-      <div className="flex items-center justify-between rounded-lg border border-gray-200 bg-white px-lg py-md text-text-on-primary">
-        <PillTabs label="Termos" pages={TERM_SECTIONS} />
-        <div className="mx-lg w-100">
+      <ListToolbar
+        start={<PillTabs label="Termos" pages={TERM_SECTIONS} />}
+        search={
           <SearchBar
             value={list.search}
             onChange={list.setSearch}
             placeholder="Buscar termos"
           />
-        </div>
-        <div className="flex">
-          <AddButton label="Adicionar termo" onClick={openModal} />
-          <RemoveButton
-            active={selectedIds.length > 0}
-            onClick={handleDelete}
-          />
-        </div>
-      </div>
+        }
+        end={
+          <>
+            <AddButton label="Adicionar termo" onClick={openModal} />
+            <RemoveButton
+              active={selectedIds.length > 0}
+              onClick={handleDelete}
+            />
+          </>
+        }
+      />
       {deleteError && (
         <p className="px-4 text-sm text-red-500">{deleteError}</p>
       )}

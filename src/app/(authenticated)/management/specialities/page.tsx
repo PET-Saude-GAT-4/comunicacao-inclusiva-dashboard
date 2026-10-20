@@ -8,6 +8,7 @@ import AddButton from "@/components/AddButton/AddButton";
 import Modal from "@/components/Modal/Modal";
 import Table from "@/components/Table/Table";
 import SearchBar from "@/components/SearchBar/SearchBar";
+import ListToolbar from "@/components/ListToolbar/ListToolbar";
 import { usePaginatedList } from "@/hooks/usePaginatedList";
 import Input from "@/components/Input/Input";
 import Button from "@/components/Button/Button";
@@ -70,29 +71,33 @@ function Specialities() {
 
   return (
     <div className="flex w-full flex-col gap-lg">
-      <div className="flex items-center justify-between rounded-lg border border-gray-200 bg-white px-lg py-md text-text-on-primary">
-        <PillTabs
-          label={MANAGEMENT_GROUP.title}
-          pages={MANAGEMENT_GROUP.pages}
-        />
-        <div className="mx-lg w-100">
+      <ListToolbar
+        start={
+          <PillTabs
+            label={MANAGEMENT_GROUP.title}
+            pages={MANAGEMENT_GROUP.pages}
+          />
+        }
+        search={
           <SearchBar
             value={list.search}
             onChange={list.setSearch}
             placeholder="Buscar especialidades"
           />
-        </div>
-        <div className="flex">
-          <AddButton
-            label="Adicionar especialidade"
-            onClick={() => setIsModalOpen(true)}
-          />
-          <RemoveButton
-            active={selectedIds.length > 0}
-            onClick={handleDelete}
-          />
-        </div>
-      </div>
+        }
+        end={
+          <>
+            <AddButton
+              label="Adicionar especialidade"
+              onClick={() => setIsModalOpen(true)}
+            />
+            <RemoveButton
+              active={selectedIds.length > 0}
+              onClick={handleDelete}
+            />
+          </>
+        }
+      />
       <div className="flex-1">
         <Table
           selected={list.selectedIds}

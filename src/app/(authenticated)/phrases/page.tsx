@@ -8,6 +8,7 @@ import RemoveButton from "@/components/RemoveButton/RemoveButton";
 import Modal from "@/components/Modal/Modal";
 import Table from "@/components/Table/Table";
 import SearchBar from "@/components/SearchBar/SearchBar";
+import ListToolbar from "@/components/ListToolbar/ListToolbar";
 import { usePaginatedList } from "@/hooks/usePaginatedList";
 import Input from "@/components/Input/Input";
 import Button from "@/components/Button/Button";
@@ -118,10 +119,11 @@ function Phrases() {
 
   return (
     <div className="flex w-full flex-col gap-lg">
-      <div className="flex items-center justify-end rounded-lg border border-gray-200 bg-white px-lg py-md text-text-on-primary">
-        <div className="flex items-center justify-between w-full">
+      <ListToolbar
+        start={
+          // Button sets my-md, and a plain my-0 loses to it in the generated CSS.
           <Button
-            className="bg-surface-primary outline-1 outline-outline-common "
+            className="my-0! bg-surface-primary outline-1 outline-outline-common "
             onClick={() => {
               setChainFormError(null);
               setIsChainModalOpen(true);
@@ -131,22 +133,24 @@ function Phrases() {
               Criar Interação a Partir de Frase
             </p>
           </Button>
-          <div className="mx-lg w-100">
-            <SearchBar
-              value={list.search}
-              onChange={list.setSearch}
-              placeholder="Buscar frases"
-            />
-          </div>
-          <div className="flex">
+        }
+        search={
+          <SearchBar
+            value={list.search}
+            onChange={list.setSearch}
+            placeholder="Buscar frases"
+          />
+        }
+        end={
+          <>
             <AddButton label="Adicionar frase" onClick={openModal} />
             <RemoveButton
               active={selectedIds.length > 0}
               onClick={handleDelete}
             />
-          </div>
-        </div>
-      </div>
+          </>
+        }
+      />
       {deleteError && (
         <p className="text-sm text-red-500 px-lg py-sm border-b border-outline-common">
           {deleteError}

@@ -10,6 +10,7 @@ import Input from "@/components/Input/Input";
 import Button from "@/components/Button/Button";
 import Pagination from "@/components/Pagination/Pagination";
 import SearchBar from "@/components/SearchBar/SearchBar";
+import ListToolbar from "@/components/ListToolbar/ListToolbar";
 import ListStatus from "@/components/ListStatus/ListStatus";
 import { usePaginatedList } from "@/hooks/usePaginatedList";
 import { getUserPage, createUser, deleteUser } from "@/services/users";
@@ -74,29 +75,33 @@ function Users() {
 
   return (
     <div className="flex w-full flex-col gap-lg">
-      <div className="flex items-center justify-between rounded-lg border border-gray-200 bg-white px-lg py-md text-text-on-primary">
-        <PillTabs
-          label={MANAGEMENT_GROUP.title}
-          pages={MANAGEMENT_GROUP.pages}
-        />
-        <div className="mx-lg w-100">
+      <ListToolbar
+        start={
+          <PillTabs
+            label={MANAGEMENT_GROUP.title}
+            pages={MANAGEMENT_GROUP.pages}
+          />
+        }
+        search={
           <SearchBar
             value={list.search}
             onChange={list.setSearch}
             placeholder="Buscar usuários"
           />
-        </div>
-        <div className="flex">
-          <AddButton
-            label="Adicionar usuário"
-            onClick={() => setIsModalOpen(true)}
-          />
-          <RemoveButton
-            active={selectedIds.length > 0}
-            onClick={handleDelete}
-          />
-        </div>
-      </div>
+        }
+        end={
+          <>
+            <AddButton
+              label="Adicionar usuário"
+              onClick={() => setIsModalOpen(true)}
+            />
+            <RemoveButton
+              active={selectedIds.length > 0}
+              onClick={handleDelete}
+            />
+          </>
+        }
+      />
       <div>
         <div className="grid grid-cols-3 auto-rows-max gap-4">
           {list.items.map((user) => (

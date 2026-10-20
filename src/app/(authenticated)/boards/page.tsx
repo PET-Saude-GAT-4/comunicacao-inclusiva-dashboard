@@ -6,6 +6,7 @@ import AddButton from "@/components/AddButton/AddButton";
 import Modal from "@/components/Modal/Modal";
 import Table from "@/components/Table/Table";
 import SearchBar from "@/components/SearchBar/SearchBar";
+import ListToolbar from "@/components/ListToolbar/ListToolbar";
 import { usePaginatedList } from "@/hooks/usePaginatedList";
 import Input from "@/components/Input/Input";
 import Button from "@/components/Button/Button";
@@ -141,24 +142,27 @@ function Boards() {
 
   return (
     <div className="flex w-full flex-col gap-lg">
-      <div className="flex items-center justify-end rounded-lg border border-gray-200 bg-white px-lg py-md text-text-on-primary">
-        <div className="flex justify-between w-full">
+      <ListToolbar
+        start={
+          // Button sets my-md, and a plain my-0 loses to it in the generated CSS.
           <Button
-            className="bg-surface-primary outline-1 outline-outline-common "
+            className="my-0! bg-surface-primary outline-1 outline-outline-common "
             onClick={() => setIsCreateInteractionChainModalOpen(true)}
           >
             <p className="text-gray-600 w-full h-full hover:text-text-on-primary-dark">
               Criar Interação Entre Pranchas
             </p>
           </Button>
-          <div className="mx-lg w-100">
-            <SearchBar
-              value={list.search}
-              onChange={list.setSearch}
-              placeholder="Buscar pranchas"
-            />
-          </div>
-          <div className=" flex items-center justify-center ">
+        }
+        search={
+          <SearchBar
+            value={list.search}
+            onChange={list.setSearch}
+            placeholder="Buscar pranchas"
+          />
+        }
+        end={
+          <>
             <div className="mr-md w-48">
               <Dropdown<BoardType | "all">
                 id="typeFilter"
@@ -183,9 +187,9 @@ function Boards() {
               active={selectedIds.length > 0}
               onClick={handleDelete}
             />
-          </div>
-        </div>
-      </div>
+          </>
+        }
+      />
       {deleteError && (
         <p className="text-sm text-red-500 px-lg py-sm">{deleteError}</p>
       )}
