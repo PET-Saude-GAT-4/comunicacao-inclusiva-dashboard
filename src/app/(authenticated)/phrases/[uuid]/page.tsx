@@ -19,9 +19,7 @@ import {
   unpublishPhrase,
   setPhraseListedInLibrary,
 } from "@/services/phrases";
-import { getTerms } from "@/services/terms";
 import { PhraseOutput } from "@/types/phrase";
-import { TermOutput } from "@/types/term";
 import { formatList } from "@/utils/text";
 import { useUnsavedChangesGuard } from "@/hooks/useUnsavedChangesGuard";
 import CreateInteractionChainModal from "@/app/(authenticated)/components/CreateInteractionChainModal/CreateInteractionChainModal";
@@ -66,7 +64,6 @@ function PhraseDetail() {
     useState<PhraseVisibility>("draft");
 
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [terms, setTerms] = useState<TermOutput[]>([]);
 
   const [chains, setChains] = useState<InteractionChainOutput[]>([]);
   const [boards, setBoards] = useState<BoardOutput[]>([]);
@@ -214,10 +211,7 @@ function PhraseDetail() {
     setChainBusy(false);
   };
 
-  const listTerms = () => {
-    getTerms().then(setTerms);
-    setIsModalOpen(true);
-  };
+  const listTerms = () => setIsModalOpen(true);
 
   if (phrase === null) {
     return (
@@ -415,7 +409,6 @@ function PhraseDetail() {
       >
         <div className="flex flex-row gap-sm w-200 m-xl mb-xs">
           <TermPicker
-            terms={terms}
             onSelect={(term) =>
               setItems((prev) => [...prev, entryFromTerm(term)])
             }

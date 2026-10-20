@@ -14,10 +14,8 @@ import AssetCard from "../components/AssetCard/AssetCard";
 import Input from "@/components/Input/Input";
 import Button from "@/components/Button/Button";
 import { getTermPage, createTerm, deleteTerm } from "@/services/terms";
-import { getPictograms } from "@/services/pictograms";
-import { getSignWritings } from "@/services/sign-writings";
-import { PictogramOutput } from "@/types/pictogram";
-import { SignWritingOutput } from "@/types/sign-writing";
+import { getPictogramPage } from "@/services/pictograms";
+import { getSignWritingPage } from "@/services/sign-writings";
 import Image from "next/image";
 import Link from "next/link";
 import RemoveButton from "@/components/RemoveButton/RemoveButton";
@@ -33,8 +31,10 @@ function Terms() {
 
   const [description, setDescription] = useState("");
   const [descriptionEdited, setDescriptionEdited] = useState(false);
-  const [pictograms, setPictograms] = useState<PictogramOutput[]>([]);
-  const [signWritings, setSignWritings] = useState<SignWritingOutput[]>([]);
+  // Null until known, so the hint does not claim there are none too early.
+  const [hasSignWritings, setHasSignWritings] = useState<boolean | null>(
+    null,
+  );
   const [selectedPictogram, setSelectedPictogram] = useState<Asset>();
   const [selectedSignWriting, setSelectedSignWriting] = useState<Asset>();
 
@@ -55,8 +55,10 @@ function Terms() {
   };
 
   const openModal = () => {
-    getPictograms().then(setPictograms);
-    getSignWritings().then(setSignWritings);
+    // The picker loads its own pages; this only asks whether any exist.
+    getSignWritingPage({ page: 1, pageSize: 1 })
+      .then((data) => setHasSignWritings(data.meta.total > 0))
+      .catch(() => setHasSignWritings(null));
     setIsModalOpen(true);
   };
 
@@ -198,12 +200,17 @@ function Terms() {
             }}
           />
           <div className="flex flex-row gap-xxl">
-            <AssetPicker items={pictograms} onSelect={handleSelectPictogram} />
+            <AssetPicker
+              listKey="pictograms"
+              fetchPage={getPictogramPage}
+              onSelect={handleSelectPictogram}
+            />
             <AssetPicker
               id="sign-writing-filter"
               label="SignWritings Disponíveis:"
               itemNoun="SignWriting"
-              items={signWritings}
+              listKey="signWritings"
+              fetchPage={getSignWritingPage}
               onSelect={setSelectedSignWriting}
             />
             <div className="flex flex-col w-full gap-md">
@@ -263,7 +270,7 @@ function Terms() {
               <p className="text-sm text-text-on-primary-variant text-right">
                 Falta escolher {formatList(missing)}.{" "}
                 {!selectedSignWriting &&
-                  (signWritings.length === 0 ? (
+                  (hasSignWritings === false ? (
                     <>
                       Nenhum SignWriting foi cadastrado ainda —{" "}
                       <Link

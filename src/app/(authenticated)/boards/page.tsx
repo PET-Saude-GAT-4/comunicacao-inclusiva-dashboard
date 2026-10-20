@@ -27,7 +27,7 @@ import Image from "next/image";
 import RemoveButton from "@/components/RemoveButton/RemoveButton";
 import Badge from "@/components/Badge/Badge";
 import { PictogramOutput } from "@/types/pictogram";
-import { getPictograms } from "@/services/pictograms";
+import { getPictogramPage } from "@/services/pictograms";
 import AssetPicker, { Asset } from "@/components/AssetPicker/AssetPicker";
 import CreateInteractionChainModal from "../components/CreateInteractionChainModal/CreateInteractionChainModal";
 import { MdPerson } from "react-icons/md";
@@ -61,7 +61,6 @@ function Boards() {
 
   const [formError, setFormError] = useState<string | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
-  const [pictograms, setPictograms] = useState<PictogramOutput[]>([]);
 
   const [title, setTitle] = useState("");
   const [boardType, setBoardType] = useState<BoardType>("common");
@@ -135,11 +134,6 @@ function Boards() {
     }
   };
 
-  const listPictograms = async () => {
-    getPictograms().then((items) => setPictograms(items));
-    setIsCreateBoardModalOpen(true);
-  };
-
   return (
     <div className="flex w-full flex-col gap-lg">
       <ListToolbar
@@ -179,9 +173,7 @@ function Boards() {
             </div>
             <AddButton
               label="Adicionar prancha"
-              onClick={() => {
-                listPictograms();
-              }}
+              onClick={() => setIsCreateBoardModalOpen(true)}
             />
             <RemoveButton
               active={selectedIds.length > 0}
@@ -279,7 +271,11 @@ function Boards() {
       >
         {formError && <p className="text-sm text-red-500">{formError}</p>}
         <div className="flex flex-rol justify-between w-200 gap-xxl m-xl mb-xs">
-          <AssetPicker items={pictograms} onSelect={setSelectedPictogram} />
+          <AssetPicker
+            listKey="pictograms"
+            fetchPage={getPictogramPage}
+            onSelect={setSelectedPictogram}
+          />
           <div className="flex flex-col w-full gap-lg">
             <Input
               id="title"

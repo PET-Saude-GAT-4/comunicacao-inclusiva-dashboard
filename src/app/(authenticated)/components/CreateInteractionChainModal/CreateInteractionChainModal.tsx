@@ -7,8 +7,8 @@ import { PhraseOutput } from "@/types/phrase";
 import { useCallback, useEffect, useState } from "react";
 import BoardPicker from "@/components/BoardPicker/BoardPicker";
 import PhrasePicker from "@/components/PhrasePicker/PhrasePicker";
-import { getBoards, getBoard } from "@/services/boards";
-import { getPhrases, getPhrase } from "@/services/phrases";
+import { getBoard } from "@/services/boards";
+import { getPhrase } from "@/services/phrases";
 
 import { MdArrowBack, MdListAlt } from "react-icons/md";
 
@@ -61,9 +61,6 @@ export default function CreateInteractionChainModal({
     InteractionChainOutput[]
   >([]);
 
-  const [data, setData] = useState<BoardOutput[]>([]);
-  const [phrases, setPhrases] = useState<PhraseOutput[]>([]);
-
   const isPhraseTrigger = triggerKind === "phrase";
 
   // The two trigger states are collapsed into the arc the API speaks.
@@ -92,9 +89,6 @@ export default function CreateInteractionChainModal({
   // list nobody has asked to see.
   useEffect(() => {
     if (!isModalOpen) return;
-
-    getBoards().then(setData);
-    getPhrases().then(setPhrases);
 
     if (!incomingType || !incomingUuid) return;
 
@@ -133,13 +127,7 @@ export default function CreateInteractionChainModal({
         )
       : null;
 
-  const getBoardTitle = (uuid: string) =>
-    data.find((b) => b.uuid === uuid)?.title ?? uuid;
-
-  const getTriggerTitle = (t: ChainTrigger) =>
-    t.type === "board"
-      ? getBoardTitle(t.uuid)
-      : (phrases.find((p) => p.uuid === t.uuid)?.description ?? t.uuid);
+  const triggerTitle = triggerBoard?.title ?? triggerPhrase?.description ?? "";
 
   const handleCreate = async () => {
     if (!trigger) {
@@ -179,27 +167,32 @@ export default function CreateInteractionChainModal({
     }
   };
 
-  const handleShownBoards = () => {
-    return data.filter((board) => board.uuid !== triggerBoard?.uuid);
-  };
-
   // A trigger may point at a board only once, so its existing responses are
-  // left out of the picker. Matching on each chain's own trigger keeps this
+  // greyed out in the picker. Matching on each chain's own trigger keeps this
   // right while interactionList still holds all chains or a previous trigger's.
-  const handleShownResponseBoards = () => {
-    if (!trigger) return handleShownBoards();
+  const linkedResponseUuids = new Set(
+    trigger
+      ? interactionList
+          .filter(
+            (ic) =>
+              ic.trigger.type === trigger.type &&
+              ic.trigger.uuid === trigger.uuid,
+          )
+          .map((ic) => ic.responseBoardUuid)
+      : [],
+  );
 
-    const linked = new Set(
-      interactionList
-        .filter(
-          (ic) =>
-            ic.trigger.type === trigger.type &&
-            ic.trigger.uuid === trigger.uuid,
-        )
-        .map((ic) => ic.responseBoardUuid),
-    );
+  const triggerUnavailableReason = (board: BoardOutput) =>
+    board.uuid === triggerBoard?.uuid ? "Origem atual" : null;
 
-    return handleShownBoards().filter((board) => !linked.has(board.uuid));
+  // The API refuses an unpublished board as the destination of an
+  // interaction, so it is shown with the reason instead of being offered only
+  // to fail on submit.
+  const responseUnavailableReason = (board: BoardOutput) => {
+    if (board.uuid === triggerBoard?.uuid) return "Prancha de origem";
+    if (linkedResponseUuids.has(board.uuid)) return "Já vinculada";
+    if (board.publishedAt === null) return "Não publicada";
+    return null;
   };
 
   const handleSelectTriggerBoard = (board: BoardOutput) => {
@@ -254,7 +247,7 @@ export default function CreateInteractionChainModal({
                     <>
                       Origem:{" "}
                       <span className="font-semibold">
-                        {getTriggerTitle(trigger)}
+                        {triggerTitle}
                       </span>
                     </>
                   ) : (
@@ -289,9 +282,7 @@ export default function CreateInteractionChainModal({
                       <span className="min-w-0 wrap-break-word font-semibold">
                         {ic.label?.trim()
                           ? ic.label
-                          : `${getTriggerTitle(ic.trigger)} → ${getBoardTitle(
-                              ic.responseBoardUuid,
-                            )}`}
+                          : `${ic.trigger.title} → ${ic.responseBoardTitle}`}
                       </span>
                       <RemoveButton
                         active
@@ -373,7 +364,7 @@ export default function CreateInteractionChainModal({
                           <p className="mt-sm wrap-break-word text-sm text-gray-500">
                             Origem:{" "}
                             <span className="font-semibold">
-                              {trigger ? getTriggerTitle(trigger) : ""}
+                              {triggerTitle}
                             </span>
                           </p>
                           <p className="wrap-break-word text-sm text-gray-500">
@@ -441,21 +432,21 @@ export default function CreateInteractionChainModal({
               <div className="min-w-0">
                 {step === "trigger" ? (
                   isPhraseTrigger ? (
-                    <PhrasePicker
-                      phrases={phrases}
-                      onSelect={handleSelectTriggerPhrase}
-                    />
+                    <PhrasePicker onSelect={handleSelectTriggerPhrase} />
                   ) : (
                     <BoardPicker
-                      boards={handleShownBoards()}
+                      key="trigger"
                       onSelect={handleSelectTriggerBoard}
+                      unavailableReason={triggerUnavailableReason}
                     />
                   )
                 ) : (
+                  // Keyed apart from the trigger picker, so the search typed
+                  // there does not carry over to this step.
                   <BoardPicker
-                    boards={handleShownResponseBoards()}
+                    key="response"
                     onSelect={setResponseBoard}
-                    requirePublished
+                    unavailableReason={responseUnavailableReason}
                   />
                 )}
               </div>

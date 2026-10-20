@@ -19,10 +19,9 @@ import PhraseSequenceEditor, {
   entryFromTerm,
 } from "@/components/PhraseSequenceEditor/PhraseSequenceEditor";
 import { getPhrasePage, createPhrase, deletePhrase } from "@/services/phrases";
-import { getTerms } from "@/services/terms";
 import { getSessionUser } from "@/services/auth";
 import { PhraseOutput } from "@/types/phrase";
-import { TermOutput, TermPlacementOutput } from "@/types/term";
+import { TermPlacementOutput } from "@/types/term";
 import { SessionUser } from "@/types/session";
 import { formatList } from "@/utils/text";
 import CreateInteractionChainModal from "@/app/(authenticated)/components/CreateInteractionChainModal/CreateInteractionChainModal";
@@ -65,7 +64,6 @@ function Phrases() {
 
   const [description, setDescription] = useState("");
   const [items, setItems] = useState<SequenceEntry[]>([]);
-  const [terms, setTerms] = useState<TermOutput[]>([]);
 
   useEffect(() => {
     getSessionUser().then(setUser);
@@ -77,10 +75,7 @@ function Phrases() {
     setFormError(null);
   };
 
-  const openModal = () => {
-    getTerms().then(setTerms);
-    setIsModalOpen(true);
-  };
+  const openModal = () => setIsModalOpen(true);
 
   const missing = [
     !description.trim() && "uma descrição",
@@ -238,7 +233,6 @@ function Phrases() {
           />
           <div className="flex flex-row gap-xxl">
             <TermPicker
-              terms={terms}
               onSelect={(term) =>
                 setItems((prev) => [...prev, entryFromTerm(term)])
               }
