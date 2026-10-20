@@ -12,7 +12,6 @@ import Input from "@/components/Input/Input";
 import Button from "@/components/Button/Button";
 import Dropdown from "@/components/Dropdown/Dropdown";
 import { getBoardPage, createBoard, deleteBoard } from "@/services/boards";
-import { getUsers } from "@/services/users";
 import { getSessionUser } from "@/services/auth";
 import {
   BOARD_TYPE_LABELS,
@@ -30,7 +29,7 @@ import { PictogramOutput } from "@/types/pictogram";
 import { getPictogramPage } from "@/services/pictograms";
 import AssetPicker, { Asset } from "@/components/AssetPicker/AssetPicker";
 import CreateInteractionChainModal from "../components/CreateInteractionChainModal/CreateInteractionChainModal";
-import { MdPerson } from "react-icons/md";
+import AuthorEmail from "../components/AuthorEmail/AuthorEmail";
 
 // The type comes from the URL, so anything other than a known type is dropped
 // instead of reaching the API as a 400.
@@ -50,7 +49,6 @@ function Boards() {
     filterKeys: ["type"],
   });
   const { selectedIds } = list;
-  const [authorEmails, setAuthorEmails] = useState<Record<string, string>>({});
   const [user, setUser] = useState<SessionUser | null>(null);
   const [isCreateBoardModalOpen, setIsCreateBoardModalOpen] = useState(false);
 
@@ -80,20 +78,7 @@ function Boards() {
   };
 
   useEffect(() => {
-    getSessionUser().then((sessionUser) => {
-      setUser(sessionUser);
-      if (sessionUser?.role === "super_admin") {
-        getUsers()
-          .catch(() => [])
-          .then((users) =>
-            setAuthorEmails(
-              Object.fromEntries(
-                users.map((author) => [author.uuid, author.email]),
-              ),
-            ),
-          );
-      }
-    });
+    getSessionUser().then(setUser);
   }, []);
 
   const handleCreate = async () => {
@@ -215,14 +200,7 @@ function Boards() {
                     render: (
                       _value: BoardOutput[keyof BoardOutput],
                       row: BoardOutput,
-                    ) => (
-                      <div className="flex items-center gap-sm">
-                        <MdPerson className="text-gray-400" size={18} />
-                        <p>
-                          {authorEmails[row.authorUuid ?? ""] ?? "Desconhecido"}
-                        </p>
-                      </div>
-                    ),
+                    ) => <AuthorEmail uuid={row.authorUuid} />,
                   },
                 ]
               : []),

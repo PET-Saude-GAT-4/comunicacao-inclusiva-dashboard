@@ -1,17 +1,11 @@
 import { ListQuery, Paginated } from "@/types/common";
-import { PictogramOutput } from "@/types/pictogram";
+import { PictogramOutput, PictogramListItem } from "@/types/pictogram";
 import { apiFetch, listQueryString } from "./client";
-
-export async function getPictograms(): Promise<PictogramOutput[]> {
-  const data = await apiFetch<{ pictograms: PictogramOutput[] }>("/pictograms");
-  if (!data) throw new Error("Erro ao buscar pictogramas.");
-  return data.pictograms;
-}
 
 export async function getPictogramPage(
   query: ListQuery,
-): Promise<Paginated<"pictograms", PictogramOutput>> {
-  const data = await apiFetch<Paginated<"pictograms", PictogramOutput>>(
+): Promise<Paginated<"pictograms", PictogramListItem>> {
+  const data = await apiFetch<Paginated<"pictograms", PictogramListItem>>(
     `/pictograms${listQueryString(query)}`,
   );
   if (!data) throw new Error("Erro ao buscar pictogramas.");

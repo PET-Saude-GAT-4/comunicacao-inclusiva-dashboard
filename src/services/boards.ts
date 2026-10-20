@@ -7,10 +7,6 @@ import { BoardTermOutput } from "@/types/term";
 import { ApiError } from "@/lib/api/client";
 import * as api from "@/lib/api/boards";
 
-export async function getBoards(): Promise<BoardOutput[]> {
-  return api.getBoards();
-}
-
 export async function getBoardPage(
   query: ListQuery,
   filters: { type?: BoardType } = {},

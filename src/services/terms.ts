@@ -6,10 +6,6 @@ import { TermOutput } from "@/types/term";
 import { ApiError } from "@/lib/api/client";
 import * as api from "@/lib/api/terms";
 
-export async function getTerms(): Promise<TermOutput[]> {
-  return api.getTerms();
-}
-
 export async function getTermPage(
   query: ListQuery,
 ): Promise<Paginated<"terms", TermOutput>> {

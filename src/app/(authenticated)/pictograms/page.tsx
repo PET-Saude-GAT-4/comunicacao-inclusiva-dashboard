@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useEffect, useRef, useState } from "react";
+import { Suspense, useRef, useState } from "react";
 import AddButton from "@/components/AddButton/AddButton";
 import PillTabs from "@/components/PillTabs/PillTabs";
 import { TERM_SECTIONS } from "@/config/navigation";
@@ -16,9 +16,7 @@ import {
   createPictogram,
   deletePictogram,
 } from "@/services/pictograms";
-import { getUsers } from "@/services/users";
-import { getTerms } from "@/services/terms";
-import { termBadge, termNamesByPart } from "@/utils/term";
+import { termBadge } from "@/utils/term";
 import RemoveButton from "@/components/RemoveButton/RemoveButton";
 import AssetCard from "../components/AssetCard/AssetCard";
 import { usePaginatedList } from "@/hooks/usePaginatedList";
@@ -28,32 +26,12 @@ function Pictograms() {
     pageSize: 12,
   });
   const { selectedIds, setSelectedIds } = list;
-  const [authorEmails, setAuthorEmails] = useState<Record<string, string>>({});
-  // Null until the terms load, so no card claims "Sem termo" too early.
-  const [termNames, setTermNames] = useState<Record<string, string[]> | null>(
-    null,
-  );
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
 
   const [description, setDescription] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    getTerms()
-      .then((terms) => setTermNames(termNamesByPart(terms, "pictogram")))
-      .catch(() => {});
-    getUsers()
-      .catch(() => [])
-      .then((users) =>
-        setAuthorEmails(
-          Object.fromEntries(
-            users.map((author) => [author.uuid, author.email]),
-          ),
-        ),
-      );
-  }, []);
 
   const handleCreate = async () => {
     const file = fileRef.current?.files?.[0];
@@ -140,15 +118,14 @@ function Pictograms() {
         <div className="grid grid-cols-6 gap-4 p-4">
           {list.items.map((pictogram) => (
             <div key={pictogram.uuid}>
+              {/* The API records no author for pictograms. */}
               <AssetCard
                 title={pictogram.description}
                 uuid={pictogram.uuid}
                 createdAt={pictogram.createdAt}
                 images={[{ src: pictogram.fileUrl, label: "Pictograma" }]}
-                badge={
-                  termNames ? termBadge(termNames[pictogram.uuid]) : undefined
-                }
-                authorEmail={authorEmails[pictogram.authorUuid ?? ""] ?? null}
+                badge={termBadge(pictogram.terms)}
+                authorEmail={null}
                 onSelect={() => toggleSelection(pictogram.uuid)}
                 onDelete={() => handleDeleteOne(pictogram.uuid)}
                 isSelected={selectedIds.includes(pictogram.uuid)}

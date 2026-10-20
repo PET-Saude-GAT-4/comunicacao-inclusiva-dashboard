@@ -4,10 +4,7 @@ import { ActionResult, ListQuery, Paginated } from "@/types/common";
 import { UserOutput } from "@/types/user";
 import * as api from "@/lib/api/users";
 import { ApiError } from "@/lib/api/client";
-
-export async function getUsers(): Promise<UserOutput[]> {
-  return api.getUsers();
-}
+import { unstable_rethrow } from "next/navigation";
 
 export async function getUserPage(
   query: ListQuery,
@@ -46,6 +43,28 @@ function translateUserError(status: number, rawMessage?: string): string {
 
 export async function getUser(uuid: string): Promise<UserOutput | null> {
   return api.getUser(uuid);
+}
+
+// The emails of the given users, by uuid; one that cannot be read, because it
+// is gone or the caller may not see it, is left out. The client runs Server
+// Functions one at a time, so the authors on screen are asked for together
+// and looked up in parallel here.
+export async function getUserEmails(
+  uuids: string[],
+): Promise<Record<string, string>> {
+  const results = await Promise.allSettled(uuids.map((uuid) => api.getUser(uuid)));
+  // An expired session makes apiFetch redirect to /login by throwing; that
+  // must still reach Next instead of reading as one user left out.
+  for (const result of results) {
+    if (result.status === "rejected") unstable_rethrow(result.reason);
+  }
+  return Object.fromEntries(
+    results.flatMap((result, index) =>
+      result.status === "fulfilled" && result.value
+        ? [[uuids[index], result.value.email]]
+        : [],
+    ),
+  );
 }
 
 export async function createUser(data: {

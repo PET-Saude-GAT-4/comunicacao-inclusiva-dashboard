@@ -3,12 +3,6 @@ import { BoardOutput, BoardType } from "@/types/board";
 import { BoardTermOutput } from "@/types/term";
 import { apiFetch, listQueryString } from "./client";
 
-export async function getBoards(): Promise<BoardOutput[]> {
-  const data = await apiFetch<{ boards: BoardOutput[] }>("/boards");
-  if (!data) throw new Error("Erro ao buscar pranchas.");
-  return data.boards;
-}
-
 export async function getBoardPage(
   query: ListQuery,
   filters: { type?: BoardType } = {},

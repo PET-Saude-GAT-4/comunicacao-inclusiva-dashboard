@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useEffect, useRef, useState } from "react";
+import { Suspense, useRef, useState } from "react";
 import AddButton from "@/components/AddButton/AddButton";
 import PillTabs from "@/components/PillTabs/PillTabs";
 import { TERM_SECTIONS } from "@/config/navigation";
@@ -18,8 +18,7 @@ import {
   createSignWriting,
   deleteSignWriting,
 } from "@/services/sign-writings";
-import { getTerms } from "@/services/terms";
-import { termBadge, termNamesByPart } from "@/utils/term";
+import { termBadge } from "@/utils/term";
 import RemoveButton from "@/components/RemoveButton/RemoveButton";
 
 function SignWritings() {
@@ -27,22 +26,12 @@ function SignWritings() {
     pageSize: 12,
   });
   const { selectedIds, setSelectedIds } = list;
-  // Null until the terms load, so no card claims "Sem termo" too early.
-  const [termNames, setTermNames] = useState<Record<string, string[]> | null>(
-    null,
-  );
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
 
   const [description, setDescription] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    getTerms()
-      .then((terms) => setTermNames(termNamesByPart(terms, "signWriting")))
-      .catch(() => {});
-  }, []);
 
   const handleCreate = async () => {
     const file = fileRef.current?.files?.[0];
@@ -134,9 +123,7 @@ function SignWritings() {
                 uuid={signWriting.uuid}
                 createdAt={signWriting.createdAt}
                 images={[{ src: signWriting.fileUrl, label: "SignWriting" }]}
-                badge={
-                  termNames ? termBadge(termNames[signWriting.uuid]) : undefined
-                }
+                badge={termBadge(signWriting.terms)}
                 authorEmail={null}
                 onSelect={() => toggleSelection(signWriting.uuid)}
                 onDelete={() => handleDeleteOne(signWriting.uuid)}

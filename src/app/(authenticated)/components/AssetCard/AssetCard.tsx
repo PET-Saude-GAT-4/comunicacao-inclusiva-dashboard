@@ -14,6 +14,9 @@ export type AssetCardBadge = {
   text: string;
   // Neutral marks an absence, e.g. a pictogram that belongs to no term.
   neutral?: boolean;
+  // The whole text when `text` is a shortened form of it, e.g. a list of
+  // names cut to a count. Shown on hover and read by screen readers.
+  fullText?: string;
 };
 
 type Props = {
@@ -136,10 +139,17 @@ export default function AssetCard({
             {badge && (
               <Badge
                 variant={badge.neutral ? "neutral" : "success"}
-                title={badge.text}
+                title={badge.fullText ?? badge.text}
                 className="inline-block max-w-full truncate"
               >
-                {badge.text}
+                {badge.fullText ? (
+                  <>
+                    <span aria-hidden="true">{badge.text}</span>
+                    <span className="sr-only">{badge.fullText}</span>
+                  </>
+                ) : (
+                  badge.text
+                )}
               </Badge>
             )}
             <div className="flex justify-center">

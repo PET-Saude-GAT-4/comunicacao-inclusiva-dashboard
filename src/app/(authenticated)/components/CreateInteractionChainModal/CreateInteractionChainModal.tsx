@@ -16,8 +16,10 @@ import {
   createInteractionChain,
   getInteractionChainsByTrigger,
   deleteInteractionChain,
-  getInteractionChains,
+  getInteractionChainPage,
 } from "@/services/interaction-chain";
+import InfiniteList from "@/components/InfiniteList/InfiniteList";
+import { useRemoteSearch } from "@/hooks/useRemoteSearch";
 
 import Button from "@/components/Button/Button";
 import RemoveButton from "@/components/RemoveButton/RemoveButton";
@@ -57,6 +59,8 @@ export default function CreateInteractionChainModal({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [removeError, setRemoveError] = useState<string | null>(null);
 
+  // The chains of the chosen trigger. Without one, "Todas as interações"
+  // pages through every chain on its own instead.
   const [interactionList, setInteractionList] = useState<
     InteractionChainOutput[]
   >([]);
@@ -71,13 +75,11 @@ export default function CreateInteractionChainModal({
       : null;
 
   const fetchInteractionChain = useCallback((current: ChainTrigger | null) => {
-    if (current) {
-      getInteractionChainsByTrigger(current).then((list) =>
-        setInteractionList(list ?? []),
-      );
-    } else {
-      getInteractionChains().then(setInteractionList);
-    }
+    // Without a trigger nothing reads this list; the full one pages itself.
+    if (!current) return;
+    getInteractionChainsByTrigger(current).then((list) =>
+      setInteractionList(list ?? []),
+    );
   }, []);
 
   // Callers pass incomingTrigger as an object literal, so depending on the
@@ -169,7 +171,7 @@ export default function CreateInteractionChainModal({
 
   // A trigger may point at a board only once, so its existing responses are
   // greyed out in the picker. Matching on each chain's own trigger keeps this
-  // right while interactionList still holds all chains or a previous trigger's.
+  // right while interactionList still holds a previous trigger's chains.
   const linkedResponseUuids = new Set(
     trigger
       ? interactionList
@@ -224,6 +226,7 @@ export default function CreateInteractionChainModal({
     } else {
       setRemoveError(result.error ?? "Erro ao remover interação.");
     }
+    return result.success;
   };
 
   return (
@@ -267,32 +270,27 @@ export default function CreateInteractionChainModal({
             {removeError && (
               <p className="mb-sm text-sm text-red-500">{removeError}</p>
             )}
-            <div className="max-h-96 overflow-y-auto">
-              {interactionList.length === 0 ? (
-                <p className="rounded-md border border-outline-common p-md text-sm text-gray-500">
-                  Nenhuma interação encontrada.
-                </p>
-              ) : (
-                <ul className="flex flex-col gap-sm">
-                  {interactionList.map((ic) => (
-                    <li
-                      key={ic.uuid}
-                      className="flex items-center justify-between gap-md rounded-md border border-outline-common bg-background px-md py-sm"
-                    >
-                      <span className="min-w-0 wrap-break-word font-semibold">
-                        {ic.label?.trim()
-                          ? ic.label
-                          : `${ic.trigger.title} → ${ic.responseBoardTitle}`}
-                      </span>
-                      <RemoveButton
-                        active
-                        onClick={() => handleRemoveInteraction(ic.uuid)}
+            {trigger ? (
+              <div className="max-h-96 overflow-y-auto">
+                {interactionList.length === 0 ? (
+                  <p className="rounded-md border border-outline-common p-md text-sm text-gray-500">
+                    Nenhuma interação encontrada.
+                  </p>
+                ) : (
+                  <ul className="flex flex-col gap-sm">
+                    {interactionList.map((ic) => (
+                      <ChainRow
+                        key={ic.uuid}
+                        chain={ic}
+                        onRemove={() => handleRemoveInteraction(ic.uuid)}
                       />
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            ) : (
+              <AllInteractionChains onRemove={handleRemoveInteraction} />
+            )}
           </section>
         ) : (
           <>
@@ -455,5 +453,48 @@ export default function CreateInteractionChainModal({
         )}
       </div>
     </Modal>
+  );
+}
+
+function ChainRow({
+  chain,
+  onRemove,
+}: {
+  chain: InteractionChainOutput;
+  onRemove: () => void;
+}) {
+  return (
+    <li className="flex items-center justify-between gap-md rounded-md border border-outline-common bg-background px-md py-sm">
+      <span className="min-w-0 wrap-break-word font-semibold">
+        {chain.label?.trim()
+          ? chain.label
+          : `${chain.trigger.title} → ${chain.responseBoardTitle}`}
+      </span>
+      <RemoveButton active onClick={onRemove} />
+    </li>
+  );
+}
+
+// Every chain the user can see, a page at a time. Mounted only while shown,
+// so the modal asks for them only when someone opens this list.
+function AllInteractionChains({
+  onRemove,
+}: {
+  onRemove: (uuid: string) => Promise<boolean>;
+}) {
+  const list = useRemoteSearch("interactionChains", getInteractionChainPage);
+
+  return (
+    <InfiniteList list={list} className="max-h-96">
+      {list.items.map((ic) => (
+        <ChainRow
+          key={ic.uuid}
+          chain={ic}
+          onRemove={async () => {
+            if (await onRemove(ic.uuid)) list.reload();
+          }}
+        />
+      ))}
+    </InfiniteList>
   );
 }

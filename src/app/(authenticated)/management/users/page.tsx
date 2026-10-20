@@ -14,7 +14,7 @@ import ListToolbar from "@/components/ListToolbar/ListToolbar";
 import ListStatus from "@/components/ListStatus/ListStatus";
 import { usePaginatedList } from "@/hooks/usePaginatedList";
 import { getUserPage, createUser, deleteUser } from "@/services/users";
-import { getRoles } from "@/services/roles";
+import { getRolePage } from "@/services/roles";
 import { RoleOutput } from "@/types/role";
 import UserCard from "../../components/UserCard/UserCard";
 
@@ -29,7 +29,9 @@ function Users() {
   const [roleId, setRoleId] = useState<number>(0);
 
   useEffect(() => {
-    getRoles().then(setRoles);
+    // Roles are few and admin-managed, so one page of the largest size the
+    // API allows holds them all.
+    getRolePage({ page: 1, pageSize: 100 }).then((data) => setRoles(data.roles));
   }, []);
 
   const handleCreate = async () => {

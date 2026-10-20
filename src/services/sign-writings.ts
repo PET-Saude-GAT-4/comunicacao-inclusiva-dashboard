@@ -2,17 +2,13 @@
 
 import { revalidatePath } from "next/cache";
 import { ActionResult, ListQuery, Paginated } from "@/types/common";
-import { SignWritingOutput } from "@/types/sign-writing";
+import { SignWritingOutput, SignWritingListItem } from "@/types/sign-writing";
 import { ApiError } from "@/lib/api/client";
 import * as api from "@/lib/api/sign-writings";
 
-export async function getSignWritings(): Promise<SignWritingOutput[]> {
-  return api.getSignWritings();
-}
-
 export async function getSignWritingPage(
   query: ListQuery,
-): Promise<Paginated<"signWritings", SignWritingOutput>> {
+): Promise<Paginated<"signWritings", SignWritingListItem>> {
   return api.getSignWritingPage(query);
 }
 

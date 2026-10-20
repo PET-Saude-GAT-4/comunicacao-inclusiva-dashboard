@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { ActionResult } from "@/types/common";
+import { ActionResult, ListQuery, Paginated } from "@/types/common";
 import type {
   ChainTrigger,
   InteractionChainOutput,
@@ -9,10 +9,10 @@ import type {
 import { ApiError } from "@/lib/api/client";
 import * as api from "@/lib/api/interaction-chain";
 
-export async function getInteractionChains(): Promise<
-  InteractionChainOutput[]
-> {
-  return api.getInteractionChains();
+export async function getInteractionChainPage(
+  query: ListQuery,
+): Promise<Paginated<"interactionChains", InteractionChainOutput>> {
+  return api.getInteractionChainPage(query);
 }
 
 export async function getInteractionChainsByTrigger(
