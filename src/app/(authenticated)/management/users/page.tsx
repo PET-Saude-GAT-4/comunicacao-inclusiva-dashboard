@@ -10,6 +10,7 @@ import Input from "@/components/Input/Input";
 import Button from "@/components/Button/Button";
 import Pagination from "@/components/Pagination/Pagination";
 import SearchBar from "@/components/SearchBar/SearchBar";
+import ListStatus from "@/components/ListStatus/ListStatus";
 import { usePaginatedList } from "@/hooks/usePaginatedList";
 import { getUserPage, createUser, deleteUser } from "@/services/users";
 import { getRoles } from "@/services/roles";
@@ -106,11 +107,11 @@ function Users() {
             </div>
           ))}
         </div>
-        {list.loaded && list.items.length === 0 && (
-          <p className="py-lg text-center text-text-secondary">
-            Nenhum item encontrado
-          </p>
-        )}
+        <ListStatus
+          loaded={list.loaded}
+          error={list.error}
+          isEmpty={list.items.length === 0}
+        />
 
         {list.pageCount > 1 && (
           <div className="flex items-center justify-center border-t border-outline-common py-sm bg-surface-primary">

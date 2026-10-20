@@ -192,6 +192,7 @@ function Boards() {
         <Table
           selected={list.selectedIds}
           loading={!list.loaded}
+          error={list.error}
           data={list.items}
           page={list.page}
           pageCount={list.pageCount}

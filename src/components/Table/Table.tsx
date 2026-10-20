@@ -19,6 +19,7 @@ function Table<T extends { id: number } | { uuid: string }>({
   onPageChange,
   selected: controlledSelected,
   loading = false,
+  error,
 }: {
   data: T[];
   columns: Column<T>[];
@@ -33,6 +34,7 @@ function Table<T extends { id: number } | { uuid: string }>({
   // The selection, when its owner has to clear it as the rows change.
   selected?: (number | string)[];
   loading?: boolean;
+  error?: string | null;
 }) {
   const [internalSelected, setSelected] = useState<(number | string)[]>([]);
   const selected = controlledSelected ?? internalSelected;
@@ -119,9 +121,13 @@ function Table<T extends { id: number } | { uuid: string }>({
               <tr>
                 <td
                   colSpan={columns.length + 1}
-                  className="py-lg text-center text-text-secondary"
+                  className={[
+                    "py-lg text-center",
+                    error ? "text-red-500" : "text-text-secondary",
+                  ].join(" ")}
                 >
-                  {loading ? "Carregando…" : "Nenhum item encontrado"}
+                  {error ??
+                    (loading ? "Carregando…" : "Nenhum item encontrado")}
                 </td>
               </tr>
             )}

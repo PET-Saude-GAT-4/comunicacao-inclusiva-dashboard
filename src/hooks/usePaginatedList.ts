@@ -50,9 +50,10 @@ export function usePaginatedList<K extends string, T>(
   const [selectedIds, setSelectedIds] = useState<(number | string)[]>([]);
   const [version, setVersion] = useState(0);
   const [result, setResult] = useState<{
-    requestKey: string;
+    viewKey: string;
     items: T[];
     meta: PageMeta | null;
+    failed: boolean;
   } | null>(null);
   const searchTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
 
@@ -68,10 +69,11 @@ export function usePaginatedList<K extends string, T>(
     if (q !== search.trim()) setSearchInput(q);
   }
 
-  const requestKey = `${viewKey}|${version}`;
-  const current = result?.requestKey === requestKey ? result : null;
+  // Rows from another view are withheld, but a refresh of the same view keeps
+  // showing the rows it is replacing, so a create or delete does not blink.
+  const current = result?.viewKey === viewKey ? result : null;
   // The last known page count keeps the pagination bar steady while loading.
-  const knownPageCount = (current ?? result)?.meta?.pageCount ?? 1;
+  const knownPageCount = result?.meta?.pageCount ?? 1;
 
   // Reads the live URL rather than the render's searchParams, since a
   // debounced search can fire after the page or a filter has changed.
@@ -131,21 +133,43 @@ export function usePaginatedList<K extends string, T>(
           });
           return;
         }
-        setResult({ requestKey, items: data[key], meta: data.meta });
+        setResult({
+          viewKey,
+          items: data[key],
+          meta: data.meta,
+          failed: false,
+        });
       })
       .catch(() => {
-        // Settles the view as empty instead of leaving it loading for good.
-        if (!cancelled) setResult({ requestKey, items: [], meta: null });
+        if (cancelled) return;
+        setResult((previous) => ({
+          viewKey,
+          items: [],
+          meta: previous?.meta ?? null,
+          failed: true,
+        }));
       });
 
     return () => {
       cancelled = true;
     };
-  }, [key, fetchPage, page, pageSize, q, filtersKey, requestKey, updateUrl]);
+    // version is not read inside, but bumping it is what refresh() means.
+  }, [
+    key,
+    fetchPage,
+    page,
+    pageSize,
+    q,
+    filtersKey,
+    viewKey,
+    version,
+    updateUrl,
+  ]);
 
   return {
     items: current?.items ?? [],
     loaded: current !== null,
+    error: current?.failed ? "Não foi possível carregar a lista." : null,
     page,
     pageCount: Math.max(1, knownPageCount),
     setPage,

@@ -7,6 +7,7 @@ import { TERM_SECTIONS } from "@/config/navigation";
 import Modal from "@/components/Modal/Modal";
 import Pagination from "@/components/Pagination/Pagination";
 import SearchBar from "@/components/SearchBar/SearchBar";
+import ListStatus from "@/components/ListStatus/ListStatus";
 import { usePaginatedList } from "@/hooks/usePaginatedList";
 import AssetCard from "../components/AssetCard/AssetCard";
 import Input from "@/components/Input/Input";
@@ -160,11 +161,11 @@ function Terms() {
             </div>
           ))}
         </div>
-        {list.loaded && list.items.length === 0 && (
-          <p className="py-lg text-center text-text-secondary">
-            Nenhum item encontrado
-          </p>
-        )}
+        <ListStatus
+          loaded={list.loaded}
+          error={list.error}
+          isEmpty={list.items.length === 0}
+        />
         <div className="flex items-center justify-center py-4 rounded-md outline-1 outline-outline-common bg-white">
           <Pagination
             page={list.page}

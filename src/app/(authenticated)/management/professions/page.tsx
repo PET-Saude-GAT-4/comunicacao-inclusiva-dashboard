@@ -90,6 +90,7 @@ function Professions() {
         <Table
           selected={list.selectedIds}
           loading={!list.loaded}
+          error={list.error}
           data={list.items.map(toRow)}
           page={list.page}
           pageCount={list.pageCount}

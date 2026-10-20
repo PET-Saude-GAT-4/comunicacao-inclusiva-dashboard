@@ -9,6 +9,7 @@ import Input from "@/components/Input/Input";
 import Button from "@/components/Button/Button";
 import Pagination from "@/components/Pagination/Pagination";
 import SearchBar from "@/components/SearchBar/SearchBar";
+import ListStatus from "@/components/ListStatus/ListStatus";
 import {
   getPictogramPage,
   createPictogram,
@@ -149,11 +150,11 @@ function Pictograms() {
             </div>
           ))}
         </div>
-        {list.loaded && list.items.length === 0 && (
-          <p className="py-lg text-center text-text-secondary">
-            Nenhum item encontrado
-          </p>
-        )}
+        <ListStatus
+          loaded={list.loaded}
+          error={list.error}
+          isEmpty={list.items.length === 0}
+        />
         <div className="flex items-center justify-center py-4 rounded-md outline-1 outline-outline-common bg-white">
           <Pagination
             page={list.page}
