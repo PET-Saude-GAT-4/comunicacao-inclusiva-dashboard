@@ -14,23 +14,42 @@ function Table<T extends { id: number } | { uuid: string }>({
   pageSize = 10,
   onSelectionChange,
   onRowClick,
+  page: controlledPage,
+  pageCount: controlledPageCount,
+  onPageChange,
 }: {
   data: T[];
   columns: Column<T>[];
   pageSize?: number;
   onSelectionChange?: (ids: (number | string)[]) => void;
   onRowClick?: (row: T) => void;
+  // Pass all three when data already is one page fetched from the server.
+  // Without them, the table pages through the full list it was given.
+  page?: number;
+  pageCount?: number;
+  onPageChange?: (page: number) => void;
 }) {
   const [selected, setSelected] = useState<(number | string)[]>([]);
-  const [page, setPage] = useState(1);
+  const [internalPage, setInternalPage] = useState(1);
+  const isControlled = controlledPage !== undefined;
 
   const rowKey = (row: T): number | string => ("id" in row ? row.id : row.uuid);
 
-  const pageCount = Math.max(1, Math.ceil(data.length / pageSize));
+  const page = isControlled ? controlledPage : internalPage;
+  const pageCount = isControlled
+    ? Math.max(1, controlledPageCount ?? 1)
+    : Math.max(1, Math.ceil(data.length / pageSize));
   const pageData = useMemo(() => {
+    if (isControlled) return data;
     const start = (page - 1) * pageSize;
     return data.slice(start, start + pageSize);
-  }, [data, page, pageSize]);
+  }, [isControlled, data, page, pageSize]);
+
+  const changePage = (nextPage: number) => {
+    const clamped = Math.min(Math.max(1, nextPage), pageCount);
+    if (isControlled) onPageChange?.(clamped);
+    else setInternalPage(clamped);
+  };
 
   const updateSelection = (next: (number | string)[]) => {
     setSelected(next);
@@ -147,9 +166,7 @@ function Table<T extends { id: number } | { uuid: string }>({
           <Pagination
             page={page}
             pageCount={pageCount}
-            onPageChange={(nextPage) =>
-              setPage(Math.min(Math.max(1, nextPage), pageCount))
-            }
+            onPageChange={changePage}
           />
         </div>
       )}

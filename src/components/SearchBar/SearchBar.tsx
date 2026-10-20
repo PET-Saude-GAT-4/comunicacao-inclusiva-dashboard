@@ -3,22 +3,42 @@
 import { useEffect, useState } from "react";
 import { MdOutlineSearch } from "react-icons/md";
 
-interface SearchBarProps<T> {
+// Filters an already-loaded list in the browser.
+type ClientFilterProps<T> = {
   data: T[];
   onResults: (results: T[]) => void;
   getSearchText?: (item: T) => string;
+  value?: never;
+  onChange?: never;
+};
+
+// Hands the typed text to the caller, which searches on the server.
+type ControlledProps = {
+  value: string;
+  onChange: (value: string) => void;
+  data?: never;
+  onResults?: never;
+  getSearchText?: never;
+};
+
+type SearchBarProps<T> = (ClientFilterProps<T> | ControlledProps) & {
   placeholder?: string;
-}
+};
 
 function SearchBar<T>({
   data,
   onResults,
   getSearchText,
+  value,
+  onChange,
   placeholder = "Buscar",
 }: SearchBarProps<T>) {
   const [query, setQuery] = useState("");
+  const isControlled = value !== undefined;
 
   useEffect(() => {
+    if (isControlled || !data || !onResults) return;
+
     const normalizedQuery = query.trim().toLocaleLowerCase();
     const results = normalizedQuery
       ? data.filter((item) => {
@@ -30,7 +50,7 @@ function SearchBar<T>({
       : data;
 
     onResults(results);
-  }, [data, getSearchText, onResults, query]);
+  }, [isControlled, data, getSearchText, onResults, query]);
 
   return (
     <div className="relative w-full">
@@ -43,8 +63,12 @@ function SearchBar<T>({
         className="w-full rounded-md border border-outline-common bg-surface-secondary p-md pl-xxl text-body-emph text-text-on-primary placeholder:text-text-on-primary-variant focus:outline-none focus:ring-1 focus:ring-primary-dark"
         type="text"
         placeholder={placeholder}
-        value={query}
-        onChange={(event) => setQuery(event.target.value)}
+        value={isControlled ? value : query}
+        onChange={(event) =>
+          isControlled
+            ? onChange(event.target.value)
+            : setQuery(event.target.value)
+        }
         aria-label={placeholder}
       />
     </div>
