@@ -116,9 +116,8 @@ function Phrases() {
     <div className="flex w-full flex-col gap-lg">
       <ListToolbar
         start={
-          // Button sets my-md, and a plain my-0 loses to it in the generated CSS.
           <Button
-            className="my-0! bg-surface-primary outline-1 outline-outline-common "
+            className="my-0 bg-surface-primary outline-1 outline-outline-common "
             onClick={() => {
               setChainFormError(null);
               setIsChainModalOpen(true);
