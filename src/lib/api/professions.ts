@@ -2,14 +2,6 @@ import { ListQuery, Paginated } from "@/types/common";
 import { ProfessionOutput, SpecialityOutput } from "@/types/profession";
 import { apiFetch, listQueryString } from "./client";
 
-export async function getProfessions(): Promise<ProfessionOutput[]> {
-  const data = await apiFetch<{ professions: ProfessionOutput[] }>(
-    "/professions",
-  );
-  if (!data) throw new Error("Erro ao buscar profissões.");
-  return data.professions;
-}
-
 export async function getProfessionPage(
   query: ListQuery,
 ): Promise<Paginated<"professions", ProfessionOutput>> {
@@ -32,14 +24,6 @@ export function createProfession(data: {
 
 export function deleteProfession(id: number): Promise<void> {
   return apiFetch(`/professions/${id}`, { method: "DELETE" });
-}
-
-export async function getSpecialities(): Promise<SpecialityOutput[]> {
-  const data = await apiFetch<{ specialities: SpecialityOutput[] }>(
-    "/specialities",
-  );
-  if (!data) throw new Error("Erro ao buscar especialidades.");
-  return data.specialities;
 }
 
 export async function getSpecialityPage(

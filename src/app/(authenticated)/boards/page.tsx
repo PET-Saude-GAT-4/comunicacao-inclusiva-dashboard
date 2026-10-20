@@ -6,12 +6,12 @@ import AddButton from "@/components/AddButton/AddButton";
 import Modal from "@/components/Modal/Modal";
 import Table from "@/components/Table/Table";
 import SearchBar from "@/components/SearchBar/SearchBar";
+import ListToolbar from "@/components/ListToolbar/ListToolbar";
 import { usePaginatedList } from "@/hooks/usePaginatedList";
 import Input from "@/components/Input/Input";
 import Button from "@/components/Button/Button";
 import Dropdown from "@/components/Dropdown/Dropdown";
 import { getBoardPage, createBoard, deleteBoard } from "@/services/boards";
-import { getUsers } from "@/services/users";
 import { getSessionUser } from "@/services/auth";
 import {
   BOARD_TYPE_LABELS,
@@ -26,10 +26,10 @@ import Image from "next/image";
 import RemoveButton from "@/components/RemoveButton/RemoveButton";
 import Badge from "@/components/Badge/Badge";
 import { PictogramOutput } from "@/types/pictogram";
-import { getPictograms } from "@/services/pictograms";
+import { getPictogramPage } from "@/services/pictograms";
 import AssetPicker, { Asset } from "@/components/AssetPicker/AssetPicker";
 import CreateInteractionChainModal from "../components/CreateInteractionChainModal/CreateInteractionChainModal";
-import { MdPerson } from "react-icons/md";
+import AuthorEmail from "../components/AuthorEmail/AuthorEmail";
 
 // The type comes from the URL, so anything other than a known type is dropped
 // instead of reaching the API as a 400.
@@ -49,7 +49,6 @@ function Boards() {
     filterKeys: ["type"],
   });
   const { selectedIds } = list;
-  const [authorEmails, setAuthorEmails] = useState<Record<string, string>>({});
   const [user, setUser] = useState<SessionUser | null>(null);
   const [isCreateBoardModalOpen, setIsCreateBoardModalOpen] = useState(false);
 
@@ -60,7 +59,6 @@ function Boards() {
 
   const [formError, setFormError] = useState<string | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
-  const [pictograms, setPictograms] = useState<PictogramOutput[]>([]);
 
   const [title, setTitle] = useState("");
   const [boardType, setBoardType] = useState<BoardType>("common");
@@ -80,20 +78,7 @@ function Boards() {
   };
 
   useEffect(() => {
-    getSessionUser().then((sessionUser) => {
-      setUser(sessionUser);
-      if (sessionUser?.role === "super_admin") {
-        getUsers()
-          .catch(() => [])
-          .then((users) =>
-            setAuthorEmails(
-              Object.fromEntries(
-                users.map((author) => [author.uuid, author.email]),
-              ),
-            ),
-          );
-      }
-    });
+    getSessionUser().then(setUser);
   }, []);
 
   const handleCreate = async () => {
@@ -134,31 +119,28 @@ function Boards() {
     }
   };
 
-  const listPictograms = async () => {
-    getPictograms().then((items) => setPictograms(items));
-    setIsCreateBoardModalOpen(true);
-  };
-
   return (
     <div className="flex w-full flex-col gap-lg">
-      <div className="flex items-center justify-end rounded-lg border border-gray-200 bg-white px-lg py-md text-text-on-primary">
-        <div className="flex justify-between w-full">
+      <ListToolbar
+        start={
           <Button
-            className="bg-surface-primary outline-1 outline-outline-common "
+            className="my-0 bg-surface-primary outline-1 outline-outline-common "
             onClick={() => setIsCreateInteractionChainModalOpen(true)}
           >
             <p className="text-gray-600 w-full h-full hover:text-text-on-primary-dark">
               Criar Interação Entre Pranchas
             </p>
           </Button>
-          <div className="mx-lg w-100">
-            <SearchBar
-              value={list.search}
-              onChange={list.setSearch}
-              placeholder="Buscar pranchas"
-            />
-          </div>
-          <div className=" flex items-center justify-center ">
+        }
+        search={
+          <SearchBar
+            value={list.search}
+            onChange={list.setSearch}
+            placeholder="Buscar pranchas"
+          />
+        }
+        end={
+          <>
             <div className="mr-md w-48">
               <Dropdown<BoardType | "all">
                 id="typeFilter"
@@ -174,17 +156,16 @@ function Boards() {
               />
             </div>
             <AddButton
-              onClick={() => {
-                listPictograms();
-              }}
+              label="Adicionar prancha"
+              onClick={() => setIsCreateBoardModalOpen(true)}
             />
             <RemoveButton
               active={selectedIds.length > 0}
               onClick={handleDelete}
             />
-          </div>
-        </div>
-      </div>
+          </>
+        }
+      />
       {deleteError && (
         <p className="text-sm text-red-500 px-lg py-sm">{deleteError}</p>
       )}
@@ -218,14 +199,7 @@ function Boards() {
                     render: (
                       _value: BoardOutput[keyof BoardOutput],
                       row: BoardOutput,
-                    ) => (
-                      <div className="flex items-center gap-sm">
-                        <MdPerson className="text-gray-400" size={18} />
-                        <p>
-                          {authorEmails[row.authorUuid ?? ""] ?? "Desconhecido"}
-                        </p>
-                      </div>
-                    ),
+                    ) => <AuthorEmail uuid={row.authorUuid} />,
                   },
                 ]
               : []),
@@ -274,7 +248,11 @@ function Boards() {
       >
         {formError && <p className="text-sm text-red-500">{formError}</p>}
         <div className="flex flex-rol justify-between w-200 gap-xxl m-xl mb-xs">
-          <AssetPicker items={pictograms} onSelect={setSelectedPictogram} />
+          <AssetPicker
+            listKey="pictograms"
+            fetchPage={getPictogramPage}
+            onSelect={setSelectedPictogram}
+          />
           <div className="flex flex-col w-full gap-lg">
             <Input
               id="title"

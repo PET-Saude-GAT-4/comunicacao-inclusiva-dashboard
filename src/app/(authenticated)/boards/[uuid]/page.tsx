@@ -24,7 +24,6 @@ import Input from "@/components/Input/Input";
 import Button from "@/components/Button/Button";
 import Image from "next/image";
 import { useDragReorder } from "@/hooks/useDragReorder";
-import { getTerms } from "@/services/terms";
 import TermPicker from "@/components/TermPicker/TermPicker";
 import CreateInteractionChainModal from "../../components/CreateInteractionChainModal/CreateInteractionChainModal";
 import Badge from "@/components/Badge/Badge";
@@ -64,7 +63,6 @@ function BoardDetail() {
 
   const [selectedTerm, setSelectedTerm] = useState<TermOutput>();
 
-  const [terms, setTerms] = useState<TermOutput[]>([]);
   const [textSize, setTextSize] = useState<"Padrão" | "Grande">("Padrão");
   const getTermSearchText = useCallback(
     (item: BoardTermOutput) => item.description,
@@ -193,11 +191,7 @@ function BoardDetail() {
     }
   };
 
-  const listTerms = async () => {
-    const items = await getTerms();
-    setTerms(items);
-    setIsCreateBoardModalOpen(true);
-  };
+  const listTerms = () => setIsCreateBoardModalOpen(true);
 
   // Destructuring the handlers from the custom hook
   const { handleDragStart, handleDragOver, handleDrop, handleDropAtEnd } =
@@ -266,6 +260,7 @@ function BoardDetail() {
               : "Despublicar"}
           </Button>
           <AddButton
+            label="Adicionar termo à prancha"
             onClick={() => {
               listTerms();
             }}
@@ -363,7 +358,7 @@ function BoardDetail() {
       >
         {formError && <p className="text-sm text-red-500">{formError}</p>}
         <div className="flex flex-row gap-sm w-200 m-xl mb-xs">
-          <TermPicker terms={terms} onSelect={setSelectedTerm} />
+          <TermPicker onSelect={setSelectedTerm} />
           <div className="flex flex-col w-full gap-md ">
             <Input
               id="termUuid"

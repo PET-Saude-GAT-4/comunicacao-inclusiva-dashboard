@@ -19,20 +19,16 @@ import {
   unpublishPhrase,
   setPhraseListedInLibrary,
 } from "@/services/phrases";
-import { getTerms } from "@/services/terms";
 import { PhraseOutput } from "@/types/phrase";
-import { TermOutput } from "@/types/term";
 import { formatList } from "@/utils/text";
 import { useUnsavedChangesGuard } from "@/hooks/useUnsavedChangesGuard";
 import CreateInteractionChainModal from "@/app/(authenticated)/components/CreateInteractionChainModal/CreateInteractionChainModal";
 import RemoveButton from "@/components/RemoveButton/RemoveButton";
-import { getBoards } from "@/services/boards";
 import {
   getInteractionChainsByTrigger,
   deleteInteractionChain,
   updateInteractionChain,
 } from "@/services/interaction-chain";
-import { BoardOutput } from "@/types/board";
 import { InteractionChainOutput } from "@/types/interaction-chain";
 import { ActionResult } from "@/types/common";
 import PhraseVisibilityBadge from "@/components/PhraseVisibilityBadge/PhraseVisibilityBadge";
@@ -66,10 +62,8 @@ function PhraseDetail() {
     useState<PhraseVisibility>("draft");
 
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [terms, setTerms] = useState<TermOutput[]>([]);
 
   const [chains, setChains] = useState<InteractionChainOutput[]>([]);
-  const [boards, setBoards] = useState<BoardOutput[]>([]);
   const [chainError, setChainError] = useState<string | null>(null);
   const [chainBusy, setChainBusy] = useState(false);
   const [isChainModalOpen, setIsChainModalOpen] = useState(false);
@@ -103,7 +97,6 @@ function PhraseDetail() {
 
   useEffect(() => {
     refreshChains();
-    getBoards().then(setBoards);
   }, [refreshChains]);
 
   const savedTermUuids = phrase?.terms.map((t) => t.termUuid) ?? [];
@@ -183,9 +176,6 @@ function PhraseDetail() {
     setVisibilityLoading(false);
   };
 
-  const boardTitle = (boardUuid: string) =>
-    boards.find((b) => b.uuid === boardUuid)?.title ?? boardUuid;
-
   // Rank 0 does not exist: the API keeps ranks contiguous from 1, and moving a
   // row is a single PATCH of its new rank.
   const moveChain = async (chain: InteractionChainOutput, delta: number) => {
@@ -214,10 +204,7 @@ function PhraseDetail() {
     setChainBusy(false);
   };
 
-  const listTerms = () => {
-    getTerms().then(setTerms);
-    setIsModalOpen(true);
-  };
+  const listTerms = () => setIsModalOpen(true);
 
   if (phrase === null) {
     return (
@@ -263,7 +250,7 @@ function PhraseDetail() {
           >
             Alterar visibilidade
           </Button>
-          <AddButton onClick={listTerms} />
+          <AddButton label="Adicionar termo à frase" onClick={listTerms} />
         </div>
       </div>
 
@@ -352,7 +339,7 @@ function PhraseDetail() {
                     {chain.rank}
                   </span>
                   <p className="text-body-emph font-semibold">
-                    {boardTitle(chain.responseBoardUuid)}
+                    {chain.responseBoardTitle}
                   </p>
                   {chain.label?.trim() && (
                     <span className="text-sm text-text-on-primary-variant">
@@ -415,7 +402,6 @@ function PhraseDetail() {
       >
         <div className="flex flex-row gap-sm w-200 m-xl mb-xs">
           <TermPicker
-            terms={terms}
             onSelect={(term) =>
               setItems((prev) => [...prev, entryFromTerm(term)])
             }

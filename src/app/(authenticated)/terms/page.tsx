@@ -7,16 +7,15 @@ import { TERM_SECTIONS } from "@/config/navigation";
 import Modal from "@/components/Modal/Modal";
 import Pagination from "@/components/Pagination/Pagination";
 import SearchBar from "@/components/SearchBar/SearchBar";
+import ListToolbar from "@/components/ListToolbar/ListToolbar";
 import ListStatus from "@/components/ListStatus/ListStatus";
 import { usePaginatedList } from "@/hooks/usePaginatedList";
 import AssetCard from "../components/AssetCard/AssetCard";
 import Input from "@/components/Input/Input";
 import Button from "@/components/Button/Button";
 import { getTermPage, createTerm, deleteTerm } from "@/services/terms";
-import { getPictograms } from "@/services/pictograms";
-import { getSignWritings } from "@/services/sign-writings";
-import { PictogramOutput } from "@/types/pictogram";
-import { SignWritingOutput } from "@/types/sign-writing";
+import { getPictogramPage } from "@/services/pictograms";
+import { getSignWritingPage } from "@/services/sign-writings";
 import Image from "next/image";
 import Link from "next/link";
 import RemoveButton from "@/components/RemoveButton/RemoveButton";
@@ -32,8 +31,10 @@ function Terms() {
 
   const [description, setDescription] = useState("");
   const [descriptionEdited, setDescriptionEdited] = useState(false);
-  const [pictograms, setPictograms] = useState<PictogramOutput[]>([]);
-  const [signWritings, setSignWritings] = useState<SignWritingOutput[]>([]);
+  // Null until known, so the hint does not claim there are none too early.
+  const [hasSignWritings, setHasSignWritings] = useState<boolean | null>(
+    null,
+  );
   const [selectedPictogram, setSelectedPictogram] = useState<Asset>();
   const [selectedSignWriting, setSelectedSignWriting] = useState<Asset>();
 
@@ -54,8 +55,10 @@ function Terms() {
   };
 
   const openModal = () => {
-    getPictograms().then(setPictograms);
-    getSignWritings().then(setSignWritings);
+    // The picker loads its own pages; this only asks whether any exist.
+    getSignWritingPage({ page: 1, pageSize: 1 })
+      .then((data) => setHasSignWritings(data.meta.total > 0))
+      .catch(() => setHasSignWritings(null));
     setIsModalOpen(true);
   };
 
@@ -120,23 +123,25 @@ function Terms() {
 
   return (
     <div className="flex w-full flex-col gap-lg">
-      <div className="flex items-center justify-between rounded-lg border border-gray-200 bg-white px-lg py-md text-text-on-primary">
-        <PillTabs label="Termos" pages={TERM_SECTIONS} />
-        <div className="mx-lg w-100">
+      <ListToolbar
+        start={<PillTabs label="Termos" pages={TERM_SECTIONS} />}
+        search={
           <SearchBar
             value={list.search}
             onChange={list.setSearch}
             placeholder="Buscar termos"
           />
-        </div>
-        <div className="flex">
-          <AddButton onClick={openModal} />
-          <RemoveButton
-            active={selectedIds.length > 0}
-            onClick={handleDelete}
-          />
-        </div>
-      </div>
+        }
+        end={
+          <>
+            <AddButton label="Adicionar termo" onClick={openModal} />
+            <RemoveButton
+              active={selectedIds.length > 0}
+              onClick={handleDelete}
+            />
+          </>
+        }
+      />
       {deleteError && (
         <p className="px-4 text-sm text-red-500">{deleteError}</p>
       )}
@@ -195,11 +200,17 @@ function Terms() {
             }}
           />
           <div className="flex flex-row gap-xxl">
-            <AssetPicker items={pictograms} onSelect={handleSelectPictogram} />
+            <AssetPicker
+              listKey="pictograms"
+              fetchPage={getPictogramPage}
+              onSelect={handleSelectPictogram}
+            />
             <AssetPicker
               id="sign-writing-filter"
               label="SignWritings Disponíveis:"
-              items={signWritings}
+              itemNoun="SignWriting"
+              listKey="signWritings"
+              fetchPage={getSignWritingPage}
               onSelect={setSelectedSignWriting}
             />
             <div className="flex flex-col w-full gap-md">
@@ -259,7 +270,7 @@ function Terms() {
               <p className="text-sm text-text-on-primary-variant text-right">
                 Falta escolher {formatList(missing)}.{" "}
                 {!selectedSignWriting &&
-                  (signWritings.length === 0 ? (
+                  (hasSignWritings === false ? (
                     <>
                       Nenhum SignWriting foi cadastrado ainda —{" "}
                       <Link

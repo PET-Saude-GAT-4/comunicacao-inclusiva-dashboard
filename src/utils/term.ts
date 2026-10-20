@@ -1,25 +1,20 @@
 import type { AssetCardBadge } from "@/app/(authenticated)/components/AssetCard/AssetCard";
-import type { TermOutput } from "@/types/term";
 
-// Which terms each pictogram (or SignWriting) belongs to, by its uuid. Terms
-// already carry both parts, so one term listing answers this for a whole page
-// without a request per card.
-export function termNamesByPart(
-  terms: TermOutput[],
-  part: "pictogram" | "signWriting",
-): Record<string, string[]> {
-  const names: Record<string, string[]> = {};
-  for (const term of terms) {
-    const uuid = term[part].uuid;
-    (names[uuid] ??= []).push(term.description);
-  }
-  return names;
-}
+// Names past this many are counted instead of listed, so a part used by many
+// terms keeps its badge to one line.
+const SHOWN_TERM_NAMES = 2;
 
 // A part may belong to several terms or to none; the neutral badge marks the
 // latter.
-export function termBadge(names: string[] | undefined): AssetCardBadge {
-  return names && names.length > 0
-    ? { text: names.join(", ") }
-    : { text: "Sem termo", neutral: true };
+export function termBadge(terms: { description: string }[]): AssetCardBadge {
+  if (terms.length === 0) return { text: "Sem termo", neutral: true };
+
+  const names = terms.map((term) => term.description);
+  const hidden = names.length - SHOWN_TERM_NAMES;
+  if (hidden <= 0) return { text: names.join(", ") };
+
+  return {
+    text: `${names.slice(0, SHOWN_TERM_NAMES).join(", ")} +${hidden}`,
+    fullText: names.join(", "),
+  };
 }

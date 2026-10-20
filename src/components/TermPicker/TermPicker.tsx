@@ -1,24 +1,19 @@
 "use client";
 
-import { useState } from "react";
 import Image from "next/image";
 import AddButton from "@/components/AddButton/AddButton";
+import InfiniteList from "@/components/InfiniteList/InfiniteList";
 import Input from "@/components/Input/Input";
+import { useRemoteSearch } from "@/hooks/useRemoteSearch";
+import { getTermPage } from "@/services/terms";
 import { TermOutput } from "@/types/term";
 
 interface TermPickerProps {
-  terms: TermOutput[];
   onSelect: (term: TermOutput) => void;
 }
 
-export default function TermPicker({ terms, onSelect }: TermPickerProps) {
-  const [filter, setFilter] = useState("");
-
-  const filtered = filter
-    ? terms.filter((t) =>
-        t.description.toLowerCase().includes(filter.toLowerCase()),
-      )
-    : terms;
+export default function TermPicker({ onSelect }: TermPickerProps) {
+  const list = useRemoteSearch("terms", getTermPage);
 
   return (
     <div className="flex flex-col w-full gap-md">
@@ -26,41 +21,42 @@ export default function TermPicker({ terms, onSelect }: TermPickerProps) {
       <Input
         id="term-filter"
         placeholder="Filtrar por descrição"
-        value={filter}
-        onChange={(e) => setFilter(e.target.value)}
+        value={list.search}
+        onChange={(e) => list.setSearch(e.target.value)}
       />
-      <div className="flex flex-col h-96 overflow-y-auto gap-md">
-        <ul className="flex flex-col gap-md">
-          {filtered.map((term) => (
-            <li
-              key={term.uuid}
-              className="flex flex-row items-center gap-md border border-outline-common rounded-md p-sm justify-between cursor-pointer"
-              onClick={() => onSelect(term)}
-            >
-              <div className="flex flex-row items-center gap-sm">
-                <Image
-                  src={term.pictogram.fileUrl}
-                  alt=""
-                  width={50}
-                  height={50}
-                  className="object-contain rounded"
-                />
-                <Image
-                  src={term.signWriting.fileUrl}
-                  alt=""
-                  width={50}
-                  height={50}
-                  className="object-contain rounded"
-                />
-              </div>
-              <p className="text-text-on-primary">{term.description}</p>
-              <span onClick={(e) => e.stopPropagation()}>
-                <AddButton onClick={() => onSelect(term)} />
-              </span>
-            </li>
-          ))}
-        </ul>
-      </div>
+      <InfiniteList list={list}>
+        {list.items.map((term) => (
+          <li
+            key={term.uuid}
+            className="flex flex-row items-center gap-md border border-outline-common rounded-md p-sm justify-between cursor-pointer"
+            onClick={() => onSelect(term)}
+          >
+            <div className="flex flex-row items-center gap-sm">
+              <Image
+                src={term.pictogram.fileUrl}
+                alt=""
+                width={50}
+                height={50}
+                className="object-contain rounded"
+              />
+              <Image
+                src={term.signWriting.fileUrl}
+                alt=""
+                width={50}
+                height={50}
+                className="object-contain rounded"
+              />
+            </div>
+            <p className="text-text-on-primary">{term.description}</p>
+            <span onClick={(e) => e.stopPropagation()}>
+              <AddButton
+                label={`Adicionar termo ${term.description}`}
+                onClick={() => onSelect(term)}
+              />
+            </span>
+          </li>
+        ))}
+      </InfiniteList>
     </div>
   );
 }

@@ -2,16 +2,17 @@ import type {
   ChainTrigger,
   InteractionChainOutput,
 } from "@/types/interaction-chain";
-import { apiFetch } from "./client";
+import { ListQuery, Paginated } from "@/types/common";
+import { apiFetch, listQueryString } from "./client";
 
-export async function getInteractionChains(): Promise<
-  InteractionChainOutput[]
-> {
-  const data = await apiFetch<{ interactionChains: InteractionChainOutput[] }>(
-    "/interaction-chains",
-  );
+export async function getInteractionChainPage(
+  query: ListQuery,
+): Promise<Paginated<"interactionChains", InteractionChainOutput>> {
+  const data = await apiFetch<
+    Paginated<"interactionChains", InteractionChainOutput>
+  >(`/interaction-chains${listQueryString(query)}`);
   if (!data) throw new Error("Erro ao buscar cadeias de interação.");
-  return data.interactionChains;
+  return data;
 }
 
 export async function getInteractionChain(

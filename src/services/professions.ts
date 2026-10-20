@@ -5,10 +5,6 @@ import { ActionResult, ListQuery, Paginated } from "@/types/common";
 import { ProfessionOutput, SpecialityOutput } from "@/types/profession";
 import * as api from "@/lib/api/professions";
 
-export async function getProfessions(): Promise<ProfessionOutput[]> {
-  return api.getProfessions();
-}
-
 export async function getProfessionPage(
   query: ListQuery,
 ): Promise<Paginated<"professions", ProfessionOutput>> {
@@ -36,10 +32,6 @@ export async function deleteProfession(id: number): Promise<ActionResult> {
   } catch {
     return { success: false, error: `Erro ao remover profissão ${id}.` };
   }
-}
-
-export async function getSpecialities(): Promise<SpecialityOutput[]> {
-  return api.getSpecialities();
 }
 
 export async function getSpecialityPage(

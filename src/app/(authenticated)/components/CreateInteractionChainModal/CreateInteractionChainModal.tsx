@@ -7,8 +7,8 @@ import { PhraseOutput } from "@/types/phrase";
 import { useCallback, useEffect, useState } from "react";
 import BoardPicker from "@/components/BoardPicker/BoardPicker";
 import PhrasePicker from "@/components/PhrasePicker/PhrasePicker";
-import { getBoards, getBoard } from "@/services/boards";
-import { getPhrases, getPhrase } from "@/services/phrases";
+import { getBoard } from "@/services/boards";
+import { getPhrase } from "@/services/phrases";
 
 import { MdArrowBack, MdListAlt } from "react-icons/md";
 
@@ -16,8 +16,10 @@ import {
   createInteractionChain,
   getInteractionChainsByTrigger,
   deleteInteractionChain,
-  getInteractionChains,
+  getInteractionChainPage,
 } from "@/services/interaction-chain";
+import InfiniteList from "@/components/InfiniteList/InfiniteList";
+import { useRemoteSearch } from "@/hooks/useRemoteSearch";
 
 import Button from "@/components/Button/Button";
 import RemoveButton from "@/components/RemoveButton/RemoveButton";
@@ -57,12 +59,11 @@ export default function CreateInteractionChainModal({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [removeError, setRemoveError] = useState<string | null>(null);
 
+  // The chains of the chosen trigger. Without one, "Todas as interações"
+  // pages through every chain on its own instead.
   const [interactionList, setInteractionList] = useState<
     InteractionChainOutput[]
   >([]);
-
-  const [data, setData] = useState<BoardOutput[]>([]);
-  const [phrases, setPhrases] = useState<PhraseOutput[]>([]);
 
   const isPhraseTrigger = triggerKind === "phrase";
 
@@ -74,13 +75,11 @@ export default function CreateInteractionChainModal({
       : null;
 
   const fetchInteractionChain = useCallback((current: ChainTrigger | null) => {
-    if (current) {
-      getInteractionChainsByTrigger(current).then((list) =>
-        setInteractionList(list ?? []),
-      );
-    } else {
-      getInteractionChains().then(setInteractionList);
-    }
+    // Without a trigger nothing reads this list; the full one pages itself.
+    if (!current) return;
+    getInteractionChainsByTrigger(current).then((list) =>
+      setInteractionList(list ?? []),
+    );
   }, []);
 
   // Callers pass incomingTrigger as an object literal, so depending on the
@@ -92,9 +91,6 @@ export default function CreateInteractionChainModal({
   // list nobody has asked to see.
   useEffect(() => {
     if (!isModalOpen) return;
-
-    getBoards().then(setData);
-    getPhrases().then(setPhrases);
 
     if (!incomingType || !incomingUuid) return;
 
@@ -133,13 +129,7 @@ export default function CreateInteractionChainModal({
         )
       : null;
 
-  const getBoardTitle = (uuid: string) =>
-    data.find((b) => b.uuid === uuid)?.title ?? uuid;
-
-  const getTriggerTitle = (t: ChainTrigger) =>
-    t.type === "board"
-      ? getBoardTitle(t.uuid)
-      : (phrases.find((p) => p.uuid === t.uuid)?.description ?? t.uuid);
+  const triggerTitle = triggerBoard?.title ?? triggerPhrase?.description ?? "";
 
   const handleCreate = async () => {
     if (!trigger) {
@@ -179,27 +169,32 @@ export default function CreateInteractionChainModal({
     }
   };
 
-  const handleShownBoards = () => {
-    return data.filter((board) => board.uuid !== triggerBoard?.uuid);
-  };
-
   // A trigger may point at a board only once, so its existing responses are
-  // left out of the picker. Matching on each chain's own trigger keeps this
-  // right while interactionList still holds all chains or a previous trigger's.
-  const handleShownResponseBoards = () => {
-    if (!trigger) return handleShownBoards();
+  // greyed out in the picker. Matching on each chain's own trigger keeps this
+  // right while interactionList still holds a previous trigger's chains.
+  const linkedResponseUuids = new Set(
+    trigger
+      ? interactionList
+          .filter(
+            (ic) =>
+              ic.trigger.type === trigger.type &&
+              ic.trigger.uuid === trigger.uuid,
+          )
+          .map((ic) => ic.responseBoardUuid)
+      : [],
+  );
 
-    const linked = new Set(
-      interactionList
-        .filter(
-          (ic) =>
-            ic.trigger.type === trigger.type &&
-            ic.trigger.uuid === trigger.uuid,
-        )
-        .map((ic) => ic.responseBoardUuid),
-    );
+  const triggerUnavailableReason = (board: BoardOutput) =>
+    board.uuid === triggerBoard?.uuid ? "Origem atual" : null;
 
-    return handleShownBoards().filter((board) => !linked.has(board.uuid));
+  // The API refuses an unpublished board as the destination of an
+  // interaction, so it is shown with the reason instead of being offered only
+  // to fail on submit.
+  const responseUnavailableReason = (board: BoardOutput) => {
+    if (board.uuid === triggerBoard?.uuid) return "Prancha de origem";
+    if (linkedResponseUuids.has(board.uuid)) return "Já vinculada";
+    if (board.publishedAt === null) return "Não publicada";
+    return null;
   };
 
   const handleSelectTriggerBoard = (board: BoardOutput) => {
@@ -231,6 +226,7 @@ export default function CreateInteractionChainModal({
     } else {
       setRemoveError(result.error ?? "Erro ao remover interação.");
     }
+    return result.success;
   };
 
   return (
@@ -254,7 +250,7 @@ export default function CreateInteractionChainModal({
                     <>
                       Origem:{" "}
                       <span className="font-semibold">
-                        {getTriggerTitle(trigger)}
+                        {triggerTitle}
                       </span>
                     </>
                   ) : (
@@ -274,34 +270,27 @@ export default function CreateInteractionChainModal({
             {removeError && (
               <p className="mb-sm text-sm text-red-500">{removeError}</p>
             )}
-            <div className="max-h-96 overflow-y-auto">
-              {interactionList.length === 0 ? (
-                <p className="rounded-md border border-outline-common p-md text-sm text-gray-500">
-                  Nenhuma interação encontrada.
-                </p>
-              ) : (
-                <ul className="flex flex-col gap-sm">
-                  {interactionList.map((ic) => (
-                    <li
-                      key={ic.uuid}
-                      className="flex items-center justify-between gap-md rounded-md border border-outline-common bg-background px-md py-sm"
-                    >
-                      <span className="min-w-0 wrap-break-word font-semibold">
-                        {ic.label?.trim()
-                          ? ic.label
-                          : `${getTriggerTitle(ic.trigger)} → ${getBoardTitle(
-                              ic.responseBoardUuid,
-                            )}`}
-                      </span>
-                      <RemoveButton
-                        active
-                        onClick={() => handleRemoveInteraction(ic.uuid)}
+            {trigger ? (
+              <div className="max-h-96 overflow-y-auto">
+                {interactionList.length === 0 ? (
+                  <p className="rounded-md border border-outline-common p-md text-sm text-gray-500">
+                    Nenhuma interação encontrada.
+                  </p>
+                ) : (
+                  <ul className="flex flex-col gap-sm">
+                    {interactionList.map((ic) => (
+                      <ChainRow
+                        key={ic.uuid}
+                        chain={ic}
+                        onRemove={() => handleRemoveInteraction(ic.uuid)}
                       />
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            ) : (
+              <AllInteractionChains onRemove={handleRemoveInteraction} />
+            )}
           </section>
         ) : (
           <>
@@ -373,7 +362,7 @@ export default function CreateInteractionChainModal({
                           <p className="mt-sm wrap-break-word text-sm text-gray-500">
                             Origem:{" "}
                             <span className="font-semibold">
-                              {trigger ? getTriggerTitle(trigger) : ""}
+                              {triggerTitle}
                             </span>
                           </p>
                           <p className="wrap-break-word text-sm text-gray-500">
@@ -441,21 +430,21 @@ export default function CreateInteractionChainModal({
               <div className="min-w-0">
                 {step === "trigger" ? (
                   isPhraseTrigger ? (
-                    <PhrasePicker
-                      phrases={phrases}
-                      onSelect={handleSelectTriggerPhrase}
-                    />
+                    <PhrasePicker onSelect={handleSelectTriggerPhrase} />
                   ) : (
                     <BoardPicker
-                      boards={handleShownBoards()}
+                      key="trigger"
                       onSelect={handleSelectTriggerBoard}
+                      unavailableReason={triggerUnavailableReason}
                     />
                   )
                 ) : (
+                  // Keyed apart from the trigger picker, so the search typed
+                  // there does not carry over to this step.
                   <BoardPicker
-                    boards={handleShownResponseBoards()}
+                    key="response"
                     onSelect={setResponseBoard}
-                    requirePublished
+                    unavailableReason={responseUnavailableReason}
                   />
                 )}
               </div>
@@ -464,5 +453,48 @@ export default function CreateInteractionChainModal({
         )}
       </div>
     </Modal>
+  );
+}
+
+function ChainRow({
+  chain,
+  onRemove,
+}: {
+  chain: InteractionChainOutput;
+  onRemove: () => void;
+}) {
+  return (
+    <li className="flex items-center justify-between gap-md rounded-md border border-outline-common bg-background px-md py-sm">
+      <span className="min-w-0 wrap-break-word font-semibold">
+        {chain.label?.trim()
+          ? chain.label
+          : `${chain.trigger.title} → ${chain.responseBoardTitle}`}
+      </span>
+      <RemoveButton active onClick={onRemove} />
+    </li>
+  );
+}
+
+// Every chain the user can see, a page at a time. Mounted only while shown,
+// so the modal asks for them only when someone opens this list.
+function AllInteractionChains({
+  onRemove,
+}: {
+  onRemove: (uuid: string) => Promise<boolean>;
+}) {
+  const list = useRemoteSearch("interactionChains", getInteractionChainPage);
+
+  return (
+    <InfiniteList list={list} className="max-h-96">
+      {list.items.map((ic) => (
+        <ChainRow
+          key={ic.uuid}
+          chain={ic}
+          onRemove={async () => {
+            if (await onRemove(ic.uuid)) list.reload();
+          }}
+        />
+      ))}
+    </InfiniteList>
   );
 }

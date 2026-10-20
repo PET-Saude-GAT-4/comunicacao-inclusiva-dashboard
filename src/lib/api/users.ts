@@ -2,12 +2,6 @@ import { ListQuery, Paginated } from "@/types/common";
 import { UserOutput } from "@/types/user";
 import { apiFetch, listQueryString } from "./client";
 
-export async function getUsers(): Promise<UserOutput[]> {
-  const data = await apiFetch<{ users: UserOutput[] }>("/users");
-  if (!data) throw new Error("Erro ao buscar usuários.");
-  return data.users;
-}
-
 export async function getUserPage(
   query: ListQuery,
 ): Promise<Paginated<"users", UserOutput>> {

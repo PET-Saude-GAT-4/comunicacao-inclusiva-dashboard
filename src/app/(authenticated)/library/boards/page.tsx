@@ -6,15 +6,15 @@ import { MdContentPaste } from "react-icons/md";
 import TabButton from "@/components/TabButton/TabButton";
 import Table from "@/components/Table/Table";
 import SearchBar from "@/components/SearchBar/SearchBar";
+import ListToolbar from "@/components/ListToolbar/ListToolbar";
 import Image from "next/image";
 import { getPublicBoards } from "@/services/boards";
-import { getUsers } from "@/services/users";
 import { getSessionUser } from "@/services/auth";
 import { BoardOutput } from "@/types/board";
 import { PictogramOutput } from "@/types/pictogram";
 import { SessionUser } from "@/types/session";
 import { boardHref } from "@/utils/board";
-import { MdPerson } from "react-icons/md";
+import AuthorEmail from "../../components/AuthorEmail/AuthorEmail";
 
 // Defined once so SearchBar, which filters whenever it changes, filters only
 // when the list or the query does.
@@ -26,38 +26,32 @@ function Library() {
   // GET /public/boards is not paginated by design, so this page searches the
   // list it already has instead of asking the API.
   const [filteredBoards, setFilteredBoards] = useState<BoardOutput[]>([]);
-  const [authorEmails, setAuthorEmails] = useState<Record<string, string>>({});
   const [user, setUser] = useState<SessionUser | null>(null);
 
   useEffect(() => {
     getPublicBoards().then(setBoards);
     getSessionUser().then(setUser);
-    getUsers()
-      .catch(() => [])
-      .then((users) =>
-        setAuthorEmails(
-          Object.fromEntries(
-            users.map((author) => [author.uuid, author.email]),
-          ),
-        ),
-      );
   }, []);
+
+  const canReadUsers = user?.role === "admin" || user?.role === "super_admin";
 
   return (
     <div className="flex w-full flex-col gap-lg">
-      <div className="flex items-center justify-between rounded-lg border border-gray-200 bg-white px-lg py-md text-text-on-primary">
-        <nav className="flex justify-between">
-          <TabButton icon={MdContentPaste} active={true} />
-        </nav>
-        <div className="mx-lg w-100">
+      <ListToolbar
+        start={
+          <nav>
+            <TabButton icon={MdContentPaste} active={true} />
+          </nav>
+        }
+        search={
           <SearchBar
             data={boards}
             onResults={setFilteredBoards}
             getSearchText={boardSearchText}
             placeholder="Buscar pranchas"
           />
-        </div>
-      </div>
+        }
+      />
       <div>
         <Table
           data={filteredBoards}
@@ -67,12 +61,7 @@ function Library() {
               key: "authorUuid",
               label: "Autor",
               render: (_value, board) => (
-                <div className="flex items-center gap-sm">
-                  <MdPerson className="text-gray-400" size={18} />
-                  <p>
-                    {authorEmails[board.authorUuid ?? ""] ?? "Desconhecido"}
-                  </p>
-                </div>
+                <AuthorEmail uuid={board.authorUuid} lookup={canReadUsers} />
               ),
             },
             {

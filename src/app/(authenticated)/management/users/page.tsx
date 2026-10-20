@@ -10,10 +10,11 @@ import Input from "@/components/Input/Input";
 import Button from "@/components/Button/Button";
 import Pagination from "@/components/Pagination/Pagination";
 import SearchBar from "@/components/SearchBar/SearchBar";
+import ListToolbar from "@/components/ListToolbar/ListToolbar";
 import ListStatus from "@/components/ListStatus/ListStatus";
 import { usePaginatedList } from "@/hooks/usePaginatedList";
 import { getUserPage, createUser, deleteUser } from "@/services/users";
-import { getRoles } from "@/services/roles";
+import { getRolePage } from "@/services/roles";
 import { RoleOutput } from "@/types/role";
 import UserCard from "../../components/UserCard/UserCard";
 
@@ -28,7 +29,9 @@ function Users() {
   const [roleId, setRoleId] = useState<number>(0);
 
   useEffect(() => {
-    getRoles().then(setRoles);
+    // Roles are few and admin-managed, so one page of the largest size the
+    // API allows holds them all.
+    getRolePage({ page: 1, pageSize: 100 }).then((data) => setRoles(data.roles));
   }, []);
 
   const handleCreate = async () => {
@@ -74,26 +77,33 @@ function Users() {
 
   return (
     <div className="flex w-full flex-col gap-lg">
-      <div className="flex items-center justify-between rounded-lg border border-gray-200 bg-white px-lg py-md text-text-on-primary">
-        <PillTabs
-          label={MANAGEMENT_GROUP.title}
-          pages={MANAGEMENT_GROUP.pages}
-        />
-        <div className="mx-lg w-100">
+      <ListToolbar
+        start={
+          <PillTabs
+            label={MANAGEMENT_GROUP.title}
+            pages={MANAGEMENT_GROUP.pages}
+          />
+        }
+        search={
           <SearchBar
             value={list.search}
             onChange={list.setSearch}
             placeholder="Buscar usuários"
           />
-        </div>
-        <div className="flex">
-          <AddButton onClick={() => setIsModalOpen(true)} />
-          <RemoveButton
-            active={selectedIds.length > 0}
-            onClick={handleDelete}
-          />
-        </div>
-      </div>
+        }
+        end={
+          <>
+            <AddButton
+              label="Adicionar usuário"
+              onClick={() => setIsModalOpen(true)}
+            />
+            <RemoveButton
+              active={selectedIds.length > 0}
+              onClick={handleDelete}
+            />
+          </>
+        }
+      />
       <div>
         <div className="grid grid-cols-3 auto-rows-max gap-4">
           {list.items.map((user) => (

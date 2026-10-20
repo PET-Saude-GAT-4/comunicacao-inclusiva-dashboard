@@ -2,12 +2,6 @@ import { ListQuery, Paginated } from "@/types/common";
 import { TermOutput } from "@/types/term";
 import { apiFetch, listQueryString } from "./client";
 
-export async function getTerms(): Promise<TermOutput[]> {
-  const data = await apiFetch<{ terms: TermOutput[] }>("/terms");
-  if (!data) throw new Error("Erro ao buscar termos.");
-  return data.terms;
-}
-
 export async function getTermPage(
   query: ListQuery,
 ): Promise<Paginated<"terms", TermOutput>> {
