@@ -12,9 +12,9 @@ type Options = {
 type Result<T> = {
   viewKey: string;
   items: T[];
-  // The last page appended; 0 when the first one failed.
-  page: number;
-  pageCount: number;
+  // False when the first page failed, so retrying starts the list over.
+  loaded: boolean;
+  total: number;
   failed: boolean;
 };
 
@@ -26,7 +26,12 @@ type Result<T> = {
 // Pages are appended as they arrive and a new search starts again from page 1.
 // A response that belongs to an older search or reload is dropped, so the list
 // always matches the text in the field.
-export function useRemoteSearch<K extends string, T>(
+//
+// The API pages by offset, so removing an item shifts every later one up by
+// one. The next request therefore starts at the number of items on screen,
+// not at the next page number, which keeps the item that moved into an
+// already loaded page from being skipped.
+export function useRemoteSearch<K extends string, T extends { uuid: string }>(
   key: K,
   fetchPage: (query: ListQuery) => Promise<Paginated<K, T>>,
   { pageSize = 20 }: Options = {},
@@ -49,7 +54,8 @@ export function useRemoteSearch<K extends string, T>(
 
   const viewKey = JSON.stringify([q, version]);
   const current = result?.viewKey === viewKey ? result : null;
-  const hasMore = current !== null && current.page < current.pageCount;
+  const hasMore =
+    current !== null && current.loaded && current.items.length < current.total;
 
   const setSearch = (value: string) => {
     setSearchInput(value);
@@ -73,14 +79,14 @@ export function useRemoteSearch<K extends string, T>(
         setResult({
           viewKey,
           items: data[key],
-          page: 1,
-          pageCount: data.meta.pageCount,
+          loaded: true,
+          total: data.meta.total,
           failed: false,
         });
       })
       .catch(() => {
         if (activeRequest.current !== request) return;
-        setResult({ viewKey, items: [], page: 0, pageCount: 1, failed: true });
+        setResult({ viewKey, items: [], loaded: false, total: 0, failed: true });
       })
       .finally(() => {
         if (activeRequest.current === request) busy.current = false;
@@ -88,28 +94,56 @@ export function useRemoteSearch<K extends string, T>(
   }, [key, fetchPage, pageSize, q, viewKey]);
 
   const loadMore = useCallback(() => {
-    if (busy.current || current === null || current.page === 0) return;
-    if (current.page >= current.pageCount) return;
+    if (busy.current || current === null || !current.loaded) return;
+    if (current.items.length >= current.total) return;
 
     const view = viewKey;
     const request = activeRequest.current;
-    const nextPage = current.page + 1;
+    const offset = current.items.length;
+    const page = Math.floor(offset / pageSize) + 1;
+    // Only after a removal does the offset fall inside a page; the rest of
+    // that page is then not enough to fill a page, so the next one comes too.
+    const skip = offset % pageSize;
+    const pages =
+      skip > 0 && page < Math.ceil(current.total / pageSize)
+        ? [page, page + 1]
+        : [page];
     busy.current = true;
     setLoadingMoreFor(view);
     setResult((previous) => previous && { ...previous, failed: false });
 
-    fetchPage({ page: nextPage, pageSize, q: q || undefined })
+    // Both pages are asked for at once: the client runs Server Functions one
+    // at a time, so a removal sent meanwhile cannot land between them and
+    // shift the second page against the first.
+    Promise.all(
+      pages.map((number) =>
+        fetchPage({ page: number, pageSize, q: q || undefined }),
+      ),
+    )
+      .then((responses) => ({
+        ...responses[responses.length - 1],
+        [key]: responses.flatMap((data) => data[key]),
+      }))
       .then((data) => {
         if (activeRequest.current !== request) return;
-        setResult(
-          (previous) =>
-            previous && {
-              ...previous,
-              items: [...previous.items, ...data[key]],
-              page: nextPage,
-              pageCount: data.meta.pageCount,
-            },
-        );
+        setResult((previous) => {
+          if (!previous) return previous;
+          const shown = new Set(previous.items.map((item) => item.uuid));
+          const added = data[key]
+            .slice(skip)
+            .filter((item) => !shown.has(item.uuid));
+          return {
+            ...previous,
+            items: [...previous.items, ...added],
+            // A page with nothing new means the list changed elsewhere since
+            // it was loaded; ending it here keeps the observer from asking
+            // for the same page forever.
+            total:
+              added.length > 0
+                ? data.meta.total
+                : previous.items.length,
+          };
+        });
       })
       .catch(() => {
         if (activeRequest.current !== request) return;
@@ -121,11 +155,24 @@ export function useRemoteSearch<K extends string, T>(
       });
   }, [current, viewKey, fetchPage, pageSize, q, key]);
 
-  // Starts the list over, e.g. after one of its items was removed.
+  // Starts the list over, losing the pages already loaded.
   const reload = useCallback(() => setVersion((count) => count + 1), []);
 
+  // Drops an item the server no longer has, keeping the rest of the list and
+  // its scroll position in place.
+  const remove = useCallback((uuid: string) => {
+    setResult((previous) => {
+      if (!previous?.items.some((item) => item.uuid === uuid)) return previous;
+      return {
+        ...previous,
+        items: previous.items.filter((item) => item.uuid !== uuid),
+        total: previous.total - 1,
+      };
+    });
+  }, []);
+
   // Retrying never happens on its own: a failed page waits for the user.
-  const retry = current?.page === 0 ? reload : loadMore;
+  const retry = current?.loaded === false ? reload : loadMore;
 
   return {
     search,
@@ -137,10 +184,11 @@ export function useRemoteSearch<K extends string, T>(
     loadMore,
     retry,
     reload,
+    remove,
   };
 }
 
-export type RemoteSearch<T> = Omit<
+export type RemoteSearch<T extends { uuid: string }> = Omit<
   ReturnType<typeof useRemoteSearch<string, T>>,
   "search" | "setSearch"
 >;
