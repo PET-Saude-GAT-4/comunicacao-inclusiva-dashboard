@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { ActionResult } from "@/types/common";
+import { ActionResult, ListQuery, Paginated } from "@/types/common";
 import { BoardOutput, BoardType } from "@/types/board";
 import { BoardTermOutput } from "@/types/term";
 import { ApiError } from "@/lib/api/client";
@@ -9,6 +9,13 @@ import * as api from "@/lib/api/boards";
 
 export async function getBoards(): Promise<BoardOutput[]> {
   return api.getBoards();
+}
+
+export async function getBoardPage(
+  query: ListQuery,
+  filters: { type?: BoardType } = {},
+): Promise<Paginated<"boards", BoardOutput>> {
+  return api.getBoardPage(query, filters);
 }
 
 export async function getBoard(uuid: string): Promise<BoardOutput | null> {

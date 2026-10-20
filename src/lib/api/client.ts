@@ -1,4 +1,5 @@
 import { getSession, deleteSession } from "@/utils/session";
+import { ListQuery } from "@/types/common";
 
 export class ApiError extends Error {
   constructor(
@@ -38,4 +39,17 @@ export async function apiFetch<T>(
   const text = await res.text();
   if (!text) return undefined;
   return JSON.parse(text) as T;
+}
+
+// Builds "?page=…&pageSize=…&q=…" for a paginated list endpoint, plus any
+// filter the endpoint accepts. Empty values are left out of the string.
+export function listQueryString(
+  query: ListQuery,
+  filters: Record<string, string | undefined> = {},
+): string {
+  const params = new URLSearchParams();
+  for (const [key, value] of Object.entries({ ...query, ...filters })) {
+    if (value !== undefined && value !== "") params.set(key, String(value));
+  }
+  return `?${params}`;
 }

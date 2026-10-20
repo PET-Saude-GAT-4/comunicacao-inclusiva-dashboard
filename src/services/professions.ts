@@ -1,12 +1,18 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { ActionResult } from "@/types/common";
+import { ActionResult, ListQuery, Paginated } from "@/types/common";
 import { ProfessionOutput, SpecialityOutput } from "@/types/profession";
 import * as api from "@/lib/api/professions";
 
 export async function getProfessions(): Promise<ProfessionOutput[]> {
   return api.getProfessions();
+}
+
+export async function getProfessionPage(
+  query: ListQuery,
+): Promise<Paginated<"professions", ProfessionOutput>> {
+  return api.getProfessionPage(query);
 }
 
 export async function createProfession(data: {
@@ -34,6 +40,12 @@ export async function deleteProfession(id: number): Promise<ActionResult> {
 
 export async function getSpecialities(): Promise<SpecialityOutput[]> {
   return api.getSpecialities();
+}
+
+export async function getSpecialityPage(
+  query: ListQuery,
+): Promise<Paginated<"specialities", SpecialityOutput>> {
+  return api.getSpecialityPage(query);
 }
 
 export async function createSpeciality(data: {

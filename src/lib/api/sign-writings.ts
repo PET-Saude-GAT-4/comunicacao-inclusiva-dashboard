@@ -1,5 +1,6 @@
+import { ListQuery, Paginated } from "@/types/common";
 import { SignWritingOutput } from "@/types/sign-writing";
-import { apiFetch } from "./client";
+import { apiFetch, listQueryString } from "./client";
 
 export async function getSignWritings(): Promise<SignWritingOutput[]> {
   const data = await apiFetch<{ signWritings: SignWritingOutput[] }>(
@@ -7,6 +8,16 @@ export async function getSignWritings(): Promise<SignWritingOutput[]> {
   );
   if (!data) throw new Error("Erro ao buscar SignWritings.");
   return data.signWritings;
+}
+
+export async function getSignWritingPage(
+  query: ListQuery,
+): Promise<Paginated<"signWritings", SignWritingOutput>> {
+  const data = await apiFetch<Paginated<"signWritings", SignWritingOutput>>(
+    `/sign-writings${listQueryString(query)}`,
+  );
+  if (!data) throw new Error("Erro ao buscar SignWritings.");
+  return data;
 }
 
 export async function getSignWriting(

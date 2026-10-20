@@ -14,23 +14,54 @@ function Table<T extends { id: number } | { uuid: string }>({
   pageSize = 10,
   onSelectionChange,
   onRowClick,
+  page: controlledPage,
+  pageCount: controlledPageCount,
+  onPageChange,
+  selected: controlledSelected,
+  loading = false,
+  error,
 }: {
   data: T[];
   columns: Column<T>[];
   pageSize?: number;
   onSelectionChange?: (ids: (number | string)[]) => void;
   onRowClick?: (row: T) => void;
+  // Pass all three when data already is one page fetched from the server.
+  // Without them, the table pages through the full list it was given.
+  page?: number;
+  pageCount?: number;
+  onPageChange?: (page: number) => void;
+  // The selection, when its owner has to clear it as the rows change.
+  selected?: (number | string)[];
+  loading?: boolean;
+  error?: string | null;
 }) {
-  const [selected, setSelected] = useState<(number | string)[]>([]);
-  const [page, setPage] = useState(1);
+  const [internalSelected, setSelected] = useState<(number | string)[]>([]);
+  const selected = controlledSelected ?? internalSelected;
+  const [internalPage, setInternalPage] = useState(1);
+  const isControlled = controlledPage !== undefined;
 
   const rowKey = (row: T): number | string => ("id" in row ? row.id : row.uuid);
 
-  const pageCount = Math.max(1, Math.ceil(data.length / pageSize));
+  const pageCount = isControlled
+    ? Math.max(1, controlledPageCount ?? 1)
+    : Math.max(1, Math.ceil(data.length / pageSize));
+  // Clamped so that a list that shrinks, like a narrowed search, never leaves
+  // the table on a page past its end.
+  const page = isControlled
+    ? controlledPage
+    : Math.min(internalPage, pageCount);
   const pageData = useMemo(() => {
+    if (isControlled) return data;
     const start = (page - 1) * pageSize;
     return data.slice(start, start + pageSize);
-  }, [data, page, pageSize]);
+  }, [isControlled, data, page, pageSize]);
+
+  const changePage = (nextPage: number) => {
+    const clamped = Math.min(Math.max(1, nextPage), pageCount);
+    if (isControlled) onPageChange?.(clamped);
+    else setInternalPage(clamped);
+  };
 
   const updateSelection = (next: (number | string)[]) => {
     setSelected(next);
@@ -90,9 +121,13 @@ function Table<T extends { id: number } | { uuid: string }>({
               <tr>
                 <td
                   colSpan={columns.length + 1}
-                  className="py-lg text-center text-text-secondary"
+                  className={[
+                    "py-lg text-center",
+                    error ? "text-red-500" : "text-text-secondary",
+                  ].join(" ")}
                 >
-                  Nenhum item encontrado
+                  {error ??
+                    (loading ? "Carregando…" : "Nenhum item encontrado")}
                 </td>
               </tr>
             )}
@@ -147,9 +182,7 @@ function Table<T extends { id: number } | { uuid: string }>({
           <Pagination
             page={page}
             pageCount={pageCount}
-            onPageChange={(nextPage) =>
-              setPage(Math.min(Math.max(1, nextPage), pageCount))
-            }
+            onPageChange={changePage}
           />
         </div>
       )}

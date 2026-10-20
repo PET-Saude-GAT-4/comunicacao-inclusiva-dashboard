@@ -1,16 +1,18 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useState } from "react";
 import PillTabs from "@/components/PillTabs/PillTabs";
 import { MANAGEMENT_GROUP } from "@/config/navigation";
 import RemoveButton from "@/components/RemoveButton/RemoveButton";
 import AddButton from "@/components/AddButton/AddButton";
 import Modal from "@/components/Modal/Modal";
 import Table from "@/components/Table/Table";
+import SearchBar from "@/components/SearchBar/SearchBar";
+import { usePaginatedList } from "@/hooks/usePaginatedList";
 import Input from "@/components/Input/Input";
 import Button from "@/components/Button/Button";
 import {
-  getProfessions,
+  getProfessionPage,
   createProfession,
   deleteProfession,
 } from "@/services/professions";
@@ -33,20 +35,15 @@ function toRow(p: ProfessionOutput): ProfessionRow {
 }
 
 function Professions() {
-  const [data, setData] = useState<ProfessionRow[]>([]);
-  const [selectedIds, setSelectedIds] = useState<(number | string)[]>([]);
+  const list = usePaginatedList("professions", getProfessionPage, {
+    pageSize: 10,
+  });
+  const { selectedIds } = list;
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
 
   const [name, setName] = useState("");
   const [code, setCode] = useState("");
-
-  const fetchData = () =>
-    getProfessions().then((rows) => setData(rows.map(toRow)));
-
-  useEffect(() => {
-    fetchData();
-  }, []);
 
   const handleCreate = async () => {
     const result = await createProfession({ name, code });
@@ -55,7 +52,7 @@ function Professions() {
       setFormError(null);
       setName("");
       setCode("");
-      fetchData();
+      list.refresh();
     } else {
       setFormError(result.error ?? "Erro ao criar profissão.");
     }
@@ -63,15 +60,24 @@ function Professions() {
 
   const handleDelete = async () => {
     await Promise.all(selectedIds.map((id) => deleteProfession(Number(id))));
-    setData((prev) => prev.filter((item) => !selectedIds.includes(item.id)));
-    setSelectedIds([]);
+    list.refresh();
+    list.setSelectedIds([]);
   };
 
   return (
     <div className="flex w-full flex-col gap-lg">
       <div className="flex items-center justify-between rounded-lg border border-gray-200 bg-white px-lg py-md text-text-on-primary">
-        <PillTabs label={MANAGEMENT_GROUP.title} pages={MANAGEMENT_GROUP.pages} />
-        <div className="flex">{/* <SearchBar/> */}</div>
+        <PillTabs
+          label={MANAGEMENT_GROUP.title}
+          pages={MANAGEMENT_GROUP.pages}
+        />
+        <div className="mx-lg w-100">
+          <SearchBar
+            value={list.search}
+            onChange={list.setSearch}
+            placeholder="Buscar áreas de atuação"
+          />
+        </div>
         <div className="flex">
           <AddButton onClick={() => setIsModalOpen(true)} />
           <RemoveButton
@@ -82,14 +88,20 @@ function Professions() {
       </div>
       <div className="flex-1">
         <Table
-          data={data}
+          selected={list.selectedIds}
+          loading={!list.loaded}
+          error={list.error}
+          data={list.items.map(toRow)}
+          page={list.page}
+          pageCount={list.pageCount}
+          onPageChange={list.setPage}
           columns={[
             { key: "id", label: "ID" },
             { key: "name", label: "Área de Atuação" },
             { key: "code", label: "Código" },
             { key: "createdAt", label: "Data de Criação" },
           ]}
-          onSelectionChange={setSelectedIds}
+          onSelectionChange={list.setSelectedIds}
         />
       </div>
       <Modal
@@ -124,4 +136,10 @@ function Professions() {
   );
 }
 
-export default Professions;
+export default function ProfessionsPage() {
+  return (
+    <Suspense>
+      <Professions />
+    </Suspense>
+  );
+}

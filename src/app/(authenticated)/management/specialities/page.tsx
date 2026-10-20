@@ -1,16 +1,18 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useState } from "react";
 import PillTabs from "@/components/PillTabs/PillTabs";
 import { MANAGEMENT_GROUP } from "@/config/navigation";
 import RemoveButton from "@/components/RemoveButton/RemoveButton";
 import AddButton from "@/components/AddButton/AddButton";
 import Modal from "@/components/Modal/Modal";
 import Table from "@/components/Table/Table";
+import SearchBar from "@/components/SearchBar/SearchBar";
+import { usePaginatedList } from "@/hooks/usePaginatedList";
 import Input from "@/components/Input/Input";
 import Button from "@/components/Button/Button";
 import {
-  getSpecialities,
+  getSpecialityPage,
   createSpeciality,
   deleteSpeciality,
 } from "@/services/professions";
@@ -35,21 +37,16 @@ function toRow(s: SpecialityOutput): SpecialityRow {
 }
 
 function Specialities() {
-  const [data, setData] = useState<SpecialityRow[]>([]);
-  const [selectedIds, setSelectedIds] = useState<(number | string)[]>([]);
+  const list = usePaginatedList("specialities", getSpecialityPage, {
+    pageSize: 10,
+  });
+  const { selectedIds } = list;
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
 
   const [name, setName] = useState("");
   const [code, setCode] = useState("");
   const [professionCode, setProfessionCode] = useState("");
-
-  const fetchData = () =>
-    getSpecialities().then((rows) => setData(rows.map(toRow)));
-
-  useEffect(() => {
-    fetchData();
-  }, []);
 
   const handleCreate = async () => {
     const result = await createSpeciality({ name, code, professionCode });
@@ -59,7 +56,7 @@ function Specialities() {
       setName("");
       setCode("");
       setProfessionCode("");
-      fetchData();
+      list.refresh();
     } else {
       setFormError(result.error ?? "Erro ao criar especialidade.");
     }
@@ -67,15 +64,24 @@ function Specialities() {
 
   const handleDelete = async () => {
     await Promise.all(selectedIds.map((id) => deleteSpeciality(Number(id))));
-    setData((prev) => prev.filter((item) => !selectedIds.includes(item.id)));
-    setSelectedIds([]);
+    list.refresh();
+    list.setSelectedIds([]);
   };
 
   return (
     <div className="flex w-full flex-col gap-lg">
       <div className="flex items-center justify-between rounded-lg border border-gray-200 bg-white px-lg py-md text-text-on-primary">
-        <PillTabs label={MANAGEMENT_GROUP.title} pages={MANAGEMENT_GROUP.pages} />
-        <div className="flex">{/* <SearchBar/> */}</div>
+        <PillTabs
+          label={MANAGEMENT_GROUP.title}
+          pages={MANAGEMENT_GROUP.pages}
+        />
+        <div className="mx-lg w-100">
+          <SearchBar
+            value={list.search}
+            onChange={list.setSearch}
+            placeholder="Buscar especialidades"
+          />
+        </div>
         <div className="flex">
           <AddButton onClick={() => setIsModalOpen(true)} />
           <RemoveButton
@@ -86,7 +92,13 @@ function Specialities() {
       </div>
       <div className="flex-1">
         <Table
-          data={data}
+          selected={list.selectedIds}
+          loading={!list.loaded}
+          error={list.error}
+          data={list.items.map(toRow)}
+          page={list.page}
+          pageCount={list.pageCount}
+          onPageChange={list.setPage}
           columns={[
             { key: "id", label: "ID" },
             { key: "name", label: "Especialidade" },
@@ -94,7 +106,7 @@ function Specialities() {
             { key: "professionCode", label: "Código da Profissão" },
             { key: "createdAt", label: "Data de Criação" },
           ]}
-          onSelectionChange={setSelectedIds}
+          onSelectionChange={list.setSelectedIds}
         />
       </div>
       <Modal
@@ -137,4 +149,10 @@ function Specialities() {
   );
 }
 
-export default Specialities;
+export default function SpecialitiesPage() {
+  return (
+    <Suspense>
+      <Specialities />
+    </Suspense>
+  );
+}

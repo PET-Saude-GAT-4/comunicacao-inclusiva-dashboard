@@ -1,18 +1,20 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useState } from "react";
 import AddButton from "@/components/AddButton/AddButton";
 import PillTabs from "@/components/PillTabs/PillTabs";
 import { TERM_SECTIONS } from "@/config/navigation";
 import Modal from "@/components/Modal/Modal";
 import Pagination from "@/components/Pagination/Pagination";
+import SearchBar from "@/components/SearchBar/SearchBar";
+import ListStatus from "@/components/ListStatus/ListStatus";
+import { usePaginatedList } from "@/hooks/usePaginatedList";
 import AssetCard from "../components/AssetCard/AssetCard";
 import Input from "@/components/Input/Input";
 import Button from "@/components/Button/Button";
-import { getTerms, createTerm, deleteTerm } from "@/services/terms";
+import { getTermPage, createTerm, deleteTerm } from "@/services/terms";
 import { getPictograms } from "@/services/pictograms";
 import { getSignWritings } from "@/services/sign-writings";
-import { TermOutput } from "@/types/term";
 import { PictogramOutput } from "@/types/pictogram";
 import { SignWritingOutput } from "@/types/sign-writing";
 import Image from "next/image";
@@ -22,13 +24,11 @@ import AssetPicker, { Asset } from "@/components/AssetPicker/AssetPicker";
 import { formatList } from "@/utils/text";
 
 function Terms() {
-  const [data, setData] = useState<TermOutput[]>([]);
+  const list = usePaginatedList("terms", getTermPage, { pageSize: 12 });
+  const { selectedIds, setSelectedIds } = list;
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
-  const [selectedIds, setSelectedIds] = useState<(string | number)[]>([]);
-  const [page, setPage] = useState(1);
-  const pageSize = 12;
 
   const [description, setDescription] = useState("");
   const [descriptionEdited, setDescriptionEdited] = useState(false);
@@ -36,12 +36,6 @@ function Terms() {
   const [signWritings, setSignWritings] = useState<SignWritingOutput[]>([]);
   const [selectedPictogram, setSelectedPictogram] = useState<Asset>();
   const [selectedSignWriting, setSelectedSignWriting] = useState<Asset>();
-
-  const fetchData = () => getTerms().then(setData);
-
-  useEffect(() => {
-    fetchData();
-  }, []);
 
   const clearForm = () => {
     setDescription("");
@@ -78,7 +72,7 @@ function Terms() {
     if (result.success) {
       setIsModalOpen(false);
       clearForm();
-      fetchData();
+      list.refresh();
     } else {
       setFormError(result.error ?? "Erro ao criar termo.");
     }
@@ -99,10 +93,8 @@ function Terms() {
         result: await deleteTerm(String(id)),
       })),
     );
-    // Rows that the API refused to remove stay in the table.
-    const removed = results.filter((r) => r.result.success).map((r) => r.uuid);
     const failure = results.find((r) => !r.result.success);
-    setData((prev) => prev.filter((item) => !removed.includes(item.uuid)));
+    list.refresh();
     setSelectedIds([]);
     setDeleteError(failure?.result.error ?? null);
   };
@@ -110,7 +102,7 @@ function Terms() {
   const handleDeleteOne = async (uuid: string) => {
     const result = await deleteTerm(uuid);
     if (result.success) {
-      setData((prev) => prev.filter((item) => item.uuid !== uuid));
+      list.refresh();
       setSelectedIds((prev) =>
         prev.filter((selectedId) => selectedId !== uuid),
       );
@@ -126,12 +118,17 @@ function Terms() {
     );
   };
 
-  const pageCount = Math.max(1, Math.ceil(data.length / pageSize));
-  const pageData = data.slice((page - 1) * pageSize, page * pageSize);
   return (
     <div className="flex w-full flex-col gap-lg">
       <div className="flex items-center justify-between rounded-lg border border-gray-200 bg-white px-lg py-md text-text-on-primary">
         <PillTabs label="Termos" pages={TERM_SECTIONS} />
+        <div className="mx-lg w-100">
+          <SearchBar
+            value={list.search}
+            onChange={list.setSearch}
+            placeholder="Buscar termos"
+          />
+        </div>
         <div className="flex">
           <AddButton onClick={openModal} />
           <RemoveButton
@@ -145,7 +142,7 @@ function Terms() {
       )}
       <div className="flex flex-col">
         <div className="grid grid-cols-6 gap-4 p-4">
-          {pageData.map((term) => (
+          {list.items.map((term) => (
             <div key={term.uuid}>
               {/* Terms record no author. */}
               <AssetCard
@@ -164,13 +161,16 @@ function Terms() {
             </div>
           ))}
         </div>
+        <ListStatus
+          loaded={list.loaded}
+          error={list.error}
+          isEmpty={list.items.length === 0}
+        />
         <div className="flex items-center justify-center py-4 rounded-md outline-1 outline-outline-common bg-white">
           <Pagination
-            page={page}
-            pageCount={pageCount}
-            onPageChange={(nextPage) =>
-              setPage(Math.min(Math.max(1, nextPage), pageCount))
-            }
+            page={list.page}
+            pageCount={list.pageCount}
+            onPageChange={list.setPage}
           />
         </div>
       </div>
@@ -299,4 +299,10 @@ function Terms() {
   );
 }
 
-export default Terms;
+export default function TermsPage() {
+  return (
+    <Suspense>
+      <Terms />
+    </Suspense>
+  );
+}

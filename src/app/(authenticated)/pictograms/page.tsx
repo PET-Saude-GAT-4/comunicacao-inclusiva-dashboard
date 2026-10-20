@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import AddButton from "@/components/AddButton/AddButton";
 import PillTabs from "@/components/PillTabs/PillTabs";
 import { TERM_SECTIONS } from "@/config/navigation";
@@ -8,20 +8,25 @@ import Modal from "@/components/Modal/Modal";
 import Input from "@/components/Input/Input";
 import Button from "@/components/Button/Button";
 import Pagination from "@/components/Pagination/Pagination";
+import SearchBar from "@/components/SearchBar/SearchBar";
+import ListStatus from "@/components/ListStatus/ListStatus";
 import {
-  getPictograms,
+  getPictogramPage,
   createPictogram,
   deletePictogram,
 } from "@/services/pictograms";
 import { getUsers } from "@/services/users";
 import { getTerms } from "@/services/terms";
 import { termBadge, termNamesByPart } from "@/utils/term";
-import { PictogramOutput } from "@/types/pictogram";
 import RemoveButton from "@/components/RemoveButton/RemoveButton";
 import AssetCard from "../components/AssetCard/AssetCard";
+import { usePaginatedList } from "@/hooks/usePaginatedList";
 
 function Pictograms() {
-  const [data, setData] = useState<PictogramOutput[]>([]);
+  const list = usePaginatedList("pictograms", getPictogramPage, {
+    pageSize: 12,
+  });
+  const { selectedIds, setSelectedIds } = list;
   const [authorEmails, setAuthorEmails] = useState<Record<string, string>>({});
   // Null until the terms load, so no card claims "Sem termo" too early.
   const [termNames, setTermNames] = useState<Record<string, string[]> | null>(
@@ -30,18 +35,11 @@ function Pictograms() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
-  const [selectedIds, setSelectedIds] = useState<(string | number)[]>([]);
-  const [page, setPage] = useState(1);
-  const pageSize = 12;
 
   const [description, setDescription] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
 
-  const fetchData = () =>
-    getPictograms().then((pictograms) => setData(pictograms));
-
   useEffect(() => {
-    fetchData();
     getTerms()
       .then((terms) => setTermNames(termNamesByPart(terms, "pictogram")))
       .catch(() => {});
@@ -71,7 +69,7 @@ function Pictograms() {
       setFormError(null);
       setDescription("");
       if (fileRef.current) fileRef.current.value = "";
-      fetchData();
+      list.refresh();
     } else {
       setFormError(result.error ?? "Erro ao criar pictograma.");
     }
@@ -84,22 +82,17 @@ function Pictograms() {
         result: await deletePictogram(String(id)),
       })),
     );
-    const deletedIds = results
-      .filter(({ result }) => result.success)
-      .map(({ id }) => id);
     const failure = results.find(({ result }) => !result.success);
 
-    setData((prev) => prev.filter((item) => !deletedIds.includes(item.uuid)));
-    setSelectedIds((prev) =>
-      prev.filter((id) => !deletedIds.includes(String(id))),
-    );
+    list.refresh();
+    setSelectedIds([]);
     setDeleteError(failure?.result.error ?? null);
   };
 
   const handleDeleteOne = async (uuid: string) => {
     const result = await deletePictogram(uuid);
     if (result.success) {
-      setData((prev) => prev.filter((item) => item.uuid !== uuid));
+      list.refresh();
       setSelectedIds((prev) =>
         prev.filter((selectedId) => selectedId !== uuid),
       );
@@ -115,12 +108,17 @@ function Pictograms() {
     );
   };
 
-  const pageCount = Math.max(1, Math.ceil(data.length / pageSize));
-  const pageData = data.slice((page - 1) * pageSize, page * pageSize);
   return (
     <div className="flex w-full flex-col gap-lg">
       <div className="flex items-center justify-between rounded-lg border border-gray-200 bg-white px-lg py-md text-text-on-primary">
         <PillTabs label="Termos" pages={TERM_SECTIONS} />
+        <div className="mx-lg w-100">
+          <SearchBar
+            value={list.search}
+            onChange={list.setSearch}
+            placeholder="Buscar pictogramas"
+          />
+        </div>
         <div className="flex">
           <AddButton onClick={() => setIsModalOpen(true)} />
           <RemoveButton
@@ -134,7 +132,7 @@ function Pictograms() {
       )}
       <div className="flex flex-col">
         <div className="grid grid-cols-6 gap-4 p-4">
-          {pageData.map((pictogram) => (
+          {list.items.map((pictogram) => (
             <div key={pictogram.uuid}>
               <AssetCard
                 title={pictogram.description}
@@ -152,13 +150,16 @@ function Pictograms() {
             </div>
           ))}
         </div>
+        <ListStatus
+          loaded={list.loaded}
+          error={list.error}
+          isEmpty={list.items.length === 0}
+        />
         <div className="flex items-center justify-center py-4 rounded-md outline-1 outline-outline-common bg-white">
           <Pagination
-            page={page}
-            pageCount={pageCount}
-            onPageChange={(nextPage) =>
-              setPage(Math.min(Math.max(1, nextPage), pageCount))
-            }
+            page={list.page}
+            pageCount={list.pageCount}
+            onPageChange={list.setPage}
           />
         </div>
       </div>
@@ -198,4 +199,10 @@ function Pictograms() {
   );
 }
 
-export default Pictograms;
+export default function PictogramsPage() {
+  return (
+    <Suspense>
+      <Pictograms />
+    </Suspense>
+  );
+}

@@ -1,14 +1,16 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import AddButton from "@/components/AddButton/AddButton";
 import Modal from "@/components/Modal/Modal";
 import Table from "@/components/Table/Table";
-import Input from "@/components/Input/Input"; 
+import SearchBar from "@/components/SearchBar/SearchBar";
+import { usePaginatedList } from "@/hooks/usePaginatedList";
+import Input from "@/components/Input/Input";
 import Button from "@/components/Button/Button";
 import Dropdown from "@/components/Dropdown/Dropdown";
-import { getBoards, createBoard, deleteBoard } from "@/services/boards";
+import { getBoardPage, createBoard, deleteBoard } from "@/services/boards";
 import { getUsers } from "@/services/users";
 import { getSessionUser } from "@/services/auth";
 import {
@@ -18,6 +20,7 @@ import {
   BoardType,
 } from "@/types/board";
 import { SessionUser } from "@/types/session";
+import { ListQuery } from "@/types/common";
 import { boardHref } from "@/utils/board";
 import Image from "next/image";
 import RemoveButton from "@/components/RemoveButton/RemoveButton";
@@ -28,9 +31,24 @@ import AssetPicker, { Asset } from "@/components/AssetPicker/AssetPicker";
 import CreateInteractionChainModal from "../components/CreateInteractionChainModal/CreateInteractionChainModal";
 import { MdPerson } from "react-icons/md";
 
+// The type comes from the URL, so anything other than a known type is dropped
+// instead of reaching the API as a 400.
+function fetchBoardPage(
+  query: ListQuery,
+  filters: Record<string, string | undefined>,
+) {
+  return getBoardPage(query, {
+    type: BOARD_TYPES.find((type) => type === filters.type),
+  });
+}
+
 function Boards() {
   const router = useRouter();
-  const [data, setData] = useState<BoardOutput[]>([]);
+  const list = usePaginatedList("boards", fetchBoardPage, {
+    pageSize: 10,
+    filterKeys: ["type"],
+  });
+  const { selectedIds } = list;
   const [authorEmails, setAuthorEmails] = useState<Record<string, string>>({});
   const [user, setUser] = useState<SessionUser | null>(null);
   const [isCreateBoardModalOpen, setIsCreateBoardModalOpen] = useState(false);
@@ -49,20 +67,11 @@ function Boards() {
 
   const [selectedPictogram, setSelectedPictogram] = useState<Asset>();
 
-  const [selectedIds, setSelectedIds] = useState<(string | number)[]>([]);
+  const typeFilter: BoardType | "all" =
+    BOARD_TYPES.find((type) => type === list.filters.type) ?? "all";
 
-  const [typeFilter, setTypeFilter] = useState<BoardType | "all">("all");
-  const visibleBoards =
-    typeFilter === "all"
-      ? data
-      : data.filter((board) => board.type === typeFilter);
-
-  // Remounting the table (keyed on the filter below) resets its page and
-  // selection, so a delete never reaches rows the filter is hiding.
-  const changeTypeFilter = (value: BoardType | "all") => {
-    setTypeFilter(value);
-    setSelectedIds([]);
-  };
+  const changeTypeFilter = (value: BoardType | "all") =>
+    list.setFilter("type", value === "all" ? undefined : value);
 
   const clearForm = () => {
     setTitle("");
@@ -70,10 +79,7 @@ function Boards() {
     setSelectedPictogram(undefined);
   };
 
-  const fetchData = () => getBoards().then(setData);
-
   useEffect(() => {
-    fetchData();
     getSessionUser().then((sessionUser) => {
       setUser(sessionUser);
       if (sessionUser?.role === "super_admin") {
@@ -105,7 +111,7 @@ function Boards() {
     if (result.success) {
       setIsCreateBoardModalOpen(false);
       clearForm();
-      fetchData();
+      list.refresh();
     } else {
       setFormError(result.error ?? "Erro ao criar prancha.");
     }
@@ -117,10 +123,10 @@ function Boards() {
       selectedIds.map((id) => deleteBoard(String(id))),
     );
 
-    // Only boards the API actually deleted leave the list; one it refused,
-    // like a board at a triage level, stays and says why.
-    const deleted = selectedIds.filter((_, i) => results[i].success);
-    setData((prev) => prev.filter((item) => !deleted.includes(item.uuid)));
+    // A board the API refused to delete, like one at a triage level, stays
+    // in the refetched page and the error says why.
+    list.refresh();
+    list.setSelectedIds([]);
 
     const failure = results.find((result) => !result.success);
     if (failure) {
@@ -145,6 +151,13 @@ function Boards() {
               Criar Interação Entre Pranchas
             </p>
           </Button>
+          <div className="mx-lg w-100">
+            <SearchBar
+              value={list.search}
+              onChange={list.setSearch}
+              placeholder="Buscar pranchas"
+            />
+          </div>
           <div className=" flex items-center justify-center ">
             <div className="mr-md w-48">
               <Dropdown<BoardType | "all">
@@ -177,8 +190,13 @@ function Boards() {
       )}
       <div>
         <Table
-          key={typeFilter}
-          data={visibleBoards}
+          selected={list.selectedIds}
+          loading={!list.loaded}
+          error={list.error}
+          data={list.items}
+          page={list.page}
+          pageCount={list.pageCount}
+          onPageChange={list.setPage}
           columns={[
             { key: "title", label: "Título" },
             {
@@ -242,7 +260,7 @@ function Boards() {
             },
           ]}
           onRowClick={(row) => router.push(boardHref(row, user))}
-          onSelectionChange={setSelectedIds}
+          onSelectionChange={list.setSelectedIds}
         />
       </div>
       <Modal
@@ -324,4 +342,10 @@ function Boards() {
   );
 }
 
-export default Boards;
+export default function BoardsPage() {
+  return (
+    <Suspense>
+      <Boards />
+    </Suspense>
+  );
+}

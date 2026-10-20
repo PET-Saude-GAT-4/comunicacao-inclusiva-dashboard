@@ -1,13 +1,19 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { ActionResult } from "@/types/common";
+import { ActionResult, ListQuery, Paginated } from "@/types/common";
 import { PictogramOutput } from "@/types/pictogram";
 import * as api from "@/lib/api/pictograms";
 import { ApiError } from "@/lib/api/client";
 
 export async function getPictograms(): Promise<PictogramOutput[]> {
   return api.getPictograms();
+}
+
+export async function getPictogramPage(
+  query: ListQuery,
+): Promise<Paginated<"pictograms", PictogramOutput>> {
+  return api.getPictogramPage(query);
 }
 
 export async function getPictogram(

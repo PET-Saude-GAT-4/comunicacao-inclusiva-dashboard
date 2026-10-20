@@ -1,15 +1,17 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useState } from "react";
 import PillTabs from "@/components/PillTabs/PillTabs";
 import { MANAGEMENT_GROUP } from "@/config/navigation";
 import RemoveButton from "@/components/RemoveButton/RemoveButton";
 import AddButton from "@/components/AddButton/AddButton";
 import Modal from "@/components/Modal/Modal";
 import Table from "@/components/Table/Table";
+import SearchBar from "@/components/SearchBar/SearchBar";
+import { usePaginatedList } from "@/hooks/usePaginatedList";
 import Input from "@/components/Input/Input";
 import Button from "@/components/Button/Button";
-import { getRoles, createRole, deleteRole } from "@/services/roles";
+import { getRolePage, createRole, deleteRole } from "@/services/roles";
 import { RoleOutput } from "@/types/role";
 
 type RoleRow = { id: number; name: string; createdAt: string };
@@ -23,18 +25,12 @@ function toRow(r: RoleOutput): RoleRow {
 }
 
 function Roles() {
-  const [data, setData] = useState<RoleRow[]>([]);
-  const [selectedIds, setSelectedIds] = useState<(number | string)[]>([]);
+  const list = usePaginatedList("roles", getRolePage, { pageSize: 10 });
+  const { selectedIds } = list;
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
 
   const [name, setName] = useState("");
-
-  const fetchData = () => getRoles().then((rows) => setData(rows.map(toRow)));
-
-  useEffect(() => {
-    fetchData();
-  }, []);
 
   const handleCreate = async () => {
     const result = await createRole({ name });
@@ -42,7 +38,7 @@ function Roles() {
       setIsModalOpen(false);
       setFormError(null);
       setName("");
-      fetchData();
+      list.refresh();
     } else {
       setFormError(result.error ?? "Erro ao criar permissão.");
     }
@@ -50,16 +46,23 @@ function Roles() {
 
   const handleDelete = async () => {
     await Promise.all(selectedIds.map((id) => deleteRole(Number(id))));
-    setData((prev) => prev.filter((item) => !selectedIds.includes(item.id)));
-    setSelectedIds([]);
+    list.refresh();
+    list.setSelectedIds([]);
   };
 
   return (
     <div className="flex w-full flex-col gap-lg">
       <div className="flex items-center justify-between rounded-lg border border-gray-200 bg-white px-lg py-md text-text-on-primary">
-        <PillTabs label={MANAGEMENT_GROUP.title} pages={MANAGEMENT_GROUP.pages} />
-        <div>
-          <p>search</p>
+        <PillTabs
+          label={MANAGEMENT_GROUP.title}
+          pages={MANAGEMENT_GROUP.pages}
+        />
+        <div className="mx-lg w-100">
+          <SearchBar
+            value={list.search}
+            onChange={list.setSearch}
+            placeholder="Buscar permissões"
+          />
         </div>
         <div className="flex">
           <AddButton onClick={() => setIsModalOpen(true)} />
@@ -71,13 +74,19 @@ function Roles() {
       </div>
       <div className="flex-1">
         <Table
-          data={data}
+          selected={list.selectedIds}
+          loading={!list.loaded}
+          error={list.error}
+          data={list.items.map(toRow)}
+          page={list.page}
+          pageCount={list.pageCount}
+          onPageChange={list.setPage}
           columns={[
             { key: "id", label: "ID" },
             { key: "name", label: "Nível de Permissão" },
             { key: "createdAt", label: "Data de Criação" },
           ]}
-          onSelectionChange={setSelectedIds}
+          onSelectionChange={list.setSelectedIds}
         />
       </div>
       <Modal
@@ -104,4 +113,10 @@ function Roles() {
   );
 }
 
-export default Roles;
+export default function RolesPage() {
+  return (
+    <Suspense>
+      <Roles />
+    </Suspense>
+  );
+}

@@ -1,13 +1,19 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { ActionResult } from "@/types/common";
+import { ActionResult, ListQuery, Paginated } from "@/types/common";
 import { TermOutput } from "@/types/term";
 import { ApiError } from "@/lib/api/client";
 import * as api from "@/lib/api/terms";
 
 export async function getTerms(): Promise<TermOutput[]> {
   return api.getTerms();
+}
+
+export async function getTermPage(
+  query: ListQuery,
+): Promise<Paginated<"terms", TermOutput>> {
+  return api.getTermPage(query);
 }
 
 export async function getTerm(uuid: string): Promise<TermOutput | null> {
