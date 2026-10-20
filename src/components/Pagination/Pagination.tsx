@@ -6,13 +6,41 @@ type Props = {
   onPageChange: (page: number) => void;
 };
 
+type Entry = { kind: "page"; page: number } | { kind: "gap"; after: number };
+
+// The first page, the last page and the current page's neighbours, with a gap
+// marker for each stretch left out. A stretch of a single page shows that page
+// instead: the marker would take the same room and hide it for nothing.
+function buildPages(page: number, pageCount: number): Entry[] {
+  const shown = new Set([1, pageCount, page - 1, page, page + 1]);
+  const sorted = [...shown]
+    .filter((candidate) => candidate >= 1 && candidate <= pageCount)
+    .sort((a, b) => a - b);
+
+  const entries: Entry[] = [];
+  sorted.forEach((current, index) => {
+    const previous = sorted[index - 1];
+    if (previous !== undefined && current - previous === 2) {
+      entries.push({ kind: "page", page: previous + 1 });
+    } else if (previous !== undefined && current - previous > 2) {
+      entries.push({ kind: "gap", after: previous });
+    }
+    entries.push({ kind: "page", page: current });
+  });
+
+  return entries;
+}
+
 export default function Pagination({ page, pageCount, onPageChange }: Props) {
   if (pageCount <= 1) {
     return null;
   }
 
   return (
-    <div className="flex items-center justify-center gap-1 bg-gray-100 rounded-md py-sm text-body-emph">
+    <nav
+      aria-label="Paginação"
+      className="flex items-center justify-center gap-1 bg-gray-100 rounded-md py-sm text-body-emph"
+    >
       <button
         type="button"
         onClick={() => onPageChange(page - 1)}
@@ -24,21 +52,30 @@ export default function Pagination({ page, pageCount, onPageChange }: Props) {
       </button>
 
       <div className="flex items-center gap-0.5">
-        {Array.from({ length: pageCount }, (_, index) => index + 1).map(
-          (pageNumber) => (
+        {buildPages(page, pageCount).map((entry) =>
+          entry.kind === "gap" ? (
+            <span
+              key={`gap-${entry.after}`}
+              aria-hidden="true"
+              className="grid h-8 min-w-8 place-items-center px-2 text-body text-text-on-primary-variant"
+            >
+              …
+            </span>
+          ) : (
             <button
-              key={pageNumber}
+              key={entry.page}
               type="button"
-              onClick={() => onPageChange(pageNumber)}
-              aria-current={pageNumber === page ? "page" : undefined}
+              onClick={() => onPageChange(entry.page)}
+              aria-label={`Página ${entry.page}`}
+              aria-current={entry.page === page ? "page" : undefined}
               className={[
                 "grid h-8 min-w-8 place-items-center rounded-sm px-2 text-body transition-colors",
-                pageNumber === page
+                entry.page === page
                   ? "font-bold text-primary-dark"
                   : "font-regular text-text-on-primary-variant hover:bg-surface-secondary",
               ].join(" ")}
             >
-              {pageNumber}
+              {entry.page}
             </button>
           ),
         )}
@@ -53,6 +90,6 @@ export default function Pagination({ page, pageCount, onPageChange }: Props) {
       >
         <MdChevronRight size={20} />
       </button>
-    </div>
+    </nav>
   );
 }
