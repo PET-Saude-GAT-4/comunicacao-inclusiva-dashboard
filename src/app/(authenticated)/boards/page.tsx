@@ -174,6 +174,7 @@ function Boards() {
               />
             </div>
             <AddButton
+              label="Adicionar prancha"
               onClick={() => {
                 listPictograms();
               }}

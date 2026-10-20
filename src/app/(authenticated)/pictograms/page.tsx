@@ -120,7 +120,10 @@ function Pictograms() {
           />
         </div>
         <div className="flex">
-          <AddButton onClick={() => setIsModalOpen(true)} />
+          <AddButton
+            label="Adicionar pictograma"
+            onClick={() => setIsModalOpen(true)}
+          />
           <RemoveButton
             active={selectedIds.length > 0}
             onClick={handleDelete}

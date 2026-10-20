@@ -52,7 +52,10 @@ export default function PhrasePicker({ phrases, onSelect }: PhrasePickerProps) {
                     visibility={phraseVisibility(phrase)}
                   />
                   <span onClick={(e) => e.stopPropagation()}>
-                    <AddButton onClick={() => onSelect(phrase)} />
+                    <AddButton
+                      label={`Adicionar frase ${phrase.description}`}
+                      onClick={() => onSelect(phrase)}
+                    />
                   </span>
                 </div>
               </li>

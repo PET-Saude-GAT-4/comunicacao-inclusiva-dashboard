@@ -17,6 +17,8 @@ interface AssetPickerProps {
   items: Asset[];
   onSelect: (asset: Asset) => void;
   label?: string;
+  // Names one item in its add button, e.g. "Adicionar pictograma Cachorro".
+  itemNoun?: string;
   id?: string;
 }
 
@@ -24,6 +26,7 @@ export default function AssetPicker({
   items,
   onSelect,
   label = "Pictogramas Disponíveis:",
+  itemNoun = "pictograma",
   id = "asset-filter",
 }: AssetPickerProps) {
   const [filter, setFilter] = useState("");
@@ -46,7 +49,7 @@ export default function AssetPicker({
       <div className="flex flex-col h-96 overflow-y-auto gap-md">
         <ul className="flex flex-col gap-md">
           {filtered.map((asset) => (
-            <div
+            <li
               key={asset.uuid}
               className="flex flex-row items-center gap-md border border-outline-common rounded-md p-sm justify-between cursor-pointer"
               onClick={() => onSelect(asset)}
@@ -59,8 +62,13 @@ export default function AssetPicker({
                 className="object-contain rounded"
               />
               <p className="text-text-on-primary">{asset.description}</p>
-              <AddButton onClick={() => onSelect(asset)} />
-            </div>
+              <span onClick={(e) => e.stopPropagation()}>
+                <AddButton
+                  label={`Adicionar ${itemNoun} ${asset.description}`}
+                  onClick={() => onSelect(asset)}
+                />
+              </span>
+            </li>
           ))}
         </ul>
       </div>

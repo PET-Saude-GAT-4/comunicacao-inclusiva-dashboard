@@ -63,7 +63,12 @@ export default function BoardPicker({
                     Não publicada
                   </span>
                 ) : (
-                  <AddButton onClick={() => onSelect(board)} />
+                  <span onClick={(e) => e.stopPropagation()}>
+                    <AddButton
+                      label={`Adicionar prancha ${board.title}`}
+                      onClick={() => onSelect(board)}
+                    />
+                  </span>
                 )}
               </li>
             );

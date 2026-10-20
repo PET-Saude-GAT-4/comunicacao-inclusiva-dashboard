@@ -263,7 +263,7 @@ function PhraseDetail() {
           >
             Alterar visibilidade
           </Button>
-          <AddButton onClick={listTerms} />
+          <AddButton label="Adicionar termo à frase" onClick={listTerms} />
         </div>
       </div>
 

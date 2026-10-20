@@ -79,7 +79,10 @@ function Professions() {
           />
         </div>
         <div className="flex">
-          <AddButton onClick={() => setIsModalOpen(true)} />
+          <AddButton
+            label="Adicionar área de atuação"
+            onClick={() => setIsModalOpen(true)}
+          />
           <RemoveButton
             active={selectedIds.length > 0}
             onClick={handleDelete}

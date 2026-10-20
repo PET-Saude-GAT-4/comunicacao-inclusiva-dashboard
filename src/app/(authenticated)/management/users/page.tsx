@@ -87,7 +87,10 @@ function Users() {
           />
         </div>
         <div className="flex">
-          <AddButton onClick={() => setIsModalOpen(true)} />
+          <AddButton
+            label="Adicionar usuário"
+            onClick={() => setIsModalOpen(true)}
+          />
           <RemoveButton
             active={selectedIds.length > 0}
             onClick={handleDelete}

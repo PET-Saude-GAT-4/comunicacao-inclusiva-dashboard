@@ -83,7 +83,10 @@ function Specialities() {
           />
         </div>
         <div className="flex">
-          <AddButton onClick={() => setIsModalOpen(true)} />
+          <AddButton
+            label="Adicionar especialidade"
+            onClick={() => setIsModalOpen(true)}
+          />
           <RemoveButton
             active={selectedIds.length > 0}
             onClick={handleDelete}

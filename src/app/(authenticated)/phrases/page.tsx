@@ -139,7 +139,7 @@ function Phrases() {
             />
           </div>
           <div className="flex">
-            <AddButton onClick={openModal} />
+            <AddButton label="Adicionar frase" onClick={openModal} />
             <RemoveButton
               active={selectedIds.length > 0}
               onClick={handleDelete}

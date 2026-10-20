@@ -266,6 +266,7 @@ function BoardDetail() {
               : "Despublicar"}
           </Button>
           <AddButton
+            label="Adicionar termo à prancha"
             onClick={() => {
               listTerms();
             }}

@@ -130,7 +130,7 @@ function Terms() {
           />
         </div>
         <div className="flex">
-          <AddButton onClick={openModal} />
+          <AddButton label="Adicionar termo" onClick={openModal} />
           <RemoveButton
             active={selectedIds.length > 0}
             onClick={handleDelete}
@@ -199,6 +199,7 @@ function Terms() {
             <AssetPicker
               id="sign-writing-filter"
               label="SignWritings Disponíveis:"
+              itemNoun="SignWriting"
               items={signWritings}
               onSelect={setSelectedSignWriting}
             />
