@@ -4,7 +4,7 @@ import { useEffect, useRef } from "react";
 import Spinner from "@/components/Spinner/Spinner";
 import { RemoteSearch } from "@/hooks/useRemoteSearch";
 
-type Props<T> = {
+type Props<T extends { uuid: string }> = {
   list: RemoteSearch<T>;
   children: React.ReactNode;
   className?: string;
@@ -12,7 +12,7 @@ type Props<T> = {
 
 // The scrolling list of a picker, fed by useRemoteSearch. The next page loads
 // when a sentinel after the last item comes within 100px of the bottom.
-export default function InfiniteList<T>({
+export default function InfiniteList<T extends { uuid: string }>({
   list,
   children,
   className = "h-96",

@@ -491,7 +491,7 @@ function AllInteractionChains({
           key={ic.uuid}
           chain={ic}
           onRemove={async () => {
-            if (await onRemove(ic.uuid)) list.reload();
+            if (await onRemove(ic.uuid)) list.remove(ic.uuid);
           }}
         />
       ))}

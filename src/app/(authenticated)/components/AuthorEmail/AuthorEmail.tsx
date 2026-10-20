@@ -1,7 +1,7 @@
 "use client";
 
-import { MdPerson } from "react-icons/md";
 import { useAuthorEmail } from "@/hooks/useAuthorEmail";
+import AuthorLabel from "../AuthorLabel/AuthorLabel";
 
 type Props = {
   uuid: string | null;
@@ -10,15 +10,11 @@ type Props = {
   lookup?: boolean;
 };
 
-// An author cell in a table of boards. Each one resolves its own email, so
-// only the authors of the rows on screen are ever requested.
+// An author cell in a table of boards that come without the author's email,
+// like /public/boards. Each one resolves its own email, so only the authors of
+// the rows on screen are ever requested.
 export default function AuthorEmail({ uuid, lookup = true }: Props) {
   const email = useAuthorEmail(lookup ? uuid : null);
 
-  return (
-    <div className="flex items-center gap-sm">
-      <MdPerson className="text-gray-400" size={18} />
-      <p>{email ?? "Desconhecido"}</p>
-    </div>
-  );
+  return <AuthorLabel email={email} />;
 }

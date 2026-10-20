@@ -15,9 +15,14 @@ export type BoardOutput = {
   title: string;
   type: BoardType;
   authorUuid: string | null;
+  author: { uuid: string; email: string } | null;
   representativePictogram: PictogramOutput;
   termCount: number;
   publishedAt: string | null;
   createdAt: string;
   updatedAt: string;
 };
+
+// /public/boards never names the author's email, so its boards carry only
+// authorUuid.
+export type PublicBoardOutput = Omit<BoardOutput, "author">;

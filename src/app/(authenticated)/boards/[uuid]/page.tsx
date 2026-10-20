@@ -27,9 +27,8 @@ import { useDragReorder } from "@/hooks/useDragReorder";
 import TermPicker from "@/components/TermPicker/TermPicker";
 import CreateInteractionChainModal from "../../components/CreateInteractionChainModal/CreateInteractionChainModal";
 import Badge from "@/components/Badge/Badge";
-import { MdFormatSize, MdPermMedia, MdPerson } from "react-icons/md";
-import { getUser } from "@/services/users";
-import { UserOutput } from "@/types/user";
+import { MdFormatSize, MdPermMedia } from "react-icons/md";
+import AuthorLabel from "../../components/AuthorLabel/AuthorLabel";
 import CopyableUuid from "@/components/CopyableUuid/CopyableUuid";
 import KebabButton from "@/components/KebabButton/KebabButton";
 import SearchBar from "@/components/SearchBar/SearchBar";
@@ -42,7 +41,6 @@ function BoardDetail() {
   const [items, setItems] = useState<BoardTermOutput[]>([]);
   const [filteredItems, setFilteredItems] = useState<BoardTermOutput[]>([]);
   const [loading, setLoading] = useState(true);
-  const [author, setAuthor] = useState<UserOutput | null>(null);
 
   const [isCreateBoardModalOpen, setIsCreateBoardModalOpen] = useState(false);
 
@@ -116,25 +114,6 @@ function BoardDetail() {
       isActive = false;
     };
   }, [loadBoardData]);
-
-  // Kept apart from loadBoardData so the author is fetched once per board,
-  // not again on every refresh after a term or publish change.
-  const authorUuid = board?.authorUuid ?? null;
-
-  useEffect(() => {
-    if (!authorUuid) return;
-    let isActive = true;
-
-    getUser(authorUuid)
-      .catch(() => null)
-      .then((user) => {
-        if (isActive) setAuthor(user);
-      });
-
-    return () => {
-      isActive = false;
-    };
-  }, [authorUuid]);
 
   const handleTogglePublish = async () => {
     if (!board) return;
@@ -225,10 +204,7 @@ function BoardDetail() {
               <MdPermMedia className="text-primary" size={16} />
               <p>{items.length} Pictogramas</p>
             </div>
-            <div className="flex items-center gap-sm">
-              <MdPerson className="text-gray-400" size={18} />
-              {author ? <p>{author.email}</p> : <p>Desconhecido</p>}
-            </div>
+            <AuthorLabel email={board.author?.email ?? null} />
           </div>
           {board.publishedAt ? (
             <Badge>Público</Badge>
