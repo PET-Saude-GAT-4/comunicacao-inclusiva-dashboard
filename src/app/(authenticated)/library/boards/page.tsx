@@ -51,7 +51,7 @@ function Library() {
         </nav>
         <div className="mx-lg w-100">
           <SearchBar
-            data={filteredBoards}
+            data={boards}
             onResults={setFilteredBoards}
             getSearchText={boardSearchText}
             placeholder="Buscar pranchas"
@@ -60,7 +60,7 @@ function Library() {
       </div>
       <div>
         <Table
-          data={boards}
+          data={filteredBoards}
           columns={[
             { key: "title", label: "Título" },
             {

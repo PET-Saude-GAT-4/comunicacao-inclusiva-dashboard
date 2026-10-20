@@ -54,11 +54,13 @@ function Users() {
   const handleDelete = async () => {
     await Promise.all(selectedIds.map((id) => deleteUser(Number(id))));
     list.refresh();
+    setSelectedIds([]);
   };
 
   const handleDeleteOne = async (id: number) => {
     await deleteUser(id);
     list.refresh();
+    setSelectedIds((prev) => prev.filter((selectedId) => selectedId !== id));
   };
 
   const toggleSelection = (id: number) => {

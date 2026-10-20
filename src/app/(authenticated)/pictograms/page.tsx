@@ -84,12 +84,18 @@ function Pictograms() {
     const failure = results.find(({ result }) => !result.success);
 
     list.refresh();
+    setSelectedIds([]);
     setDeleteError(failure?.result.error ?? null);
   };
 
   const handleDeleteOne = async (uuid: string) => {
     const result = await deletePictogram(uuid);
-    if (result.success) list.refresh();
+    if (result.success) {
+      list.refresh();
+      setSelectedIds((prev) =>
+        prev.filter((selectedId) => selectedId !== uuid),
+      );
+    }
     setDeleteError(result.success ? null : (result.error ?? null));
   };
 

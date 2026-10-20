@@ -17,6 +17,8 @@ function Table<T extends { id: number } | { uuid: string }>({
   page: controlledPage,
   pageCount: controlledPageCount,
   onPageChange,
+  selected: controlledSelected,
+  loading = false,
 }: {
   data: T[];
   columns: Column<T>[];
@@ -28,8 +30,12 @@ function Table<T extends { id: number } | { uuid: string }>({
   page?: number;
   pageCount?: number;
   onPageChange?: (page: number) => void;
+  // The selection, when its owner has to clear it as the rows change.
+  selected?: (number | string)[];
+  loading?: boolean;
 }) {
-  const [selected, setSelected] = useState<(number | string)[]>([]);
+  const [internalSelected, setSelected] = useState<(number | string)[]>([]);
+  const selected = controlledSelected ?? internalSelected;
   const [internalPage, setInternalPage] = useState(1);
   const isControlled = controlledPage !== undefined;
 
@@ -115,7 +121,7 @@ function Table<T extends { id: number } | { uuid: string }>({
                   colSpan={columns.length + 1}
                   className="py-lg text-center text-text-secondary"
                 >
-                  Nenhum item encontrado
+                  {loading ? "Carregando…" : "Nenhum item encontrado"}
                 </td>
               </tr>
             )}

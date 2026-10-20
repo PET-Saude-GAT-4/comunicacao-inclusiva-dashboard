@@ -126,6 +126,7 @@ function Boards() {
     // A board the API refused to delete, like one at a triage level, stays
     // in the refetched page and the error says why.
     list.refresh();
+    list.setSelectedIds([]);
 
     const failure = results.find((result) => !result.success);
     if (failure) {
@@ -189,7 +190,8 @@ function Boards() {
       )}
       <div>
         <Table
-          key={list.listKey}
+          selected={list.selectedIds}
+          loading={!list.loaded}
           data={list.items}
           page={list.page}
           pageCount={list.pageCount}

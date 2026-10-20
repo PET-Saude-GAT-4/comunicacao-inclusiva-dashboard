@@ -61,6 +61,7 @@ function Professions() {
   const handleDelete = async () => {
     await Promise.all(selectedIds.map((id) => deleteProfession(Number(id))));
     list.refresh();
+    list.setSelectedIds([]);
   };
 
   return (
@@ -87,7 +88,8 @@ function Professions() {
       </div>
       <div className="flex-1">
         <Table
-          key={list.listKey}
+          selected={list.selectedIds}
+          loading={!list.loaded}
           data={list.items.map(toRow)}
           page={list.page}
           pageCount={list.pageCount}

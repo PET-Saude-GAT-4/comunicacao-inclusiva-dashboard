@@ -47,6 +47,7 @@ function Roles() {
   const handleDelete = async () => {
     await Promise.all(selectedIds.map((id) => deleteRole(Number(id))));
     list.refresh();
+    list.setSelectedIds([]);
   };
 
   return (
@@ -73,7 +74,8 @@ function Roles() {
       </div>
       <div className="flex-1">
         <Table
-          key={list.listKey}
+          selected={list.selectedIds}
+          loading={!list.loaded}
           data={list.items.map(toRow)}
           page={list.page}
           pageCount={list.pageCount}

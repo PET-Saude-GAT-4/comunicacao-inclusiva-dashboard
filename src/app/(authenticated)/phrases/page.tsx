@@ -112,6 +112,7 @@ function Phrases() {
     );
     const failure = results.find((r) => !r.result.success);
     list.refresh();
+    list.setSelectedIds([]);
     setDeleteError(failure?.result.error ?? null);
   };
 
@@ -153,7 +154,8 @@ function Phrases() {
       )}
       <div>
         <Table
-          key={list.listKey}
+          selected={list.selectedIds}
+          loading={!list.loaded}
           data={list.items.map(toRow)}
           page={list.page}
           pageCount={list.pageCount}
