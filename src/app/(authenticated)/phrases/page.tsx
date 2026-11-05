@@ -2,7 +2,6 @@
 
 import { Suspense, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 import AddButton from "@/components/AddButton/AddButton";
 import RemoveButton from "@/components/RemoveButton/RemoveButton";
 import Modal from "@/components/Modal/Modal";
@@ -12,6 +11,7 @@ import ListToolbar from "@/components/ListToolbar/ListToolbar";
 import { usePaginatedList } from "@/hooks/usePaginatedList";
 import Input from "@/components/Input/Input";
 import Button from "@/components/Button/Button";
+import PhraseTermsPreview from "@/components/PhraseTermsPreview/PhraseTermsPreview";
 import PhraseVisibilityBadge from "@/components/PhraseVisibilityBadge/PhraseVisibilityBadge";
 import TermPicker from "@/components/TermPicker/TermPicker";
 import PhraseSequenceEditor, {
@@ -26,8 +26,6 @@ import { SessionUser } from "@/types/session";
 import { formatList } from "@/utils/text";
 import CreateInteractionChainModal from "@/app/(authenticated)/components/CreateInteractionChainModal/CreateInteractionChainModal";
 import { PhraseVisibility, phraseVisibility } from "@/utils/phrase-visibility";
-
-const PREVIEW_LIMIT = 4;
 
 type PhraseRow = {
   uuid: string;
@@ -164,30 +162,9 @@ function Phrases() {
             {
               key: "terms",
               label: "Frase",
-              // Capped so a long phrase cannot blow out the row height.
-              render: (value) => {
-                const placements = value as TermPlacementOutput[];
-                const extra = placements.length - PREVIEW_LIMIT;
-                return (
-                  <div className="flex items-center gap-xs">
-                    {placements.slice(0, PREVIEW_LIMIT).map((placement) => (
-                      <Image
-                        key={placement.uuid}
-                        src={placement.pictogram.fileUrl}
-                        alt=""
-                        width={32}
-                        height={32}
-                        className="object-contain rounded"
-                      />
-                    ))}
-                    {extra > 0 && (
-                      <span className="text-text-on-primary-variant text-body">
-                        +{extra}
-                      </span>
-                    )}
-                  </div>
-                );
-              },
+              render: (value) => (
+                <PhraseTermsPreview terms={value as TermPlacementOutput[]} />
+              ),
             },
             ...(user?.role === "super_admin"
               ? [
