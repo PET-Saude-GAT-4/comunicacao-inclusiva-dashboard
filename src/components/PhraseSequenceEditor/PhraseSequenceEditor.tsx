@@ -44,7 +44,9 @@ export function entryFromPlacement(
 
 interface PhraseSequenceEditorProps {
   items: SequenceEntry[];
-  onChange: (items: SequenceEntry[]) => void;
+  // Without it the sequence is only shown, as in the library: same layout, no
+  // dragging and no removing.
+  onChange?: (items: SequenceEntry[]) => void;
 }
 
 export default function PhraseSequenceEditor({
@@ -52,6 +54,7 @@ export default function PhraseSequenceEditor({
   onChange,
 }: PhraseSequenceEditorProps) {
   const [draggedKey, setDraggedKey] = useState<string | null>(null);
+  const editable = onChange !== undefined;
 
   const move = (key: string, targetIndex: number) => {
     const from = items.findIndex((i) => i.key === key);
@@ -61,7 +64,7 @@ export default function PhraseSequenceEditor({
     // Removing the dragged entry shifts everything after it back by one.
     const to = targetIndex > from ? targetIndex - 1 : targetIndex;
 
-    onChange([...without.slice(0, to), items[from], ...without.slice(to)]);
+    onChange?.([...without.slice(0, to), items[from], ...without.slice(to)]);
     setDraggedKey(null);
   };
 
@@ -84,7 +87,7 @@ export default function PhraseSequenceEditor({
   };
 
   const handleRemove = (key: string) => {
-    onChange(items.filter((i) => i.key !== key));
+    onChange?.(items.filter((i) => i.key !== key));
   };
 
   return (
@@ -92,31 +95,35 @@ export default function PhraseSequenceEditor({
       <p className="text-text-on-primary">Sequência da Frase:</p>
       <div
         className="flex min-h-40 flex-wrap items-start gap-md rounded-lg border border-gray-200 bg-surface-secondary p-md"
-        onDragOver={handleDragOver}
-        onDrop={(e) => handleDrop(e, items.length)}
+        onDragOver={editable ? handleDragOver : undefined}
+        onDrop={editable ? (e) => handleDrop(e, items.length) : undefined}
       >
         {items.map((item, index) => (
           <div
             key={item.key}
-            draggable
-            onDragStart={(e) => handleDragStart(e, item.key)}
-            onDragOver={handleDragOver}
-            onDrop={(e) => {
-              e.stopPropagation();
-              handleDrop(e, index);
-            }}
-            className={`group relative flex flex-col items-center gap-xs rounded-md border border-gray-200 bg-white p-xs cursor-move${
-              draggedKey === item.key ? " opacity-50" : ""
-            }`}
+            {...(editable && {
+              draggable: true,
+              onDragStart: (e: DragEvent) => handleDragStart(e, item.key),
+              onDragOver: handleDragOver,
+              onDrop: (e: DragEvent) => {
+                e.stopPropagation();
+                handleDrop(e, index);
+              },
+            })}
+            className={`group relative flex flex-col items-center gap-xs rounded-md border border-gray-200 bg-white p-xs${
+              editable ? " cursor-move" : ""
+            }${draggedKey === item.key ? " opacity-50" : ""}`}
           >
-            <button
-              type="button"
-              aria-label={`Remover ${item.description}`}
-              onClick={() => handleRemove(item.key)}
-              className="absolute top-0 right-0 hidden group-hover:block px-xs text-text-on-primary-variant hover:text-text-on-primary hover:cursor-pointer"
-            >
-              ×
-            </button>
+            {editable && (
+              <button
+                type="button"
+                aria-label={`Remover ${item.description}`}
+                onClick={() => handleRemove(item.key)}
+                className="absolute top-0 right-0 hidden group-hover:block px-xs text-text-on-primary-variant hover:text-text-on-primary hover:cursor-pointer"
+              >
+                ×
+              </button>
+            )}
             <div className="flex items-center gap-xs">
               <Image
                 src={item.pictogram.fileUrl}
@@ -142,7 +149,9 @@ export default function PhraseSequenceEditor({
         ))}
         {items.length === 0 && (
           <p className="text-text-on-primary-variant text-body">
-            Nenhum termo na frase. Escolha um termo na lista ao lado.
+            {editable
+              ? "Nenhum termo na frase. Escolha um termo na lista ao lado."
+              : "Nenhum termo na frase."}
           </p>
         )}
       </div>
