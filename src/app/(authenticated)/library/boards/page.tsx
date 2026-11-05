@@ -6,6 +6,7 @@ import Table from "@/components/Table/Table";
 import SearchBar from "@/components/SearchBar/SearchBar";
 import ListToolbar from "@/components/ListToolbar/ListToolbar";
 import Dropdown from "@/components/Dropdown/Dropdown";
+import Badge from "@/components/Badge/Badge";
 import Image from "next/image";
 import { getPublicBoards } from "@/services/boards";
 import { getSessionUser } from "@/services/auth";
@@ -83,6 +84,17 @@ function Library() {
           data={filteredBoards}
           columns={[
             { key: "title", label: "Título" },
+            {
+              key: "type",
+              label: "Tipo",
+              render: (value) => (
+                <Badge
+                  variant={value === "emergency" ? "warning" : "secondary"}
+                >
+                  {BOARD_TYPE_LABELS[value as BoardType]}
+                </Badge>
+              ),
+            },
             {
               key: "authorUuid",
               label: "Autor",
