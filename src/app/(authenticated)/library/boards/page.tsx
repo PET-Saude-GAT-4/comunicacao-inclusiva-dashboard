@@ -1,16 +1,20 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { MdContentPaste } from "react-icons/md";
-import TabButton from "@/components/TabButton/TabButton";
 import Table from "@/components/Table/Table";
 import SearchBar from "@/components/SearchBar/SearchBar";
 import ListToolbar from "@/components/ListToolbar/ListToolbar";
+import Dropdown from "@/components/Dropdown/Dropdown";
 import Image from "next/image";
 import { getPublicBoards } from "@/services/boards";
 import { getSessionUser } from "@/services/auth";
-import { PublicBoardOutput } from "@/types/board";
+import {
+  BOARD_TYPE_LABELS,
+  BOARD_TYPES,
+  BoardType,
+  PublicBoardOutput,
+} from "@/types/board";
 import { PictogramOutput } from "@/types/pictogram";
 import { SessionUser } from "@/types/session";
 import { boardHref } from "@/utils/board";
@@ -27,6 +31,17 @@ function Library() {
   // list it already has instead of asking the API.
   const [filteredBoards, setFilteredBoards] = useState<PublicBoardOutput[]>([]);
   const [user, setUser] = useState<SessionUser | null>(null);
+  const [typeFilter, setTypeFilter] = useState<BoardType | "all">("all");
+
+  // Memoized so SearchBar gets a new list only when the boards or the type
+  // change, and keeps the query applied on top of the type.
+  const boardsOfType = useMemo(
+    () =>
+      typeFilter === "all"
+        ? boards
+        : boards.filter((board) => board.type === typeFilter),
+    [boards, typeFilter],
+  );
 
   useEffect(() => {
     getPublicBoards().then(setBoards);
@@ -38,18 +53,29 @@ function Library() {
   return (
     <div className="flex w-full flex-col gap-lg">
       <ListToolbar
-        start={
-          <nav>
-            <TabButton icon={MdContentPaste} active={true} />
-          </nav>
-        }
         search={
           <SearchBar
-            data={boards}
+            data={boardsOfType}
             onResults={setFilteredBoards}
             getSearchText={boardSearchText}
             placeholder="Buscar pranchas"
           />
+        }
+        end={
+          <div className="w-48">
+            <Dropdown<BoardType | "all">
+              id="typeFilter"
+              value={typeFilter}
+              onChange={setTypeFilter}
+              options={[
+                { value: "all", label: "Todos os tipos" },
+                ...BOARD_TYPES.map((type) => ({
+                  value: type,
+                  label: BOARD_TYPE_LABELS[type],
+                })),
+              ]}
+            />
+          </div>
         }
       />
       <div>
