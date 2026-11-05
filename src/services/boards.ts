@@ -2,7 +2,12 @@
 
 import { revalidatePath } from "next/cache";
 import { ActionResult, ListQuery, Paginated } from "@/types/common";
-import { BoardOutput, BoardType, PublicBoardOutput } from "@/types/board";
+import {
+  BOARD_TYPES,
+  BoardOutput,
+  BoardType,
+  PublicBoardOutput,
+} from "@/types/board";
 import { BoardTermOutput } from "@/types/term";
 import { ApiError } from "@/lib/api/client";
 import * as api from "@/lib/api/boards";
@@ -18,8 +23,17 @@ export async function getBoard(uuid: string): Promise<BoardOutput | null> {
   return api.getBoard(uuid);
 }
 
-export async function getPublicBoards(): Promise<PublicBoardOutput[]> {
-  return api.getPublicBoards();
+// /public/boards has no "every type" value, so without a type this asks for
+// each one and merges them, newest published first as the API orders them.
+export async function getPublicBoards(
+  type?: BoardType,
+): Promise<PublicBoardOutput[]> {
+  if (type) return api.getPublicBoards(type);
+
+  const lists = await Promise.all(BOARD_TYPES.map(api.getPublicBoards));
+  return lists
+    .flat()
+    .sort((a, b) => (b.publishedAt ?? "").localeCompare(a.publishedAt ?? ""));
 }
 
 export async function getPublicBoard(

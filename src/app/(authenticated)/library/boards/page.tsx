@@ -27,8 +27,8 @@ const boardSearchText = (board: PublicBoardOutput) => board.title;
 function Library() {
   const router = useRouter();
   const [boards, setBoards] = useState<PublicBoardOutput[]>([]);
-  // GET /public/boards is not paginated by design, so this page searches the
-  // list it already has instead of asking the API.
+  // GET /public/boards is not paginated by design, so this page loads every
+  // type once and filters and searches that list instead of asking the API.
   const [filteredBoards, setFilteredBoards] = useState<PublicBoardOutput[]>([]);
   const [user, setUser] = useState<SessionUser | null>(null);
   const [typeFilter, setTypeFilter] = useState<BoardType | "all">("all");
