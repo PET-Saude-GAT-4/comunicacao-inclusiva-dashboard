@@ -92,7 +92,6 @@ export const MAIN_NAV: NavEntry[] = [
     headerTabs: true,
     pages: [
       { path: "/library/boards", label: "Pranchas" },
-      { path: "/library/terms", label: "Termos" },
       { path: "/library/phrases", label: "Frases" },
     ],
   },
