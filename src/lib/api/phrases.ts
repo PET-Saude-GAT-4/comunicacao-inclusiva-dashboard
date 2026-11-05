@@ -18,6 +18,25 @@ export async function getPhrase(uuid: string): Promise<PhraseOutput | null> {
   return data.phrase;
 }
 
+// Every published phrase, newest published first and not paginated, including
+// the ones not listed in the library: those still sync to the app for their
+// board recommendations.
+export async function getPublicPhrases(): Promise<PhraseOutput[]> {
+  const data = await apiFetch<{ phrases: PhraseOutput[] }>("/public/phrases");
+  if (!data) throw new Error("Erro ao buscar frases.");
+  return data.phrases;
+}
+
+export async function getPublicPhrase(
+  uuid: string,
+): Promise<PhraseOutput | null> {
+  const data = await apiFetch<{ phrase: PhraseOutput }>(
+    `/public/phrases/${uuid}`,
+  );
+  if (!data) throw new Error("Erro ao buscar frase.");
+  return data.phrase;
+}
+
 export function createPhrase(data: {
   description: string;
   termUuids: string[];

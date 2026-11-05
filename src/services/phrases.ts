@@ -15,6 +15,16 @@ export async function getPhrase(uuid: string): Promise<PhraseOutput | null> {
   return api.getPhrase(uuid);
 }
 
+export async function getPublicPhrases(): Promise<PhraseOutput[]> {
+  return api.getPublicPhrases();
+}
+
+export async function getPublicPhrase(
+  uuid: string,
+): Promise<PhraseOutput | null> {
+  return api.getPublicPhrase(uuid);
+}
+
 export async function createPhrase(data: {
   description: string;
   termUuids: string[];
