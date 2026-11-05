@@ -36,6 +36,9 @@ function Table<T extends { id: number } | { uuid: string }>({
   loading?: boolean;
   error?: string | null;
 }) {
+  // Lists nobody acts on in bulk, like the library's, pass no handler and get
+  // no checkboxes.
+  const selectable = onSelectionChange !== undefined;
   const [internalSelected, setSelected] = useState<(number | string)[]>([]);
   const selected = controlledSelected ?? internalSelected;
   const [internalPage, setInternalPage] = useState(1);
@@ -94,14 +97,16 @@ function Table<T extends { id: number } | { uuid: string }>({
         <table className="w-full text-left text-sm text-gray-600">
           <thead className="sticky top-0 z-10">
             <tr className="bg-[#E8EEEC]">
-              <th className="w-10 border-b border-outline-common py-md text-center">
-                <input
-                  type="checkbox"
-                  checked={pageAllSelected}
-                  onChange={toggleAll}
-                  className="accent-primary"
-                />
-              </th>
+              {selectable && (
+                <th className="w-10 border-b border-outline-common py-md text-center">
+                  <input
+                    type="checkbox"
+                    checked={pageAllSelected}
+                    onChange={toggleAll}
+                    className="accent-primary"
+                  />
+                </th>
+              )}
               <th className="border-b border-outline-common px-sm py-sm font-semibold text-text-secondary">
                 <span className="">Código de Identificação</span>
               </th>
@@ -120,7 +125,8 @@ function Table<T extends { id: number } | { uuid: string }>({
             {pageData.length === 0 && (
               <tr>
                 <td
-                  colSpan={columns.length + 1}
+                  // The checkbox column, if any, and the identification code.
+                  colSpan={columns.length + (selectable ? 2 : 1)}
                   className={[
                     "py-lg text-center",
                     error ? "text-red-500" : "text-text-secondary",
@@ -146,17 +152,19 @@ function Table<T extends { id: number } | { uuid: string }>({
                       : "",
                   ].join(" ")}
                 >
-                  <td
-                    className="px-lg py-xl text-center"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={selected.includes(key)}
-                      onChange={() => toggleRow(key)}
-                      className="accent-primary"
-                    />
-                  </td>
+                  {selectable && (
+                    <td
+                      className="px-lg py-xl text-center"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={selected.includes(key)}
+                        onChange={() => toggleRow(key)}
+                        className="accent-primary"
+                      />
+                    </td>
+                  )}
                   <td className="px-sm py-sm text-text-on-primary">
                     <CopyableUuid uuid={String(key)} />
                   </td>
