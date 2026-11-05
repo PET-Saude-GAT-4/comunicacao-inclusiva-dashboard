@@ -37,8 +37,18 @@ function Table<T extends { id: number } | { uuid: string }>({
   error?: string | null;
 }) {
   // Lists nobody acts on in bulk, like the library's, pass no handler and get
-  // no checkboxes.
+  // no checkboxes. Their column stays, holding an invisible box of the same
+  // size, because its padding sets the row height and the left inset.
   const selectable = onSelectionChange !== undefined;
+  const placeholderBox = (
+    <input
+      type="checkbox"
+      disabled
+      tabIndex={-1}
+      aria-hidden="true"
+      className="invisible"
+    />
+  );
   const [internalSelected, setSelected] = useState<(number | string)[]>([]);
   const selected = controlledSelected ?? internalSelected;
   const [internalPage, setInternalPage] = useState(1);
@@ -97,16 +107,18 @@ function Table<T extends { id: number } | { uuid: string }>({
         <table className="w-full text-left text-sm text-gray-600">
           <thead className="sticky top-0 z-10">
             <tr className="bg-[#E8EEEC]">
-              {selectable && (
-                <th className="w-10 border-b border-outline-common py-md text-center">
+              <th className="w-10 border-b border-outline-common py-md text-center">
+                {selectable ? (
                   <input
                     type="checkbox"
                     checked={pageAllSelected}
                     onChange={toggleAll}
                     className="accent-primary"
                   />
-                </th>
-              )}
+                ) : (
+                  placeholderBox
+                )}
+              </th>
               <th className="border-b border-outline-common px-sm py-sm font-semibold text-text-secondary">
                 <span className="">Código de Identificação</span>
               </th>
@@ -125,8 +137,8 @@ function Table<T extends { id: number } | { uuid: string }>({
             {pageData.length === 0 && (
               <tr>
                 <td
-                  // The checkbox column, if any, and the identification code.
-                  colSpan={columns.length + (selectable ? 2 : 1)}
+                  // The checkbox column and the identification code.
+                  colSpan={columns.length + 2}
                   className={[
                     "py-lg text-center",
                     error ? "text-red-500" : "text-text-secondary",
@@ -152,19 +164,24 @@ function Table<T extends { id: number } | { uuid: string }>({
                       : "",
                   ].join(" ")}
                 >
-                  {selectable && (
-                    <td
-                      className="px-lg py-xl text-center"
-                      onClick={(e) => e.stopPropagation()}
-                    >
+                  <td
+                    className="px-lg py-xl text-center"
+                    // Only a real checkbox keeps its clicks from opening the row.
+                    onClick={
+                      selectable ? (e) => e.stopPropagation() : undefined
+                    }
+                  >
+                    {selectable ? (
                       <input
                         type="checkbox"
                         checked={selected.includes(key)}
                         onChange={() => toggleRow(key)}
                         className="accent-primary"
                       />
-                    </td>
-                  )}
+                    ) : (
+                      placeholderBox
+                    )}
+                  </td>
                   <td className="px-sm py-sm text-text-on-primary">
                     <CopyableUuid uuid={String(key)} />
                   </td>
