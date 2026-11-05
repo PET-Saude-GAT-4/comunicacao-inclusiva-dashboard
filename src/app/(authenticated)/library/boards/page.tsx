@@ -18,7 +18,6 @@ import {
 } from "@/types/board";
 import { PictogramOutput } from "@/types/pictogram";
 import { SessionUser } from "@/types/session";
-import { boardHref } from "@/utils/board";
 import AuthorEmail from "../../components/AuthorEmail/AuthorEmail";
 
 // Defined once so SearchBar, which filters whenever it changes, filters only
@@ -122,7 +121,9 @@ function Library() {
                 new Date(String(value)).toLocaleDateString("pt-BR"),
             },
           ]}
-          onRowClick={(board) => router.push(boardHref(board, user))}
+          // Always the read-only view, even for a board the user may edit, so
+          // the library stays open in the side panel; editing is in Pranchas.
+          onRowClick={(board) => router.push(`/library/boards/${board.uuid}`)}
         />
       </div>
     </div>
