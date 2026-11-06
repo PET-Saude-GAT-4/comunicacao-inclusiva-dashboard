@@ -20,9 +20,13 @@ export async function getBoard(uuid: string): Promise<BoardOutput | null> {
   return data.board;
 }
 
-export async function getPublicBoards(): Promise<PublicBoardOutput[]> {
+// Without a type the API answers with common boards only, so callers that
+// want every type ask for each one.
+export async function getPublicBoards(
+  type: BoardType,
+): Promise<PublicBoardOutput[]> {
   const data = await apiFetch<{ boards: PublicBoardOutput[] }>(
-    "/public/boards",
+    `/public/boards?type=${type}`,
   );
   if (!data) throw new Error("Erro ao buscar pranchas.");
   return data.boards;
