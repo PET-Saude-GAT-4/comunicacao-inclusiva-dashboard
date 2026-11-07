@@ -1,7 +1,7 @@
 "use client";
 
 import { DragEvent, useState } from "react";
-import Image from "next/image";
+import Thumbnail from "@/components/Thumbnail/Thumbnail";
 import { PictogramOutput } from "@/types/pictogram";
 import { SignWritingOutput } from "@/types/sign-writing";
 import { TermOutput, TermPlacementOutput } from "@/types/term";
@@ -119,27 +119,23 @@ export default function PhraseSequenceEditor({
                 type="button"
                 aria-label={`Remover ${item.description}`}
                 onClick={() => handleRemove(item.key)}
-                className="absolute top-0 right-0 hidden group-hover:block px-xs text-text-on-primary-variant hover:text-text-on-primary hover:cursor-pointer"
+                className="absolute top-0 right-0 z-10 hidden group-hover:block px-xs text-text-on-primary-variant hover:text-text-on-primary hover:cursor-pointer"
               >
                 ×
               </button>
             )}
             <div className="flex items-center gap-xs">
-              <Image
+              <Thumbnail
                 src={item.pictogram.fileUrl}
-                alt=""
+                size={80}
                 draggable={false}
-                width={80}
-                height={80}
-                className="object-contain rounded"
+                className="rounded"
               />
-              <Image
+              <Thumbnail
                 src={item.signWriting.fileUrl}
-                alt=""
+                size={80}
                 draggable={false}
-                width={80}
-                height={80}
-                className="object-contain rounded"
+                className="rounded"
               />
             </div>
             <p className="text-text-on-primary text-body font-bold text-center">

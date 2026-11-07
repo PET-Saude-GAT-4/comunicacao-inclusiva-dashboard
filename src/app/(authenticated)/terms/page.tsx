@@ -16,7 +16,7 @@ import Button from "@/components/Button/Button";
 import { getTermPage, createTerm, deleteTerm } from "@/services/terms";
 import { getPictogramPage } from "@/services/pictograms";
 import { getSignWritingPage } from "@/services/sign-writings";
-import Image from "next/image";
+import Thumbnail from "@/components/Thumbnail/Thumbnail";
 import Link from "next/link";
 import RemoveButton from "@/components/RemoveButton/RemoveButton";
 import AssetPicker, { Asset } from "@/components/AssetPicker/AssetPicker";
@@ -232,12 +232,10 @@ function Terms() {
               />
               <div className="flex justify-center gap-md">
                 {selectedPictogram ? (
-                  <Image
+                  <Thumbnail
                     src={selectedPictogram.fileUrl}
-                    alt=""
-                    width="120"
-                    height="120"
-                    className="border border-outline-common object-contain rounded-md"
+                    size={120}
+                    className="border border-outline-common rounded-md"
                   />
                 ) : (
                   <div className="border border-outline-common flex items-center justify-center rounded-md w-30 h-30">
@@ -247,12 +245,10 @@ function Terms() {
                   </div>
                 )}
                 {selectedSignWriting ? (
-                  <Image
+                  <Thumbnail
                     src={selectedSignWriting.fileUrl}
-                    alt=""
-                    width="120"
-                    height="120"
-                    className="border border-outline-common object-contain rounded-md"
+                    size={120}
+                    className="border border-outline-common rounded-md"
                   />
                 ) : (
                   <div className="border border-outline-common flex items-center justify-center rounded-md w-30 h-30">

@@ -7,7 +7,7 @@ import SearchBar from "@/components/SearchBar/SearchBar";
 import ListToolbar from "@/components/ListToolbar/ListToolbar";
 import Dropdown from "@/components/Dropdown/Dropdown";
 import Badge from "@/components/Badge/Badge";
-import Image from "next/image";
+import Thumbnail from "@/components/Thumbnail/Thumbnail";
 import { getPublicBoards } from "@/services/boards";
 import { getSessionUser } from "@/services/auth";
 import {
@@ -105,12 +105,10 @@ function Library() {
               key: "representativePictogram",
               label: "Pictograma Representante",
               render: (value) => (
-                <Image
+                <Thumbnail
                   src={(value as PictogramOutput).fileUrl}
-                  alt=""
-                  width={40}
-                  height={40}
-                  className="object-contain rounded"
+                  size={40}
+                  className="rounded"
                 />
               ),
             },

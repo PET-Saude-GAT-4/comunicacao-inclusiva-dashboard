@@ -22,7 +22,7 @@ import AddButton from "@/components/AddButton/AddButton";
 import Modal from "@/components/Modal/Modal";
 import Input from "@/components/Input/Input";
 import Button from "@/components/Button/Button";
-import Image from "next/image";
+import Thumbnail from "@/components/Thumbnail/Thumbnail";
 import { useDragReorder } from "@/hooks/useDragReorder";
 import TermPicker from "@/components/TermPicker/TermPicker";
 import CreateInteractionChainModal from "../../components/CreateInteractionChainModal/CreateInteractionChainModal";
@@ -290,27 +290,23 @@ function BoardDetail() {
               type="button"
               aria-label={`Remover ${item.description}`}
               onClick={() => handleRemove(item.uuid)}
-              className="absolute top-0 right-0 hidden group-hover:block px-xs text-text-on-primary-variant hover:text-text-on-primary hover:cursor-pointer"
+              className="absolute top-0 right-0 z-10 hidden group-hover:block px-xs text-text-on-primary-variant hover:text-text-on-primary hover:cursor-pointer"
             >
               ×
             </button>
             <div className="flex items-center gap-xs">
-              <Image
+              <Thumbnail
                 src={item.pictogram.fileUrl}
-                alt=""
+                size={80}
                 draggable={false}
-                width={80}
-                height={80}
-                className="object-contain rounded"
+                className="rounded"
               />
 
-              <Image
+              <Thumbnail
                 src={item.signWriting.fileUrl}
-                alt=""
+                size={80}
                 draggable={false}
-                width={80}
-                height={80}
-                className="object-contain rounded"
+                className="rounded"
               />
             </div>
             <p className="text-text-on-primary text-body font-bold text-center  ">
@@ -348,19 +344,15 @@ function BoardDetail() {
               {selectedTerm ? (
                 <div className="flex flex-col items-center gap-md">
                   <div className="flex items-center gap-md">
-                    <Image
+                    <Thumbnail
                       src={selectedTerm.pictogram.fileUrl}
-                      alt=""
-                      width="150"
-                      height="150"
-                      className="border border-outline-common object-contain rounded-md"
+                      size={150}
+                      className="border border-outline-common rounded-md"
                     />
-                    <Image
+                    <Thumbnail
                       src={selectedTerm.signWriting.fileUrl}
-                      alt=""
-                      width="150"
-                      height="150"
-                      className="border border-outline-common object-contain rounded-md"
+                      size={150}
+                      className="border border-outline-common rounded-md"
                     />
                   </div>
                   <p className="text-text-on-primary text-center font-bold text-md">

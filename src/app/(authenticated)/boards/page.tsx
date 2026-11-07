@@ -22,7 +22,7 @@ import {
 import { SessionUser } from "@/types/session";
 import { ListQuery } from "@/types/common";
 import { boardHref } from "@/utils/board";
-import Image from "next/image";
+import Thumbnail from "@/components/Thumbnail/Thumbnail";
 import RemoveButton from "@/components/RemoveButton/RemoveButton";
 import Badge from "@/components/Badge/Badge";
 import { PictogramOutput } from "@/types/pictogram";
@@ -207,12 +207,10 @@ function Boards() {
               key: "representativePictogram",
               label: "Pictograma Representante",
               render: (value) => (
-                <Image
+                <Thumbnail
                   src={(value as PictogramOutput).fileUrl}
-                  alt=""
-                  width={40}
-                  height={40}
-                  className="object-contain rounded"
+                  size={40}
+                  className="rounded"
                 />
               ),
             },
@@ -282,12 +280,10 @@ function Boards() {
             <div className="flex w-full justify-center">
               {selectedPictogram ? (
                 <div className="flex flex-col items-center gap-md">
-                  <Image
+                  <Thumbnail
                     src={selectedPictogram?.fileUrl}
-                    alt=""
-                    width="200"
-                    height="200"
-                    className="border border-outline-common object-contain rounded-md"
+                    size={200}
+                    className="border border-outline-common rounded-md"
                   />
                   <p className="text-text-on-primary text-center font-bold text-md">
                     {selectedPictogram.description}
