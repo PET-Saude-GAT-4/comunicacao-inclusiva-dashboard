@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import Thumbnail from "@/components/Thumbnail/Thumbnail";
 import AddButton from "@/components/AddButton/AddButton";
 import InfiniteList from "@/components/InfiniteList/InfiniteList";
 import Input from "@/components/Input/Input";
@@ -52,12 +52,10 @@ export default function AssetPicker<K extends string>({
             className="flex flex-row items-center gap-md border border-outline-common rounded-md p-sm justify-between cursor-pointer"
             onClick={() => onSelect(asset)}
           >
-            <Image
+            <Thumbnail
               src={asset.fileUrl}
-              alt=""
-              width={50}
-              height={50}
-              className="object-contain rounded"
+              size={50}
+              className="rounded"
             />
             <p className="text-text-on-primary">{asset.description}</p>
             <span onClick={(e) => e.stopPropagation()}>

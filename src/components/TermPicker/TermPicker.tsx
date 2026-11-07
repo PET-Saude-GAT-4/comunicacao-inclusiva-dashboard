@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import Thumbnail from "@/components/Thumbnail/Thumbnail";
 import AddButton from "@/components/AddButton/AddButton";
 import InfiniteList from "@/components/InfiniteList/InfiniteList";
 import Input from "@/components/Input/Input";
@@ -32,19 +32,15 @@ export default function TermPicker({ onSelect }: TermPickerProps) {
             onClick={() => onSelect(term)}
           >
             <div className="flex flex-row items-center gap-sm">
-              <Image
+              <Thumbnail
                 src={term.pictogram.fileUrl}
-                alt=""
-                width={50}
-                height={50}
-                className="object-contain rounded"
+                size={50}
+                className="rounded"
               />
-              <Image
+              <Thumbnail
                 src={term.signWriting.fileUrl}
-                alt=""
-                width={50}
-                height={50}
-                className="object-contain rounded"
+                size={50}
+                className="rounded"
               />
             </div>
             <p className="text-text-on-primary">{term.description}</p>

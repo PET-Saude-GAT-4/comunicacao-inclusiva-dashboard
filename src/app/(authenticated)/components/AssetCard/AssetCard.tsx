@@ -1,7 +1,7 @@
 import Badge from "@/components/Badge/Badge";
 import CopyableUuid from "@/components/CopyableUuid/CopyableUuid";
 import KebabButton from "@/components/KebabButton/KebabButton";
-import Image from "next/image";
+import Thumbnail from "@/components/Thumbnail/Thumbnail";
 import { MdImage, MdPerson } from "react-icons/md";
 
 export type AssetCardImage = {
@@ -36,20 +36,14 @@ type Props = {
 function SingleImage({ image, alt }: { image: AssetCardImage; alt: string }) {
   return (
     <div
-      className={`relative flex items-center justify-center w-24 h-24 shrink-0 rounded-md overflow-hidden ${
+      className={`flex items-center justify-center w-24 h-24 shrink-0 rounded-md overflow-hidden ${
         image.src
-          ? "bg-white border border-outline-common"
+          ? "bg-white border border-outline-common p-xs"
           : "bg-surface-secondary-dark text-white"
       }`}
     >
       {image.src ? (
-        <Image
-          src={image.src}
-          alt={alt}
-          width={96}
-          height={96}
-          className="absolute inset-0 w-full h-full p-xs object-contain"
-        />
+        <Thumbnail src={image.src} alt={alt} size={96} fluid />
       ) : (
         <MdImage size={48} />
       )}
@@ -65,22 +59,13 @@ function ImagePair({ images }: { images: AssetCardImage[] }) {
           key={image.label}
           className="flex flex-col items-center gap-xs p-sm min-w-0"
         >
-          {/* The image is taken out of flow so a tall one cannot stretch the
-              square past its aspect ratio; object-contain shrinks it and
-              leaves white space around it instead. */}
-          <div className="relative flex items-center justify-center w-full aspect-square bg-white">
-            {image.src ? (
-              <Image
-                src={image.src}
-                alt={image.label}
-                width={96}
-                height={96}
-                className="absolute inset-0 w-full h-full object-contain"
-              />
-            ) : (
+          {image.src ? (
+            <Thumbnail src={image.src} alt={image.label} size={96} fluid />
+          ) : (
+            <div className="flex items-center justify-center w-full aspect-square bg-white">
               <MdImage size={48} className="text-text-on-primary-variant" />
-            )}
-          </div>
+            </div>
+          )}
           <figcaption className="text-xs text-text-on-primary-variant truncate">
             {image.label}
           </figcaption>

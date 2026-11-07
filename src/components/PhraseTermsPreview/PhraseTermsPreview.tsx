@@ -1,4 +1,4 @@
-import Image from "next/image";
+import Thumbnail from "@/components/Thumbnail/Thumbnail";
 import { TermPlacementOutput } from "@/types/term";
 
 const PREVIEW_LIMIT = 4;
@@ -15,13 +15,11 @@ export default function PhraseTermsPreview({
   return (
     <div className="flex items-center gap-xs">
       {terms.slice(0, PREVIEW_LIMIT).map((placement) => (
-        <Image
+        <Thumbnail
           key={placement.uuid}
           src={placement.pictogram.fileUrl}
-          alt=""
-          width={32}
-          height={32}
-          className="object-contain rounded"
+          size={32}
+          className="rounded"
         />
       ))}
       {extra > 0 && (

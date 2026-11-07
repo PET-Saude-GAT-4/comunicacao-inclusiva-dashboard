@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import Thumbnail from "@/components/Thumbnail/Thumbnail";
 import AddButton from "@/components/AddButton/AddButton";
 import InfiniteList from "@/components/InfiniteList/InfiniteList";
 import Input from "@/components/Input/Input";
@@ -45,12 +45,10 @@ export default function BoardPicker({
                 if (!reason) onSelect(board);
               }}
             >
-              <Image
+              <Thumbnail
                 src={board.representativePictogram.fileUrl}
-                alt=""
-                width={50}
-                height={50}
-                className="object-contain rounded"
+                size={50}
+                className="rounded"
               />
               <p className="text-text-on-primary">{board.title}</p>
               {reason ? (

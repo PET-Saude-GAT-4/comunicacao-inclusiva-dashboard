@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import Image from "next/image";
+import Thumbnail from "@/components/Thumbnail/Thumbnail";
 import { MdPermMedia } from "react-icons/md";
 import { getPublicBoard, getPublicBoardTerms } from "@/services/boards";
 import { getSessionUser } from "@/services/auth";
@@ -97,19 +97,15 @@ function ReadonlyBoardDetail() {
             className="flex flex-col items-center gap-xs bg-white border border-gray-200 rounded-md p-xs"
           >
             <div className="flex items-center gap-xs">
-              <Image
+              <Thumbnail
                 src={item.pictogram.fileUrl}
-                alt=""
-                width={80}
-                height={80}
-                className="object-contain rounded"
+                size={80}
+                className="rounded"
               />
-              <Image
+              <Thumbnail
                 src={item.signWriting.fileUrl}
-                alt=""
-                width={80}
-                height={80}
-                className="object-contain rounded"
+                size={80}
+                className="rounded"
               />
             </div>
             <p className="text-text-on-primary text-body font-bold text-center">
