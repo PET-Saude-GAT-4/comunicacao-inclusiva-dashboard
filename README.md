@@ -1,36 +1,75 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Comunicação Inclusiva — Dashboard
 
-## Getting Started
+The admin panel of Comunicação Inclusiva. Here the team manages the content the app shows: pictograms and SignWritings, the terms built from them, the boards that group terms and the phrases made from them, plus the users, roles and professions that can access it. The dashboard has no database of its own; every read and write goes to the [Comunicação Inclusiva API](https://github.com/PET-Saude-GAT-4/comunicacao-inclusiva-api).
 
-Install the dependencies. The repository ships its own Yarn 4.12.0 binary, so any `yarn` on your machine runs it:
+## Requirements
 
-```bash
-yarn install
-```
+- **Node 22.**
+- **Yarn 4.** The repository ships its own Yarn binary (`.yarn/releases`), so any `yarn` on your machine runs the right version.
+- **A running API.** By default the dashboard expects it at `http://localhost:8080`.
 
-Then run the development server:
+## Getting started
 
-```bash
-yarn dev
-```
+1. Start the API. In a clone of [comunicacao-inclusiva-api](https://github.com/PET-Saude-GAT-4/comunicacao-inclusiva-api), create its `.env` from `.env.example` (set `ADMIN_PASSWORD` there), then:
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+   ```bash
+   yarn docker:dev            # API on http://localhost:8080, with PostgreSQL and Mailpit
+   yarn prisma:migrate:dev    # create the tables
+   yarn prisma:seed           # create the admin account, admin@admin.admin with ADMIN_PASSWORD
+   ```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+2. In this repository, install the dependencies and point the dashboard at the API:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+   ```bash
+   yarn install
+   cp .env.local.example .env.local   # API_URL=http://localhost:8080
+   ```
 
-## Learn More
+3. Run the development server, open [http://localhost:3000](http://localhost:3000) and log in with the admin account.
 
-To learn more about Next.js, take a look at the following resources:
+   ```bash
+   yarn dev
+   ```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Commands
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+| Command | Does |
+|---|---|
+| `yarn dev` | Starts the development server on port 3000. |
+| `yarn build` | Builds for production. Needs `API_URL` set. |
+| `yarn start` | Serves the production build. |
+| `yarn lint` | Runs ESLint. |
+| `yarn test` | Runs the Jest suite once. |
+| `yarn test:watch` | Reruns the affected tests on save. |
+| `yarn test:coverage` | Runs the suite and writes a report to `coverage/`. |
 
-## Deploy on Vercel
+## Layout
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+| Folder | Holds |
+|---|---|
+| `src/app` | Routes (App Router): `(auth)` for the pages without a session, `(authenticated)` for the rest. |
+| `src/proxy.ts` | Redirects by session and hides routes the user's role may not open. |
+| `src/services` | Server actions, one file per domain — the only layer pages import. |
+| `src/lib/api` | HTTP calls to the API, one file per domain, on top of `client.ts`. |
+| `src/schemas` | zod schemas for forms. |
+| `src/types` | API shapes and form states, one file per domain. |
+| `src/components` | Shared UI components. |
+| `src/hooks` | Client hooks (paginated lists, remote search, drag reordering…). |
+| `src/config` | Route access, route display and navigation. |
+| `src/utils` | Pure helpers and the session cookie. |
+| `tests` | Support code for the Jest suite; the tests themselves sit in `__tests__` folders beside the code. |
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Documentation
+
+- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — routes, the path from a form to the API, sessions, paginated lists, tests.
+- [docs/UI.md](docs/UI.md) — design tokens, shared components and UI rules.
+- [CHANGELOG.md](CHANGELOG.md) — what changed in each version.
+- [AGENTS.md](AGENTS.md) — the rules for anyone, person or agent, writing code here.
+- The domain vocabulary (board, phrase, term, interaction chain…) is in the API's [glossary](https://github.com/PET-Saude-GAT-4/comunicacao-inclusiva-api/blob/develop/docs/GLOSSARY.md).
+
+## Contributing
+
+- Branch from `develop` (`feat/…`, `fix/…`, `docs/…`, `chore/…`).
+- Write commits as [Conventional Commits](https://www.conventionalcommits.org/) (`feat: …`, `fix: …`, `docs: …`).
+- Open pull requests into `develop`.
+- Code, comments, commits, issues and documentation are in English; text shown to users is in Portuguese.

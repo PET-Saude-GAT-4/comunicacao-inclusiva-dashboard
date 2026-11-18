@@ -6,6 +6,10 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ## [Unreleased]
 
+### Added
+
+- **README and AGENTS.md.** A README that takes a new contributor from a fresh clone to a running dashboard, a committed `.env.local.example`, and an AGENTS.md with the project's rules (replacing `.agents/rules`).
+
 ## [0.1.0] - 2026-11-17
 
 The first tagged release, summarising what the dashboard offers today. The Painel de Controle (`/dashboard`), Configurações (`/settings`) and Ajuda (`/help`) pages are still placeholders.

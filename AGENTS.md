@@ -3,3 +3,52 @@
 
 This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` before writing any code. Heed deprecation notices.
 <!-- END:nextjs-agent-rules -->
+
+# Comunicação Inclusiva — Dashboard
+
+The admin panel of Comunicação Inclusiva. It has no database: every read and write goes to the API at `API_URL`. Setup is in [README.md](README.md).
+
+## Toolchain
+
+- Next.js 16 (App Router), React 19, Tailwind CSS 4, zod 4, TypeScript.
+- Node 22 and Yarn 4 (the binary is vendored in `.yarn/releases`; use `yarn`, never `npm` or `npx`).
+- Jest with React Testing Library and jsdom.
+
+| Command | Does |
+|---|---|
+| `yarn dev` | Starts the development server on port 3000. |
+| `yarn build` | Builds for production. Needs `API_URL` set. |
+| `yarn lint` | Runs ESLint. |
+| `yarn test` | Runs the Jest suite once. |
+| `yarn test:watch` | Reruns the affected tests on save. |
+| `yarn test:coverage` | Runs the suite and writes a report to `coverage/`. |
+
+## Architecture in brief
+
+A form goes page → server action (`src/services/<domain>.ts`, `"use server"`) → API layer (`src/lib/api/<domain>.ts`) → `apiFetch` (`src/lib/api/client.ts`). Pages import only server actions. The session is an httpOnly cookie read on the server. `src/proxy.ts` redirects by session and hides routes by role. Lists are paged and searched on the server. The details, and the reasons behind them, are in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+
+## What to get right
+
+- **`src/proxy.ts` is Next 16's middleware.** Do not create a `middleware.ts`.
+- **The token never reaches the browser.** Only server actions and `src/lib/api` talk to the API; client components call a server action, never `fetch`.
+- **`apiFetch` is the only place that calls `fetch`.** It adds the base URL, the token and the error handling, and logs the user out on a 401.
+- **Copy the login page** (`src/app/(auth)/login`, `src/services/auth.ts`, `src/lib/api/auth.ts`) when adding a form, rather than inventing a variant. Call `redirect()` outside the `try`, since it works by throwing.
+- **Role access lives in one table**, `ROUTE_ACCESS` in `src/config/route-access.ts`. A new restricted route goes there, not in a page check.
+- **Never load a whole collection.** List pages use `usePaginatedList`; pickers and modals use `useRemoteSearch`.
+- **Pictograms and SignWritings render through `Thumbnail`**, never `next/image` or `<img>` directly. See [docs/UI.md](docs/UI.md).
+- **Language.** Code, comments, commits, issues and docs are in English. Everything the user sees, zod messages included, is in Portuguese. Show the user a Portuguese message picked by status code, never the API's own error text.
+- **Tests** go in a `__tests__` folder beside the file they cover (`src/utils/__tests__/board.test.ts`), support code in `tests/`, and no test makes a real HTTP call: mock `@/lib/api/client` or `@/lib/api/<domain>`.
+
+## Linting and formatting
+
+For every TypeScript file you create or change under `src/`:
+
+1. Run `yarn lint --fix` on the changed files and fix what remains by hand.
+2. Leave no ESLint error behind, TypeScript rules included.
+
+## Where to look next
+
+- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — routes, forms to the API, session, paginated lists, tests.
+- [docs/UI.md](docs/UI.md) — design tokens, shared components, UI rules.
+- [CHANGELOG.md](CHANGELOG.md) — add an `[Unreleased]` entry for every user-visible change.
+- The API's [glossary](https://github.com/PET-Saude-GAT-4/comunicacao-inclusiva-api/blob/develop/docs/GLOSSARY.md) — the domain vocabulary.
