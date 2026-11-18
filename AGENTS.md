@@ -1,8 +1,11 @@
+<!-- Next.js manages the block below; Prettier must not touch it. -->
+<!-- prettier-ignore-start -->
 <!-- BEGIN:nextjs-agent-rules -->
 # This is NOT the Next.js you know
 
 This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` before writing any code. Heed deprecation notices.
 <!-- END:nextjs-agent-rules -->
+<!-- prettier-ignore-end -->
 
 # Comunicação Inclusiva — Dashboard
 
@@ -19,6 +22,9 @@ The admin panel of Comunicação Inclusiva. It has no database: every read and w
 | `yarn dev` | Starts the development server on port 3000. |
 | `yarn build` | Builds for production. Needs `API_URL` set. |
 | `yarn lint` | Runs ESLint. |
+| `yarn format` | Formats every file with Prettier. |
+| `yarn format:check` | Fails if a file is not formatted. |
+| `yarn typecheck` | Type-checks the project (`tsc --noEmit`). |
 | `yarn test` | Runs the Jest suite once. |
 | `yarn test:watch` | Reruns the affected tests on save. |
 | `yarn test:coverage` | Runs the suite and writes a report to `coverage/`. |
@@ -41,10 +47,11 @@ A form goes page → server action (`src/services/<domain>.ts`, `"use server"`) 
 
 ## Linting and formatting
 
-For every TypeScript file you create or change under `src/`:
+For every file you create or change:
 
-1. Run `yarn lint --fix` on the changed files and fix what remains by hand.
-2. Leave no ESLint error behind, TypeScript rules included.
+1. Run `yarn lint --fix` on the changed files and fix what remains by hand. Leave no ESLint error behind, TypeScript rules included.
+2. Run `yarn prettier --write` on the changed files. The style is `.prettierrc`, shared with the API and the app.
+3. Before opening a pull request, run `yarn lint`, `yarn format:check`, `yarn typecheck`, `yarn test` and `yarn build`. CI runs the same five checks on every pull request into `develop` or `main`, and all five must pass to merge.
 
 ## Where to look next
 

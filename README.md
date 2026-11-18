@@ -39,6 +39,9 @@ The admin panel of Comunicação Inclusiva. Here the team manages the content th
 | `yarn build` | Builds for production. Needs `API_URL` set. |
 | `yarn start` | Serves the production build. |
 | `yarn lint` | Runs ESLint. |
+| `yarn format` | Formats every file with Prettier. |
+| `yarn format:check` | Fails if a file is not formatted. |
+| `yarn typecheck` | Type-checks the project (`tsc --noEmit`). |
 | `yarn test` | Runs the Jest suite once. |
 | `yarn test:watch` | Reruns the affected tests on save. |
 | `yarn test:coverage` | Runs the suite and writes a report to `coverage/`. |
@@ -71,5 +74,5 @@ The admin panel of Comunicação Inclusiva. Here the team manages the content th
 
 - Branch from `develop` (`feat/…`, `fix/…`, `docs/…`, `chore/…`).
 - Write commits as [Conventional Commits](https://www.conventionalcommits.org/) (`feat: …`, `fix: …`, `docs: …`).
-- Open pull requests into `develop`.
+- Open pull requests into `develop`. CI runs lint, format, types, test and build on each one, and all five must pass to merge.
 - Code, comments, commits, issues and documentation are in English; text shown to users is in Portuguese.

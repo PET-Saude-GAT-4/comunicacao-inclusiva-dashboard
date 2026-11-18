@@ -1,0 +1,19 @@
+name: Setup
+description: Install Node from .nvmrc, enable Yarn through Corepack and install the dependencies.
+
+runs:
+  using: composite
+  steps:
+    # Corepack must be on before setup-node, which runs `yarn` to find the cache folder.
+    - name: Enable Corepack
+      shell: bash
+      run: corepack enable
+
+    - uses: actions/setup-node@v4
+      with:
+        node-version-file: .nvmrc
+        cache: yarn
+
+    - name: Install dependencies
+      shell: bash
+      run: yarn install --immutable
