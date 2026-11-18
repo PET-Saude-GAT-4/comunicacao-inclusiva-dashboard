@@ -1,3 +1,6 @@
+/**
+ * @jest-environment node
+ */
 import type { SessionPayload } from "@/types/session";
 import { createSession, deleteSession, getSession } from "./session";
 
@@ -31,7 +34,9 @@ const originalNodeEnv = env.NODE_ENV;
 
 beforeEach(() => store.clear());
 afterEach(() => {
-  env.NODE_ENV = originalNodeEnv;
+  // Assigning undefined to process.env stores the string "undefined".
+  if (originalNodeEnv === undefined) delete env.NODE_ENV;
+  else env.NODE_ENV = originalNodeEnv;
 });
 
 describe("createSession", () => {

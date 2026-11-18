@@ -1,11 +1,8 @@
-import { flattenError } from "zod";
+import { fieldErrors as errorsOf } from "@/test/zod";
 import { AcceptInvitationSchema } from "./invitation";
 
-function fieldErrors(input: unknown) {
-  const result = AcceptInvitationSchema.safeParse(input);
-  if (result.success) return {};
-  return flattenError(result.error).fieldErrors;
-}
+const fieldErrors = (input: unknown) =>
+  errorsOf(AcceptInvitationSchema.safeParse(input));
 
 describe("AcceptInvitationSchema", () => {
   it("accepts two matching passwords of 8 characters", () => {

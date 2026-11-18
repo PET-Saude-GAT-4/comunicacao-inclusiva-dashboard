@@ -1,17 +1,9 @@
-import { flattenError } from "zod";
+import { fieldErrors } from "@/test/zod";
 import {
   ConfirmPasswordResetSchema,
   LoginFormSchema,
   RequestPasswordResetSchema,
 } from "./auth";
-
-function fieldErrors(result: { success: boolean; error?: unknown }) {
-  if (result.success) return {};
-  return flattenError(result.error as never).fieldErrors as Record<
-    string,
-    string[] | undefined
-  >;
-}
 
 describe("LoginFormSchema", () => {
   it("accepts an email and a password, trimming the password", () => {

@@ -12,7 +12,13 @@ const config: Config = {
     "^@/(.*)$": "<rootDir>/src/$1",
   },
   coverageProvider: "v8",
-  collectCoverageFrom: ["src/**/*.{ts,tsx}", "!src/**/*.test.{ts,tsx}"],
+  collectCoverageFrom: [
+    "src/**/*.{ts,tsx}",
+    "!src/**/*.test.{ts,tsx}",
+    "!src/**/*.d.ts",
+    "!src/test/**",
+    "!src/types/**",
+  ],
 };
 
 export default createJestConfig(config);
