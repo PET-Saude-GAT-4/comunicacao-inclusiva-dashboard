@@ -1,6 +1,6 @@
-# Comunicação Inclusiva — Dashboard
+# SAP — Suporte Assistivo ao Paciente (dashboard)
 
-The admin panel of Comunicação Inclusiva. Here the team manages the content the app shows: pictograms and SignWritings, the terms built from them, the boards that group terms and the phrases made from them, plus the users, roles and professions that can access it. The dashboard has no database of its own; every read and write goes to the [Comunicação Inclusiva API](https://github.com/PET-Saude-GAT-4/comunicacao-inclusiva-api).
+The admin panel of SAP (Suporte Assistivo ao Paciente). Here the team manages the content the app shows: pictograms and SignWritings, the terms built from them, the boards that group terms and the phrases made from them, plus the users, roles and professions that can access it. The dashboard has no database of its own; every read and write goes to the [SAP API](https://github.com/PET-Saude-GAT-4/comunicacao-inclusiva-api).
 
 ## Requirements
 

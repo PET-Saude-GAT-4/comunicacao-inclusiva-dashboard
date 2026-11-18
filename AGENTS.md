@@ -7,9 +7,9 @@ This version has breaking changes — APIs, conventions, and file structure may 
 <!-- END:nextjs-agent-rules -->
 <!-- prettier-ignore-end -->
 
-# Comunicação Inclusiva — Dashboard
+# SAP — Suporte Assistivo ao Paciente (dashboard)
 
-The admin panel of Comunicação Inclusiva. It has no database: every read and write goes to the API at `API_URL`. Setup is in [README.md](README.md).
+The admin panel of SAP (Suporte Assistivo ao Paciente). It has no database: every read and write goes to the API at `API_URL`. Setup is in [README.md](README.md).
 
 ## Toolchain
 
