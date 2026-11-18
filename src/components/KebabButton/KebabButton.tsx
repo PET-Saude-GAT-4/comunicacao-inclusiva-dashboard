@@ -1,5 +1,7 @@
 import { MdMoreVert } from "react-icons/md";
-import DropdownMenu, { MenuOption } from "@/components/DropdownMenu/DropdownMenu";
+import DropdownMenu, {
+  MenuOption,
+} from "@/components/DropdownMenu/DropdownMenu";
 
 interface KebabMenuProps {
   options: MenuOption[];

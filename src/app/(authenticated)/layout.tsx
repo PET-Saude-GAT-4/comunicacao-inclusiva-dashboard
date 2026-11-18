@@ -28,9 +28,7 @@ export default async function AuthenticatedLayout({
       />
       <div className="flex flex-col flex-1 overflow-hidden">
         <Header userRole={session.role} />
-        <main className="flex-1 overflow-y-auto">
-          {children}
-        </main>
+        <main className="flex-1 overflow-y-auto">{children}</main>
       </div>
     </div>
   );

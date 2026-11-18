@@ -16,7 +16,9 @@ function flush() {
   queued = new Map();
 
   getUserEmails([...batch.keys()])
-    .then((found) => batch.forEach((resolve, uuid) => resolve(found[uuid] ?? null)))
+    .then((found) =>
+      batch.forEach((resolve, uuid) => resolve(found[uuid] ?? null)),
+    )
     // The whole request failing says nothing about the authors, so they are
     // forgotten and asked for again the next time a row shows them.
     .catch(() =>

@@ -32,9 +32,7 @@ function Terms() {
   const [description, setDescription] = useState("");
   const [descriptionEdited, setDescriptionEdited] = useState(false);
   // Null until known, so the hint does not claim there are none too early.
-  const [hasSignWritings, setHasSignWritings] = useState<boolean | null>(
-    null,
-  );
+  const [hasSignWritings, setHasSignWritings] = useState<boolean | null>(null);
   const [selectedPictogram, setSelectedPictogram] = useState<Asset>();
   const [selectedSignWriting, setSelectedSignWriting] = useState<Asset>();
 

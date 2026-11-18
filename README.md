@@ -33,34 +33,34 @@ The admin panel of Comunicação Inclusiva. Here the team manages the content th
 
 ## Commands
 
-| Command | Does |
-|---|---|
-| `yarn dev` | Starts the development server on port 3000. |
-| `yarn build` | Builds for production. Needs `API_URL` set. |
-| `yarn start` | Serves the production build. |
-| `yarn lint` | Runs ESLint. |
-| `yarn format` | Formats every file with Prettier. |
-| `yarn format:check` | Fails if a file is not formatted. |
-| `yarn typecheck` | Type-checks the project (`tsc --noEmit`). |
-| `yarn test` | Runs the Jest suite once. |
-| `yarn test:watch` | Reruns the affected tests on save. |
+| Command              | Does                                               |
+| -------------------- | -------------------------------------------------- |
+| `yarn dev`           | Starts the development server on port 3000.        |
+| `yarn build`         | Builds for production. Needs `API_URL` set.        |
+| `yarn start`         | Serves the production build.                       |
+| `yarn lint`          | Runs ESLint.                                       |
+| `yarn format`        | Formats every file with Prettier.                  |
+| `yarn format:check`  | Fails if a file is not formatted.                  |
+| `yarn typecheck`     | Type-checks the project (`tsc --noEmit`).          |
+| `yarn test`          | Runs the Jest suite once.                          |
+| `yarn test:watch`    | Reruns the affected tests on save.                 |
 | `yarn test:coverage` | Runs the suite and writes a report to `coverage/`. |
 
 ## Layout
 
-| Folder | Holds |
-|---|---|
-| `src/app` | Routes (App Router): `(auth)` for the pages without a session, `(authenticated)` for the rest. |
-| `src/proxy.ts` | Redirects by session and hides routes the user's role may not open. |
-| `src/services` | Server actions, one file per domain — the only layer pages import. |
-| `src/lib/api` | HTTP calls to the API, one file per domain, on top of `client.ts`. |
-| `src/schemas` | zod schemas for forms. |
-| `src/types` | API shapes and form states, one file per domain. |
-| `src/components` | Shared UI components. |
-| `src/hooks` | Client hooks (paginated lists, remote search, drag reordering…). |
-| `src/config` | Route access, route display and navigation. |
-| `src/utils` | Pure helpers and the session cookie. |
-| `tests` | Support code for the Jest suite; the tests themselves sit in `__tests__` folders beside the code. |
+| Folder           | Holds                                                                                             |
+| ---------------- | ------------------------------------------------------------------------------------------------- |
+| `src/app`        | Routes (App Router): `(auth)` for the pages without a session, `(authenticated)` for the rest.    |
+| `src/proxy.ts`   | Redirects by session and hides routes the user's role may not open.                               |
+| `src/services`   | Server actions, one file per domain — the only layer pages import.                                |
+| `src/lib/api`    | HTTP calls to the API, one file per domain, on top of `client.ts`.                                |
+| `src/schemas`    | zod schemas for forms.                                                                            |
+| `src/types`      | API shapes and form states, one file per domain.                                                  |
+| `src/components` | Shared UI components.                                                                             |
+| `src/hooks`      | Client hooks (paginated lists, remote search, drag reordering…).                                  |
+| `src/config`     | Route access, route display and navigation.                                                       |
+| `src/utils`      | Pure helpers and the session cookie.                                                              |
+| `tests`          | Support code for the Jest suite; the tests themselves sit in `__tests__` folders beside the code. |
 
 ## Documentation
 

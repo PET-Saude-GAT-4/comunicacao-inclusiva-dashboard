@@ -31,7 +31,9 @@ function Users() {
   useEffect(() => {
     // Roles are few and admin-managed, so one page of the largest size the
     // API allows holds them all.
-    getRolePage({ page: 1, pageSize: 100 }).then((data) => setRoles(data.roles));
+    getRolePage({ page: 1, pageSize: 100 }).then((data) =>
+      setRoles(data.roles),
+    );
   }, []);
 
   const handleCreate = async () => {

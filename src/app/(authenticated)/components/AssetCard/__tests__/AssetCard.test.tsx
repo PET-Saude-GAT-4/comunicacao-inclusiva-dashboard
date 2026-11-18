@@ -20,7 +20,9 @@ describe("AssetCard", () => {
     expect(screen.getByRole("heading", { name: "Água" })).toBeInTheDocument();
     expect(screen.getByRole("img", { name: "Água" })).toBeInTheDocument();
     expect(
-      screen.getByText(new Date(baseProps.createdAt).toLocaleDateString("pt-BR")),
+      screen.getByText(
+        new Date(baseProps.createdAt).toLocaleDateString("pt-BR"),
+      ),
     ).toBeInTheDocument();
     expect(screen.getByText("ana@example.com")).toBeInTheDocument();
   });
@@ -67,7 +69,9 @@ describe("AssetCard", () => {
     );
 
     expect(screen.getByRole("img", { name: "Pictograma" })).toBeInTheDocument();
-    expect(screen.getByRole("img", { name: "SignWriting" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("img", { name: "SignWriting" }),
+    ).toBeInTheDocument();
     expect(screen.getByText("SignWriting").tagName).toBe("FIGCAPTION");
   });
 });
