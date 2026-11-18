@@ -23,9 +23,7 @@ export default function PhraseTermsPreview({
         />
       ))}
       {extra > 0 && (
-        <span className="text-text-on-primary-variant text-body">
-          +{extra}
-        </span>
+        <span className="text-text-on-primary-variant text-body">+{extra}</span>
       )}
     </div>
   );

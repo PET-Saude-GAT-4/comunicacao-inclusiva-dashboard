@@ -12,9 +12,9 @@ Next.js 16 (App Router) with React 19, Tailwind CSS 4, zod 4 and Yarn 4. The das
 
 `src/app` has two route groups. The groups do not show in the URL; each exists only to give its pages their own layout.
 
-| Group | Pages | Layout |
-|---|---|---|
-| `(auth)` | `/login`, `/reset-password`, `/invitation/accept` | A centred card on the primary colour. No session needed. |
+| Group             | Pages                                                                                                                                               | Layout                                                                                            |
+| ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| `(auth)`          | `/login`, `/reset-password`, `/invitation/accept`                                                                                                   | A centred card on the primary colour. No session needed.                                          |
 | `(authenticated)` | everything else (`/dashboard`, `/library`, `/boards`, `/phrases`, `/pictograms`, `/sign-writings`, `/terms`, `/management/*`, `/settings`, `/help`) | `Sidebar` + `Header` around the page. It reads the session and redirects to `/login` without one. |
 
 `src/app/page.tsx` only redirects, to `/dashboard` or `/login`.
@@ -25,7 +25,7 @@ Next.js 16 (App Router) with React 19, Tailwind CSS 4, zod 4 and Yarn 4. The das
 
 1. **Public paths with a session** (`/`, `/login`, `/invitation/accept`, `/reset-password`) redirect to `/dashboard`.
 2. **Any other path without a session** redirects to `/login`.
-3. **A path the session's role may not open** is *rewritten* to the 404 page, not redirected, so a viewer cannot tell an admin-only route from one that does not exist.
+3. **A path the session's role may not open** is _rewritten_ to the 404 page, not redirected, so a viewer cannot tell an admin-only route from one that does not exist.
 
 The role rules live in one table, `ROUTE_ACCESS` in `src/config/route-access.ts`. The most specific matching prefix wins, and a route missing from the table is open to any logged-in user. The proxy only checks that the cookie parses and carries a token. Whether the token is still valid is the API's call; see the 401 handling below.
 
@@ -58,7 +58,7 @@ src/lib/api/client.ts             apiFetch — URL, headers, token, errors
 1. validates the `FormData` with the domain's zod schema (`safeParse`). On failure it returns `{ errors: flattenError(error).fieldErrors }`, so the messages come straight from the schema;
 2. calls `src/lib/api/<domain>.ts`;
 3. turns an `ApiError` into a message in Portuguese, picked by `status` (401, 403, 409…). The API's own text is in English and meant for developers, so it is not shown as is;
-4. calls `redirect()` *outside* the `try`. `redirect` works by throwing, and a `catch` around it would swallow it.
+4. calls `redirect()` _outside_ the `try`. `redirect` works by throwing, and a `catch` around it would swallow it.
 
 Actions that are not forms (delete, publish, reorder…) return `ActionResult` (`{ success, error? }` in `src/types/common.ts`) and call `revalidatePath` on success.
 
@@ -78,16 +78,16 @@ Actions that are not forms (delete, publish, reorder…) return `ActionResult` (
 
 ### Where things live
 
-| Folder | Holds |
-|---|---|
-| `src/types` | One file per domain: API shapes (`*Output`, `*ListItem`), form states (`*FormState`), and `common.ts` (`ActionResult`, `ListQuery`, `PageMeta`, `Paginated`). |
-| `src/schemas` | zod schemas for forms, with the user-facing messages in Portuguese. |
-| `src/services` | Server actions, one file per domain. |
-| `src/lib/api` | HTTP calls, one file per domain, plus `client.ts`. |
-| `src/utils` | Pure helpers (`board.ts`, `phrase-visibility.ts`, `term.ts`, `text.ts`) and `session.ts`. |
-| `src/hooks` | Client hooks: lists, drag reordering, author lookups, unsaved-changes guard. |
-| `src/config` | Route access, route display and navigation. |
-| `src/components` | Shared UI (see [UI.md](UI.md)). Components used only inside the logged-in area sit in `src/app/(authenticated)/components`. |
+| Folder           | Holds                                                                                                                                                         |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `src/types`      | One file per domain: API shapes (`*Output`, `*ListItem`), form states (`*FormState`), and `common.ts` (`ActionResult`, `ListQuery`, `PageMeta`, `Paginated`). |
+| `src/schemas`    | zod schemas for forms, with the user-facing messages in Portuguese.                                                                                           |
+| `src/services`   | Server actions, one file per domain.                                                                                                                          |
+| `src/lib/api`    | HTTP calls, one file per domain, plus `client.ts`.                                                                                                            |
+| `src/utils`      | Pure helpers (`board.ts`, `phrase-visibility.ts`, `term.ts`, `text.ts`) and `session.ts`.                                                                     |
+| `src/hooks`      | Client hooks: lists, drag reordering, author lookups, unsaved-changes guard.                                                                                  |
+| `src/config`     | Route access, route display and navigation.                                                                                                                   |
+| `src/components` | Shared UI (see [UI.md](UI.md)). Components used only inside the logged-in area sit in `src/app/(authenticated)/components`.                                   |
 
 ## Paginated lists
 
@@ -110,8 +110,8 @@ Jest, with Next's built-in config (`next/jest`), React Testing Library and jsdom
 - **No test makes a real HTTP call.** Code that reaches the API is tested with the API layer mocked: `jest.mock("@/lib/api/client")` and a mocked `apiFetch`, or `jest.mock("@/lib/api/<domain>")` when testing a server action. Server-only modules that read the request mock `next/headers` (see `src/utils/__tests__/session.test.ts`).
 - jsdom has no layout. A component test checks the mechanism (classes, inline sizes, roles), not measured pixels.
 
-| Command | Does |
-|---|---|
-| `yarn test` | Runs the suite once. |
-| `yarn test:watch` | Reruns the affected tests on save. |
+| Command              | Does                                          |
+| -------------------- | --------------------------------------------- |
+| `yarn test`          | Runs the suite once.                          |
+| `yarn test:watch`    | Reruns the affected tests on save.            |
 | `yarn test:coverage` | Runs once and writes a report to `coverage/`. |

@@ -6,6 +6,11 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ## [Unreleased]
 
+### Added
+
+- **README and AGENTS.md.** A README that takes a new contributor from a fresh clone to a running dashboard, a committed `.env.local.example`, and an AGENTS.md with the project's rules (replacing `.agents/rules`).
+- **CI.** Every pull request into `develop` or `main` runs lint, format, types, test and build, each as a required check. Prettier formats the codebase (`yarn format`, `yarn format:check`), and `yarn typecheck` type-checks the project, Next's route types included. Node 22 is pinned in `.nvmrc`.
+
 ## [0.1.0] - 2026-11-17
 
 The first tagged release, summarising what the dashboard offers today. The Painel de Controle (`/dashboard`), Configurações (`/settings`) and Ajuda (`/help`) pages are still placeholders.

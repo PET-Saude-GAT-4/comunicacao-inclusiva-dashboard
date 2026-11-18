@@ -14,10 +14,7 @@ interface DropdownMenuProps {
   align?: "left" | "right";
   // Stretches the menu to the trigger's width instead of a fixed one.
   fullWidth?: boolean;
-  renderTrigger: (props: {
-    open: boolean;
-    toggle: () => void;
-  }) => ReactNode;
+  renderTrigger: (props: { open: boolean; toggle: () => void }) => ReactNode;
 }
 
 // The menu behind KebabButton and Dropdown: opens from any trigger and

@@ -52,11 +52,7 @@ export default function AssetPicker<K extends string>({
             className="flex flex-row items-center gap-md border border-outline-common rounded-md p-sm justify-between cursor-pointer"
             onClick={() => onSelect(asset)}
           >
-            <Thumbnail
-              src={asset.fileUrl}
-              size={50}
-              className="rounded"
-            />
+            <Thumbnail src={asset.fileUrl} size={50} className="rounded" />
             <p className="text-text-on-primary">{asset.description}</p>
             <span onClick={(e) => e.stopPropagation()}>
               <AddButton

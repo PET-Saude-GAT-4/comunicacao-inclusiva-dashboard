@@ -249,9 +249,7 @@ export default function CreateInteractionChainModal({
                   {trigger ? (
                     <>
                       Origem:{" "}
-                      <span className="font-semibold">
-                        {triggerTitle}
-                      </span>
+                      <span className="font-semibold">{triggerTitle}</span>
                     </>
                   ) : (
                     "Todas as origens"
@@ -312,7 +310,10 @@ export default function CreateInteractionChainModal({
 
             <div className="flex flex-col gap-lg">
               <aside className="flex flex-col gap-md border-b border-outline-common pb-md">
-                <div className="flex items-center justify-center gap-sm" aria-label="Etapas">
+                <div
+                  className="flex items-center justify-center gap-sm"
+                  aria-label="Etapas"
+                >
                   {["trigger", "response"].map((item, index) => {
                     const active = step === item;
                     const complete = item === "trigger" && !!trigger;
@@ -372,7 +373,9 @@ export default function CreateInteractionChainModal({
                                 {responseBoard.title}
                               </span>
                             ) : (
-                              <span className="italic">nenhuma selecionada</span>
+                              <span className="italic">
+                                nenhuma selecionada
+                              </span>
                             )}
                           </p>
                         </div>

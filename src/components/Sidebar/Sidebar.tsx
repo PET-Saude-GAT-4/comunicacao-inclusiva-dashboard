@@ -110,9 +110,7 @@ function NavGroupDrawer({
   // Collapsed, a group is just its icon: the header tabs switch its pages.
   if (!expanded || !open) return header;
 
-  const activeIndex = group.pages.findIndex((p) =>
-    isPageActive(pathname, p),
-  );
+  const activeIndex = group.pages.findIndex((p) => isPageActive(pathname, p));
   const dotCenter = (index: number) =>
     index * SUB_ROW_STEP + SUB_ROW_HEIGHT / 2;
 

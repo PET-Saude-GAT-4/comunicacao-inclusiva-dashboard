@@ -86,7 +86,13 @@ export function useRemoteSearch<K extends string, T extends { uuid: string }>(
       })
       .catch(() => {
         if (activeRequest.current !== request) return;
-        setResult({ viewKey, items: [], loaded: false, total: 0, failed: true });
+        setResult({
+          viewKey,
+          items: [],
+          loaded: false,
+          total: 0,
+          failed: true,
+        });
       })
       .finally(() => {
         if (activeRequest.current === request) busy.current = false;
@@ -138,10 +144,7 @@ export function useRemoteSearch<K extends string, T extends { uuid: string }>(
             // A page with nothing new means the list changed elsewhere since
             // it was loaded; ending it here keeps the observer from asking
             // for the same page forever.
-            total:
-              added.length > 0
-                ? data.meta.total
-                : previous.items.length,
+            total: added.length > 0 ? data.meta.total : previous.items.length,
           };
         });
       })

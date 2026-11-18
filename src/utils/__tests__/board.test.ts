@@ -29,9 +29,7 @@ describe("canEditBoard", () => {
 
 describe("boardHref", () => {
   it("opens the editor for whoever can edit the board", () => {
-    expect(boardHref(board, user("author-1", "admin"))).toBe(
-      "/boards/board-1",
-    );
+    expect(boardHref(board, user("author-1", "admin"))).toBe("/boards/board-1");
   });
 
   it("opens the library's read-only view for everyone else", () => {

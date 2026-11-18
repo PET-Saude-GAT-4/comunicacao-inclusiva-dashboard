@@ -48,7 +48,9 @@ function translateUserError(status: number, rawMessage?: string): string {
 export async function getUserEmails(
   uuids: string[],
 ): Promise<Record<string, string>> {
-  const results = await Promise.allSettled(uuids.map((uuid) => api.getUser(uuid)));
+  const results = await Promise.allSettled(
+    uuids.map((uuid) => api.getUser(uuid)),
+  );
   // An expired session makes apiFetch redirect to /login by throwing; that
   // must still reach Next instead of reading as one user left out.
   for (const result of results) {
