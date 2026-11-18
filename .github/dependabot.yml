@@ -1,0 +1,12 @@
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    # Dependabot does not look inside a composite action unless its folder is listed.
+    directories:
+      - /
+      - /.github/actions/setup
+    schedule:
+      interval: weekly
+    target-branch: develop
+    commit-message:
+      prefix: ci
