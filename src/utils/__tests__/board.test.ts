@@ -1,5 +1,5 @@
 import type { SessionUser } from "@/types/session";
-import { boardHref, canEditBoard } from "./board";
+import { boardHref, canEditBoard } from "../board";
 
 const board = { uuid: "board-1", authorUuid: "author-1" };
 

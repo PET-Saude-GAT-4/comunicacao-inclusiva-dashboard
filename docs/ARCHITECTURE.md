@@ -102,11 +102,12 @@ The page fetches through the domain's server action (`getPictogramPage` in `src/
 
 ## Tests
 
-Jest, with Next's built-in config (`next/jest`), React Testing Library and jsdom. Configuration is in `jest.config.ts`, and shared setup (the `jest-dom` matchers) in `src/test/setup.ts`.
+Jest, with Next's built-in config (`next/jest`), React Testing Library and jsdom. Configuration is in `jest.config.ts`.
 
-- Tests sit next to the code they cover, as `*.test.ts` or `*.test.tsx`.
+- **Where a test goes.** In a `__tests__` folder beside the file it covers, named after it: `src/utils/board.ts` is tested by `src/utils/__tests__/board.test.ts`. Jest only looks for tests there.
+- **Support code** lives under `tests/`, outside `src`, and is imported through the `@test/` alias. `tests/unit/setup.ts` loads the `jest-dom` matchers for every suite; `tests/unit/zod.ts` turns a zod result into the per-field messages a form would show. This is the same layout as the API and the app.
 - `next/jest` stubs styles, images, `next/font` and `server-only`, and the `@/` alias resolves as it does in the app.
-- **No test makes a real HTTP call.** Code that reaches the API is tested with the API layer mocked: `jest.mock("@/lib/api/client")` and a mocked `apiFetch`, or `jest.mock("@/lib/api/<domain>")` when testing a server action. Server-only modules that read the request mock `next/headers` (see `src/utils/session.test.ts`).
+- **No test makes a real HTTP call.** Code that reaches the API is tested with the API layer mocked: `jest.mock("@/lib/api/client")` and a mocked `apiFetch`, or `jest.mock("@/lib/api/<domain>")` when testing a server action. Server-only modules that read the request mock `next/headers` (see `src/utils/__tests__/session.test.ts`).
 - jsdom has no layout. A component test checks the mechanism (classes, inline sizes, roles), not measured pixels.
 
 | Command | Does |

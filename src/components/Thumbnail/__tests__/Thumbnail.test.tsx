@@ -1,5 +1,5 @@
 import { render, screen } from "@testing-library/react";
-import Thumbnail from "./Thumbnail";
+import Thumbnail from "../Thumbnail";
 
 const src = "http://localhost/uploads/tall.png";
 

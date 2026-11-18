@@ -1,5 +1,5 @@
-import { fieldErrors as errorsOf } from "@/test/zod";
-import { AcceptInvitationSchema } from "./invitation";
+import { fieldErrors as errorsOf } from "@test/unit/zod";
+import { AcceptInvitationSchema } from "../invitation";
 
 const fieldErrors = (input: unknown) =>
   errorsOf(AcceptInvitationSchema.safeParse(input));

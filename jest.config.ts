@@ -7,16 +7,19 @@ const createJestConfig = nextJest({ dir: "./" });
 
 const config: Config = {
   testEnvironment: "jsdom",
-  setupFilesAfterEnv: ["<rootDir>/src/test/setup.ts"],
+  // Tests live beside the code they cover; tests/ holds only their support.
+  roots: ["<rootDir>/src"],
+  testMatch: ["**/__tests__/**/*.test.{ts,tsx}"],
+  setupFilesAfterEnv: ["<rootDir>/tests/unit/setup.ts"],
   moduleNameMapper: {
     "^@/(.*)$": "<rootDir>/src/$1",
+    "^@test/(.*)$": "<rootDir>/tests/$1",
   },
   coverageProvider: "v8",
   collectCoverageFrom: [
     "src/**/*.{ts,tsx}",
-    "!src/**/*.test.{ts,tsx}",
+    "!src/**/__tests__/**",
     "!src/**/*.d.ts",
-    "!src/test/**",
     "!src/types/**",
   ],
 };

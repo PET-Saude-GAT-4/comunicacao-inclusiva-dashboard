@@ -1,9 +1,9 @@
-import { fieldErrors } from "@/test/zod";
+import { fieldErrors } from "@test/unit/zod";
 import {
   ConfirmPasswordResetSchema,
   LoginFormSchema,
   RequestPasswordResetSchema,
-} from "./auth";
+} from "../auth";
 
 describe("LoginFormSchema", () => {
   it("accepts an email and a password, trimming the password", () => {

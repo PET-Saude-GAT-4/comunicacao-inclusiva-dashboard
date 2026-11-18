@@ -1,4 +1,4 @@
-import { formatList } from "./text";
+import { formatList } from "../text";
 
 describe("formatList", () => {
   it.each([

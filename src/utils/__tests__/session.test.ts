@@ -2,7 +2,7 @@
  * @jest-environment node
  */
 import type { SessionPayload } from "@/types/session";
-import { createSession, deleteSession, getSession } from "./session";
+import { createSession, deleteSession, getSession } from "../session";
 
 // An in-memory stand-in for the request's cookie store.
 const store = new Map<string, { value: string; options?: unknown }>();

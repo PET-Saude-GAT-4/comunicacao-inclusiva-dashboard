@@ -3,7 +3,7 @@ import {
   phraseVisibility,
   phraseVisibilityFields,
   reducesPhraseVisibility,
-} from "./phrase-visibility";
+} from "../phrase-visibility";
 
 describe("phraseVisibility", () => {
   it.each([

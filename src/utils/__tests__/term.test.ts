@@ -1,4 +1,4 @@
-import { termBadge } from "./term";
+import { termBadge } from "../term";
 
 const terms = (...names: string[]) =>
   names.map((description) => ({ description }));
