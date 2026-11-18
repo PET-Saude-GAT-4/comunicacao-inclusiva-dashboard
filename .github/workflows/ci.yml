@@ -11,12 +11,13 @@ on:
 permissions:
   contents: read
 
-# A new push to a pull request cancels its run in progress. A run on main or
-# develop gets a group of its own commit and is never cancelled: sharing one
-# group per branch would still let GitHub drop a queued run when a newer one
-# arrives, leaving that merge without a result.
+# A new push to a pull request cancels its run in progress. A push run on main
+# or develop gets a group of its own branch and commit and is never cancelled.
+# Sharing one group per branch would still let GitHub drop a queued run when a
+# newer one arrives, leaving that merge without a result. Keying by commit alone
+# would make the same commit on main and develop wait for each other.
 concurrency:
-  group: ci-${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.ref || github.sha }}
+  group: ci-${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.ref || format('{0}-{1}', github.ref, github.sha) }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 # One job per check, so a failure names what broke. The job names are the

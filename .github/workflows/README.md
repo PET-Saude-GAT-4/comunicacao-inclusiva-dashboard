@@ -5,7 +5,7 @@
 [`ci.yml`](ci.yml) runs five jobs: `lint`, `format`, `types`, `test` and `build`. Their names are the required status checks of `main` and `develop`, so renaming a job breaks branch protection.
 
 - **On every pull request into `develop` or `main`.** All five must pass to merge. A new push to the pull request cancels its run in progress.
-- **On every push to `develop` or `main`**, that is, after every merge. Two pull requests can each pass against an older `develop` and still break it together; this run is what shows it. Each merge gets its own run, and none of them is cancelled.
+- **On every push to `develop` or `main`**, that is, after every merge. Two pull requests can each pass against an older `develop` and still break it together; this run is what shows it. Each push run has a concurrency group of its own branch and commit, so every merge gets its own run, none of them is cancelled, and the same commit on `develop` and `main` runs on both in parallel.
 
 The steps every job shares (Corepack, Node from `.nvmrc`, `yarn install`) live in the composite action [`../actions/setup`](../actions/setup/action.yml).
 
