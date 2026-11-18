@@ -54,5 +54,6 @@ jobs:
       - uses: ./.github/actions/setup
       - run: yarn build
         env:
-          # The build never calls the API, but next.config.ts parses this as a URL.
+          # The build never calls the API; next.config.ts only reads the host
+          # to allow its images, so any valid URL will do.
           API_URL: http://localhost:8080

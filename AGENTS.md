@@ -17,17 +17,17 @@ The admin panel of Comunicação Inclusiva. It has no database: every read and w
 - Node 22 and Yarn 4 (the binary is vendored in `.yarn/releases`; use `yarn`, never `npm` or `npx`).
 - Jest with React Testing Library and jsdom.
 
-| Command              | Does                                               |
-| -------------------- | -------------------------------------------------- |
-| `yarn dev`           | Starts the development server on port 3000.        |
-| `yarn build`         | Builds for production. Needs `API_URL` set.        |
-| `yarn lint`          | Runs ESLint.                                       |
-| `yarn format`        | Formats every file with Prettier.                  |
-| `yarn format:check`  | Fails if a file is not formatted.                  |
-| `yarn typecheck`     | Type-checks the project (`tsc --noEmit`).          |
-| `yarn test`          | Runs the Jest suite once.                          |
-| `yarn test:watch`    | Reruns the affected tests on save.                 |
-| `yarn test:coverage` | Runs the suite and writes a report to `coverage/`. |
+| Command              | Does                                                                                |
+| -------------------- | ----------------------------------------------------------------------------------- |
+| `yarn dev`           | Starts the development server on port 3000.                                         |
+| `yarn build`         | Builds for production. Set `API_URL` first: images are allowed only from that host. |
+| `yarn lint`          | Runs ESLint.                                                                        |
+| `yarn format`        | Formats every file with Prettier.                                                   |
+| `yarn format:check`  | Fails if a file is not formatted.                                                   |
+| `yarn typecheck`     | Generates Next's route types and type-checks the project.                           |
+| `yarn test`          | Runs the Jest suite once.                                                           |
+| `yarn test:watch`    | Reruns the affected tests on save.                                                  |
+| `yarn test:coverage` | Runs the suite and writes a report to `coverage/`.                                  |
 
 ## Architecture in brief
 

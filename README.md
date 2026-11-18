@@ -33,18 +33,18 @@ The admin panel of Comunicação Inclusiva. Here the team manages the content th
 
 ## Commands
 
-| Command              | Does                                               |
-| -------------------- | -------------------------------------------------- |
-| `yarn dev`           | Starts the development server on port 3000.        |
-| `yarn build`         | Builds for production. Needs `API_URL` set.        |
-| `yarn start`         | Serves the production build.                       |
-| `yarn lint`          | Runs ESLint.                                       |
-| `yarn format`        | Formats every file with Prettier.                  |
-| `yarn format:check`  | Fails if a file is not formatted.                  |
-| `yarn typecheck`     | Type-checks the project (`tsc --noEmit`).          |
-| `yarn test`          | Runs the Jest suite once.                          |
-| `yarn test:watch`    | Reruns the affected tests on save.                 |
-| `yarn test:coverage` | Runs the suite and writes a report to `coverage/`. |
+| Command              | Does                                                                                |
+| -------------------- | ----------------------------------------------------------------------------------- |
+| `yarn dev`           | Starts the development server on port 3000.                                         |
+| `yarn build`         | Builds for production. Set `API_URL` first: images are allowed only from that host. |
+| `yarn start`         | Serves the production build.                                                        |
+| `yarn lint`          | Runs ESLint.                                                                        |
+| `yarn format`        | Formats every file with Prettier.                                                   |
+| `yarn format:check`  | Fails if a file is not formatted.                                                   |
+| `yarn typecheck`     | Generates Next's route types and type-checks the project.                           |
+| `yarn test`          | Runs the Jest suite once.                                                           |
+| `yarn test:watch`    | Reruns the affected tests on save.                                                  |
+| `yarn test:coverage` | Runs the suite and writes a report to `coverage/`.                                  |
 
 ## Layout
 
