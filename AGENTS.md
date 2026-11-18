@@ -44,6 +44,7 @@ A form goes page → server action (`src/services/<domain>.ts`, `"use server"`) 
 - **Pictograms and SignWritings render through `Thumbnail`**, never `next/image` or `<img>` directly. See [docs/UI.md](docs/UI.md).
 - **Language.** Code, comments, commits, issues and docs are in English. Everything the user sees, zod messages included, is in Portuguese. Show the user a Portuguese message picked by status code, never the API's own error text.
 - **Tests** go in a `__tests__` folder beside the file they cover (`src/utils/__tests__/board.test.ts`), support code in `tests/`, and no test makes a real HTTP call: mock `@/lib/api/client` or `@/lib/api/<domain>`.
+- **Each page under `docs/` answers one question.** Whoever opens a page, person or agent, is after one answer and has to read the whole page to find it. When an edit makes a page answer a second question, or brings it to about 400 lines, split it by topic in the same pull request and add the new page to [Where to look next](#where-to-look-next). Pages the pull request does not touch stay as they are.
 
 ## Linting and formatting
 
