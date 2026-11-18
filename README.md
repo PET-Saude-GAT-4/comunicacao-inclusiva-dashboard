@@ -74,5 +74,5 @@ The admin panel of SAP (Suporte Assistivo ao Paciente). Here the team manages th
 
 - Branch from `develop` (`feat/…`, `fix/…`, `docs/…`, `chore/…`).
 - Write commits as [Conventional Commits](https://www.conventionalcommits.org/) (`feat: …`, `fix: …`, `docs: …`).
-- Open pull requests into `develop`. CI runs lint, format, types, test and build on each one, and all five must pass to merge.
+- Open pull requests into `develop`. CI runs lint, format, types, test and build on each one, and all five must pass to merge. The same checks run again on `develop` and `main` after every merge.
 - Code, comments, commits, issues and documentation are in English; text shown to users is in Portuguese.

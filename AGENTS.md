@@ -52,7 +52,7 @@ For every file you create or change:
 
 1. Run `yarn lint --fix` on the changed files and fix what remains by hand. Leave no ESLint error behind, TypeScript rules included.
 2. Run `yarn prettier --write` on the changed files. The style is `.prettierrc`, shared with the API and the app.
-3. Before opening a pull request, run `yarn lint`, `yarn format:check`, `yarn typecheck`, `yarn test` and `yarn build`. CI runs the same five checks on every pull request into `develop` or `main`, and all five must pass to merge.
+3. Before opening a pull request, run `yarn lint`, `yarn format:check`, `yarn typecheck`, `yarn test` and `yarn build`. CI runs the same five checks on every pull request into `develop` or `main`, and all five must pass to merge. They run again on both branches after every merge.
 
 ## Where to look next
 
